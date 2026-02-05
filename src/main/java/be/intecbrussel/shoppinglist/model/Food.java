@@ -9,18 +9,21 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
-public class Foodproduct extends AuditModel {
+public class Food extends AuditModel {
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private long id;
 
     private String name;
+    private QuantityUnit typicalUnit;// e.g. flour in g, milk in l, orange in qty, cumin in kl (koffielepel).
+    private int howMany;
+    private String remarks;
 
 }

@@ -18,12 +18,12 @@ import java.util.List;
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
 public class Recipe extends AuditModel implements Serializable {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     private String title;
-    private List<Foodproduct> ingredients;
+    private List<Food> ingredients;
     //later: cooking-step with
     // - resultingFoodproduct (which is itself also a Foodproduct), so it can be a recursive process.
     // - process-name (String)
