@@ -1,6 +1,8 @@
 package be.intecbrussel.shoppinglist.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,5 +20,6 @@ public class FoodTouched extends Food {
 
     private LocalDate useBy; // UseBy = perishable soon (sooner than unopened).
     private double amountLeft; // If opened also estimate amount left.
-    private StorageLocation storageLocation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private FoodStorage foodStorage;
 }

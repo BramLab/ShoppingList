@@ -1,0 +1,40 @@
+https://keep.google.com/#NOTE/1h6Zj8xOgv-vaODGqLz8JL1KzVQTDrhCUymSBdbKJpQgO4ugCWjcgeucReF10PQ
+hieronder tijdelijke kopie:
+
+
+Boodschappenlijstje/Voorraadkast
+
+Waarom?
+Zelf koken is meestal goedkoper, gezonder, zelfstandiger. Een gevulde voorraadkast geeft flexibiliteit in wat je wil maken, op het moment dat je iets wilt maken. En maakt weerbaarder bij calamiteiten.
+Maar zelf koken neemt tijd: plannen, winkelen, opslaan, uithalen, bereiden, restjes niet vergeten, opbergen, afwassen.
+
+Een goede organisatie verlicht sterk de nadelen. Een app kan helpen. Er zijn apps die een deel van deze functionaliteiten aanbieden, maar niet alle. https://www.google.com/search?q=shopping+list+apps
+
+Een app waarin je kan bijhouden wat je nog hebt (voorraad),
+en wat je wil maken (menu's) de volgende periode (vb week),
+zodat je weet wat je nog moet bijkopen (boodschappenlijst).
+Hoofddoel is gebruikers helpen om meer zelf te koken.
+
+Basiswerking:
+- Lijst met voedselproducten, incl bewaarbaarheid, hoeveel in voorraad, inschatting van verbruik.
+- Lijst met menu's. Minimaal enkel ingrediëntenlijstje (link naar voedselproducten).
+- Kiezen/opstellen wat je wil maken de volgende periode (suggestie of voorkeur menu).
+
+In winkel/markt:
+- Afgeleide lijst wat je dus nog moet/kan kopen afchecken.
+- Opzoeken in voorraad igv opportuniteit daar, en bijsturen basiswerking.
+- (Weekplanning kan ook veranderen igv onverwacht restaurantbezoek, ziekte, afwezigheid gezinslid, ...)
+
+Bovenstaande versie kan al opgesplitst worden in kleinere nog steeds nuttige en functionele onderdelen, maar het lijkt me het nuttigst als die functies erin zitten.
+
+Uitbreidingen:
+- of kan bijkopen (opportuniteit aanbieding).
+- (Periode planning, vb weekplanning).
+- (Lijst met opengemaakte voedselproducten incl bewaarbaarheid.)
+- Suggestie wat je best koopt/kookt in deze periode (bewaarbaarheid voedselproducten nadert einde, seizoensproducten, aanbieding in folder gezien).
+* Uitgebreider is incl. de hoeveelheden van ingredienten en de bereiding.
+- Evt recepten kan delen met anderen.
+
+Stories:
+...
+

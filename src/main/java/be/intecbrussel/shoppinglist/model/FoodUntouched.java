@@ -11,20 +11,22 @@ import java.time.LocalDate;
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
 public class FoodUntouched extends Food {
-
     private LocalDate bestBeforeEnd;// = UseBy if perishable soon.
     private double quantityPerPackage;
-
+    private int howMany;
     @ManyToOne(fetch = FetchType.LAZY)
     private FoodStorage foodStorage;
 
     // https://www.baeldung.com/lombok-builder-inheritance#lombok-builder-and-inheritance-3
     @Builder(builderMethodName = "foodUntouchedBuilder")
-    public FoodUntouched(long id, String name, QuantityUnit typicalUnit, int howMany, String remarks
-            , LocalDate bestBeforeEnd, double quantityPerPackage, FoodStorage foodStorage) {
-        super(id, name, typicalUnit, howMany, remarks);
+    public FoodUntouched(long id, String name, QuantityUnit typicalUnit, String remarks
+            , LocalDate bestBeforeEnd, double quantityPerPackage, int howMany, FoodStorage foodStorage) {
+        super(id, name, typicalUnit, remarks);
+
         this.bestBeforeEnd = bestBeforeEnd;
         this.quantityPerPackage = quantityPerPackage;
+        this.howMany = howMany;
         this.foodStorage = foodStorage;
     }
+
 }

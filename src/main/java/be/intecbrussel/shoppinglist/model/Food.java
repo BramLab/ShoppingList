@@ -20,10 +20,7 @@ public class Food extends AuditModel {
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private long id;
-
     private String name;
-    private QuantityUnit typicalUnit;// e.g. flour in g, milk in l, orange in qty, cumin in kl (koffielepel).
-    private int howMany;
+    private QuantityUnit typicalUnit;// e.g. flour: g, milk: l, orange: qty, cumin: kl (koffielepel).
     private String remarks;
-
 }
