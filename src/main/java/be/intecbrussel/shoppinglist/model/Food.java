@@ -19,6 +19,5 @@ public class Food extends AuditModel {
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private long id;
     private String name;
-    private QuantityUnit typicalUnit;// e.g. flour: g, milk: l, orange: qty, cumin: kl (koffielepel).
     private String remarks;
 }

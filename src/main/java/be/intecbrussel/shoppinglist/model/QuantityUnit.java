@@ -1,10 +1,10 @@
 package be.intecbrussel.shoppinglist.model;
 
 public enum QuantityUnit {
-    mg, g, kg,
-    ml, l,
-    qty,
-    kl, tl, el
+//    mg, g, kg,
+//    ml, l,
+//    qty,
+//    kl, tl, el
 
     /*
     tl theelepel, ca. 5 ml

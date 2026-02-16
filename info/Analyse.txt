@@ -34,21 +34,29 @@ Uitbreidingen:
 - Suggestie wat je best koopt/kookt in deze periode (bewaarbaarheid voedselproducten nadert einde, seizoensproducten, aanbieding in folder gezien).
 * Uitgebreider is incl. de hoeveelheden van ingredienten en de bereiding.
 - Evt recepten kan delen met anderen.
+- Substituties/vervangingen:
+  - https://www.almanac.com/content/common-ingredient-substitutions
+  - https://cooking.nytimes.com/article/ingredient-substitutions
+
+- Wat als niet alle ingredienten voldoende voorradig zijn?
+  Vb pannenkoeken: te weinig melk
+  => minder pannenkoeken
+  => of aanlengen met water? => minder volle, maar nog steeds eetbare pannenkoeken.
 
 ---
+
 Vereenvoudigingen:
-Alle hoeveelheden in g of ml (massa of volume onbepaald).
-Decimaal getal, kan dus nog verfijnd worden.
+- Alle hoeveelheden in g of ml (massa of volume onbepaald).
+  Decimaal getal, kan dus nog verfijnd worden.
+    Vb:
+    - 1000 melk = 1 doos melk.
+    - 800 bloemkool = 1 bloemkool (ongeveer).
+    - 0,3 zout = 1 snuifje zout (tussen wijsvingen en duim).
+    - 2,5 kurkuma = 1 theelepel.
+    - inschatten of google/AI vragen.
 
-Vb:
-- 1000 melk = 1 doos melk.
-- 800 bloemkool = 1 bloemkool (ongeveer).
-- 0,3 zout = 1 snuifje zout (tussen wijsvingen en duim).
-- 2,5 kurkuma = 1 theelepel.
-- inschatten of google/AI vragen.
-
-Producten best zolang mogelijk in originele verpakking houden; bewaart beter & helpt voorraadbeheer.
-
+- Voorraadbeheer per originele verpakking.
+  => Producten best zolang mogelijk in originele verpakking houden bewaart beter (& helpt voorraadbeheer).
 
 ---
 

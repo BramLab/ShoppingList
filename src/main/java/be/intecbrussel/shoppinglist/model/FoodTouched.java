@@ -21,5 +21,5 @@ public class FoodTouched extends Food {
     private LocalDate useBy; // UseBy = perishable soon (sooner than unopened).
     private double amountLeft; // If opened also estimate amount left.
     @ManyToOne(fetch = FetchType.LAZY)
-    private FoodStorage foodStorage;
+    private Storage storage;
 }

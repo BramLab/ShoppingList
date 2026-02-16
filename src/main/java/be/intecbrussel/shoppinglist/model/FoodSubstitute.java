@@ -20,15 +20,24 @@ public class FoodSubstitute extends AuditModel {
 	private long id;
     private long FoodOriginal;
     private long FoodAlternative;
-    private String aspect; // similarity grid: sweet, sour, bitter, salt, umami, greasiness, ...
+    private Recipe recipe;
+
+    private String aspect; // substitute is never 1:1. Always for certain aspects.
+    // e.g. use herbs instead of salt to eliminate salt, but could also be to eat more specific herbs.
+    // Weights also can change: Saffron	replaced by more weight of Turmeric (for color; flavor is different).
+
+    // similarity grid: sweet, sour, bitter, salt, umami, creaminess, greasiness...
     // Substitutes can also be for other reasons: vegan reason: tofu instead of chicken.
+    // Medical, religious, convinced, health beliefs, norms and values, ...
+
+    // Creaminess: desirable thick, smooth texture, often described velvety or milky, coats mouth without being heavy.
+    // Greasiness: more negative sensation of excess, oily fat, resulting in a slippery, heavy, or lingering residue.
 
     // tamarind paste: unique sweet-and-sour flavor profile
     // mix of lime/lemon juice and brown sugar
     // pomegranate molasses
     // or dried mango powder (amchur)
     // For a 1:1 ratio, use equal parts lime juice and brown sugar (or honey/maple syrup) to mimic the tangy, fruity taste.
-    //
     // Here are the top, actionable substitutes:
     //    Lime/Lemon Juice + Brown Sugar (Best Overall): Combine 1 tablespoon of lime juice and 1 tablespoon of brown sugar for every 1 tablespoon of tamarind paste.
     //    Pomegranate Molasses: A thick, sour, and slightly sweet syrup that is an excellent substitute for tamarind's depth.
