@@ -27,25 +27,25 @@ public class Config {
             FoodStorage koelkast = new FoodStorage(0, "Koelkast", null);
             foodStorageRepository.save(koelkast);
 
-            Food bloemkool01 = new FoodUntouched(0, "bloemkool", QuantityUnit.kg, "vorige week, op"
-                    , Helper.days2date(-3), 0.8, 1, kelder);
+            Food bloemkool01 = new FoodUntouched(0, "bloemkool", QuantityUnit.kg, "(vorige week, op)"
+                    , Helper.days2date(-3), 800, 0, kelder);
             foodRepository.save(bloemkool01);// Inferred type 'S' for type parameter 'S' is not within its bound; should extend
             Food bloemkool02 = FoodUntouched.foodUntouchedBuilder()
                     .name("bloemkool")
                     .typicalUnit(QuantityUnit.kg)
                     //.remarks(null)
                     .bestBeforeEnd(Helper.days2date(3))
-                    .quantityPerPackage(0.75)
+                    .quantityPerPackage(750)
                     .howMany(1)
                     .foodStorage(kelder)
                     .build();
             foodRepository.save(bloemkool02);
             Food miso01 = FoodUntouched.foodUntouchedBuilder()
-                    .name("miso")
+                    .name("miso licht")
                     .typicalUnit(QuantityUnit.kg)
-                    .remarks("lichte")
+                    //.remarks(null)
                     .bestBeforeEnd(Helper.days2date(90))
-                    .quantityPerPackage(0.3)
+                    .quantityPerPackage(300)
                     .howMany(1)
                     .foodStorage(koelkast)
                     .build();

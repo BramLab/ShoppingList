@@ -35,6 +35,25 @@ Uitbreidingen:
 * Uitgebreider is incl. de hoeveelheden van ingredienten en de bereiding.
 - Evt recepten kan delen met anderen.
 
+---
+Vereenvoudigingen:
+Alle hoeveelheden in g of ml (massa of volume onbepaald).
+Decimaal getal, kan dus nog verfijnd worden.
+
+Vb:
+- 1000 melk = 1 doos melk.
+- 800 bloemkool = 1 bloemkool (ongeveer).
+- 0,3 zout = 1 snuifje zout (tussen wijsvingen en duim).
+- 2,5 kurkuma = 1 theelepel.
+- inschatten of google/AI vragen.
+
+Producten best zolang mogelijk in originele verpakking houden; bewaart beter & helpt voorraadbeheer.
+
+
+---
+
+
+
 Stories:
 ...
 

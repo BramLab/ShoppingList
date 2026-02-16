@@ -14,11 +14,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
-public class Food extends AuditModel {
-	@Id
-	@GeneratedValue(strategy= GenerationType.IDENTITY)
-	private long id;
+public class FoodSimple extends AuditModel {
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private long id;
+
     private String name;
-    private QuantityUnit typicalUnit;// e.g. flour: g, milk: l, orange: qty, cumin: kl (koffielepel).
     private String remarks;
+
 }

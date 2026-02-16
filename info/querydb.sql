@@ -1,5 +1,4 @@
-select * from food;
-
+select typical_unit from food;
 
 SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA='shoppinglist' AND TABLE_NAME='food'
