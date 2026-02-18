@@ -3,13 +3,13 @@ package be.intecbrussel.shoppinglist.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
+
+// DECORATOR PATTERN - FoodTouched around FoodUntouched? -> Keep original name, know original quantity, bestBeforeEnd.
+// https://en.wikipedia.org/wiki/Decorator_pattern
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,4 +22,15 @@ public class FoodTouched extends Food {
     private double amountLeft; // If opened also estimate amount left.
     @ManyToOne(fetch = FetchType.LAZY)
     private Storage storage;
+
+    @Builder(builderMethodName = "foodTouchedBuilder")
+    public FoodTouched(long id, String name, String remarks
+            , LocalDate useBy, double amountLeft, Storage storage) {
+
+        super(id, name, remarks);
+
+        this.useBy = useBy;
+        this.amountLeft = amountLeft;
+        this.storage = storage;
+    }
 }

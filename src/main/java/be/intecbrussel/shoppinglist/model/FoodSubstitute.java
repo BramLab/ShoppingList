@@ -1,9 +1,6 @@
 package be.intecbrussel.shoppinglist.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,6 +17,8 @@ public class FoodSubstitute extends AuditModel {
 	private long id;
     private long FoodOriginal;
     private long FoodAlternative;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     private Recipe recipe;
 
     private String aspect; // substitute is never 1:1. Always for certain aspects.
