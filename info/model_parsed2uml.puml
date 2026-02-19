@@ -1,0 +1,70 @@
+@startuml
+class be.intecbrussel.shoppinglist.model.Food {
+- long id
+- String name
+- String remarks
+}
+
+abstract class be.intecbrussel.shoppinglist.model.AuditModel {
+- Date createdAt
+- Date updatedAt
+}
+
+class be.intecbrussel.shoppinglist.model.Helper {
++ {static} LocalDate days2date(int)
+}
+
+class be.intecbrussel.shoppinglist.model.FoodUntouched {
+- LocalDate bestBeforeEnd
+- double quantityInPackage
+}
+
+class be.intecbrussel.shoppinglist.model.FoodSubstitute {
+- long id
+- long FoodOriginal
+- long FoodAlternative
+- Recipe recipe
+- String aspect
+}
+
+class be.intecbrussel.shoppinglist.model.Storage {
+- long id
+- String name
+- String remarks
+}
+
+class be.intecbrussel.shoppinglist.model.Recipe {
+- long id
+- String title
+- List<Food> ingredients
+}
+
+class be.intecbrussel.shoppinglist.model.FoodInStorage {
+- long id
+~ Food food
+~ Storage storage
+~ int quantity
+}
+
+class be.intecbrussel.shoppinglist.model.FoodIngredient {
+- double quantity
+}
+
+class be.intecbrussel.shoppinglist.model.FoodTouched {
+- LocalDate useBy
+- double amountLeft
+}
+
+
+
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Food
+java.io.Serializable <|.. be.intecbrussel.shoppinglist.model.AuditModel
+be.intecbrussel.shoppinglist.model.Food <|-- be.intecbrussel.shoppinglist.model.FoodUntouched
+be.intecbrussel.shoppinglist.model.Food <|-- be.intecbrussel.shoppinglist.model.FoodSubstitute
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Recipe
+be.intecbrussel.shoppinglist.model.Food <|-- be.intecbrussel.shoppinglist.model.FoodIngredient
+be.intecbrussel.shoppinglist.model.Food <|-- be.intecbrussel.shoppinglist.model.FoodTouched
+
+FoodInStorage --> Food
+FoodInStorage --> Storage
+@enduml

@@ -2,9 +2,7 @@ package be.intecbrussel.shoppinglist.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
-
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -14,14 +12,14 @@ import java.time.LocalDate;
 @Entity
 public class FoodUntouched extends Food {
     private LocalDate bestBeforeEnd;// = UseBy if perishable soon.
-    private double quantityInPackage;
+    private double ml_g_inPackage;
 
     @Builder(builderMethodName = "foodUntouchedBuilder")
     public FoodUntouched(long id, String name, String remarks
-            , LocalDate bestBeforeEnd, double quantityPerPackage, Storage storage) {
+            , LocalDate bestBeforeEnd, double ml_g_inPackage, Storage storage) {
         super(id, name, remarks);
         this.bestBeforeEnd = bestBeforeEnd;
-        this.quantityInPackage = quantityPerPackage;
+        this.ml_g_inPackage = ml_g_inPackage;
     }
 
 }
