@@ -9,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 import java.util.List;
 
 @Transactional
@@ -19,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
-public class Recipe extends AuditModel implements Serializable {
+public class Recipe extends AuditModel /*implements Serializable*/ {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

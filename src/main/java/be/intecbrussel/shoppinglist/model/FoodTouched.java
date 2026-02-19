@@ -8,7 +8,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 
-// DECORATOR PATTERN - FoodTouched around FoodUntouched? -> Keep original name, know original quantity, bestBeforeEnd.
+// DECORATOR PATTERN? - FoodTouched around FoodUntouched? -> Keep original name, know original quantity, bestBeforeEnd.
 // https://en.wikipedia.org/wiki/Decorator_pattern
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -20,17 +20,13 @@ public class FoodTouched extends Food {
 
     private LocalDate useBy; // UseBy = perishable soon (sooner than unopened).
     private double amountLeft; // If opened also estimate amount left.
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Storage storage;
 
     @Builder(builderMethodName = "foodTouchedBuilder")
     public FoodTouched(long id, String name, String remarks
-            , LocalDate useBy, double amountLeft, Storage storage) {
+            , LocalDate useBy, double amountLeft) {
 
         super(id, name, remarks);
-
         this.useBy = useBy;
         this.amountLeft = amountLeft;
-        this.storage = storage;
     }
 }

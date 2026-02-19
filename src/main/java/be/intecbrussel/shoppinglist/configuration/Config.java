@@ -29,7 +29,7 @@ public class Config {
             Storage koelkast = new Storage(0, "Koelkast", null);
             foodStorageRepository.save(koelkast);
 
-            Food bloemkool01 = new FoodUntouched(0, "bloemkool", "(vorige week, op)"
+            Food bloemkool01 = new FoodUntouched(0, "bloemkool", "(vorige week eigenlijk al op)"
                     , Helper.days2date(-3), 800, kelder);
             foodRepository.save(bloemkool01);
 
@@ -58,8 +58,8 @@ public class Config {
             Food openedMiso = FoodTouched.foodTouchedBuilder()
                     .name(miso01.getName())
                     .useBy(Helper.days2date(30))
-                    .amountLeft(miso01.get)
-                    .storage(koelkast)
+                    //.amountLeft(miso01.get)
+                    //.storage(koelkast)
                     .build();
             foodRepository.save(openedMiso);
 

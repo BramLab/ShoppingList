@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
-public class FoodSubstitute extends AuditModel {
+public class FoodSubstitute extends Food {
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private long id;

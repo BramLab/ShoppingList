@@ -1,8 +1,23 @@
+* Keep version:
+* Rationale for project FoodStock_ShoppingList (Voorraadkast_Boodschappenlijstje):
+* Hoofddoel:
+* Business analysis - from store to plate:
+* Basiswerking:
+* Uitbreidingen:
+* Vereenvoudigingen:
+* Stories (may change with technical insight & design choices):
+* Design choices - business:
+* Design choices - technical:
+* Technical difficulties:
+
+------------------
+
+* Keep version
 https://keep.google.com/#NOTE/1h6Zj8xOgv-vaODGqLz8JL1KzVQTDrhCUymSBdbKJpQgO4ugCWjcgeucReF10PQ
 hieronder tijdelijke kopie:
 
-
-Boodschappenlijstje/Voorraadkast
+---
+* Rationale for project FoodStock_ShoppingList (Voorraadkast_Boodschappenlijstje):
 
 Waarom?
 Zelf koken is meestal goedkoper, gezonder, flexibeler.
@@ -17,9 +32,20 @@ https://www.google.com/search?q=shopping+list+apps
 Een app waarin je kan bijhouden wat je nog hebt (voorraad),
 en wat je wil maken (menu's) de volgende periode (vb week),
 zodat je weet wat je nog moet bijkopen (boodschappenlijst).
-*Hoofddoel is een goed gevulde voorraad die meer flexibiliteit toelaat, zodat zelf koken gemakkelijker wordt.*
 
-Basiswerking:
+* Hoofddoel:
+Hoofddoel is een goed gevulde voorraad die meer flexibiliteit toelaat, zodat zelf koken gemakkelijker wordt.*
+
+---
+* Business analysis - from store to plate:
+Products are bought, transported, stocked.
+Then taken out, to the kitchen counter, packages are opened, vegetables cleaned, cut, heated,
+(optionally to inbetween products), to components which will make together with other components a dish
+for 1 or several people to eat.
+What is not eaten goes into a container & is stored e.g. in the fridge.
+
+---
+* Basiswerking:
 - Lijst met voedselproducten, incl bewaarbaarheid, hoeveel in voorraad, inschatting van verbruik.
 - Lijst met menu's. Minimaal enkel ingrediëntenlijstje (link naar voedselproducten).
 - Kiezen/opstellen wat je wil maken de volgende periode (suggestie of voorkeur menu).
@@ -31,7 +57,7 @@ In winkel/markt:
 
 Bovenstaande versie kan al opgesplitst worden in kleinere nog steeds nuttige en functionele onderdelen, maar het lijkt me het nuttigst als die functies erin zitten.
 
-Uitbreidingen:
+* Uitbreidingen:
 - of kan bijkopen (opportuniteit aanbieding).
 - (Periode planning, vb weekplanning).
 - (Lijst met opengemaakte voedselproducten incl bewaarbaarheid.)
@@ -49,7 +75,7 @@ Uitbreidingen:
 
 ---
 
-Vereenvoudigingen:
+* Vereenvoudigingen:
 - Alle hoeveelheden in g of ml (massa of volume onbepaald).
   Decimaal getal, kan dus nog verfijnd worden.
     Vb:
@@ -63,9 +89,56 @@ Vereenvoudigingen:
   => Producten best zolang mogelijk in originele verpakking houden bewaart beter (& helpt voorraadbeheer).
 
 ---
+* Stories (may change with technical insight & design choices):
+
+
+---
+* Design choices - business:
+
+- bestBeforeEnd & UseBy are kept with product.
+    What with multiple packages of coffee, bought at different times?
+    It is the same kind of product. Different objects seems redundant as only date changes...
+    Doubted to put it also in FoodInStorage.
+    Yet, date is written on the product, not/less to storage location.
+- bestBeforeEnd/UseBy: UseBy = perishable soon (sooner than unopened).
+- FoodTouched could be anything that is not as it came from shop (except if just changed to other container).
+    -> Just washed, or cut -> touched with other use by date & storage location.
+    -> Took part of it in separate container to serve on table -> touched with other name & use by date & storage location.
+        Vb citroen in flesje, 250ml, 180d, kelder -> citroen in afgedekt glaasje, 40ml, 7d, koelkast.
+        Kan refereren naar oorspronkelijk product.
+    -> Substitutes are inbetween food products made from a recipe.
 
 
 
-Stories:
-...
+
+    -> Menu bestaat uit Componenten
+        - Hoofdbestanddeel (Eiwitcomponent): meestal vlees, vis, gevogelte of vegetarisch alternatief.
+        - Garnituur (Bijgerecht): begeleidende componenten, vaak aardappelen (friet, puree), rijst, pasta of granen. (=basisvoedsel?)
+        - Groenten: Verse, gestoomde of gebakken groenten.
+        - Saus (of Jus): Vloeibare toevoeging voor smaak en binding.
+        - De Garnering (Garnering/Decoratie): Fijne afwerking verse kruiden, eetbare bloemen, croutons. Visuele & textuur.
+
+        - Main item / Main protein, Starch / Side, Vegetables / Veg, Sauce / Coulis, Garnish
+          e.g. "The dish consists of a seared salmon (main), roasted asparagus (vegetable), mashed potatoes (starch),
+                and a lemon-dill sauce (sauce), garnished with microgreens."
+
+* Design choices - technical:
+- Builder
+    https://www.baeldung.com/lombok-builder-inheritance#lombok-builder-and-inheritance-3
+    @Builder(builderMethodName = "foodUntouchedBuilder")
+
+* Technical difficulties:
+- public abstract class AuditModel implements Serializable {...
+    If i omit Serializable i get:
+    org.springframework.beans.factory.BeanCreationException:
+      Error creating bean with name 'entityManagerFactory' defined in class path resource
+        [org/springframework/boot/hibernate/autoconfigure/HibernateJpaConfiguration.class]:
+          Basic collection has element type 'be.intecbrussel.shoppinglist.model.Food' which is not a known basic type
+            (attribute is not annotated '@ElementCollection', '@OneToMany', or '@ManyToMany')
+    Caused by: org.hibernate.MappingException: Basic collection has element type 'be.intecbrussel.shoppinglist.model.Food'
+        which is not a known basic type (attribute is not annotated '@ElementCollection', '@OneToMany', or '@ManyToMany')
+- PlantUML Parser keeps inheriting Recipe from AuditModel, why?
+    be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Recipe
+    model_parsed2uml.puml
+
 
