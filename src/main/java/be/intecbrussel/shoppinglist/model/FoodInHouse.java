@@ -17,6 +17,6 @@ public class FoodInHouse extends AuditModel{
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
 
-    List<FoodInStorage> foodInStorage;
+    List<StoredFood> storedFood;
 
 }

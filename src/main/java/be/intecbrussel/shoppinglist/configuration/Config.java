@@ -3,10 +3,10 @@ package be.intecbrussel.shoppinglist.configuration;
 
 import be.intecbrussel.shoppinglist.model.*;
 import be.intecbrussel.shoppinglist.repository.FoodRepository;
-import be.intecbrussel.shoppinglist.repository.FoodStorageRepository;
+import be.intecbrussel.shoppinglist.repository.FoodUntouchedRepository;
+import be.intecbrussel.shoppinglist.repository.StorageRepository;
 //import be.intecbrussel.shoppinglist.repository.FoodUntouchedRepository;
 
-import jakarta.websocket.Session;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Configuration
 @EnableJpaAuditing
@@ -23,19 +22,19 @@ public class Config {
     @Bean
     CommandLineRunner dataLoader_commandLineRunner(
             FoodRepository foodRepository,
-            FoodStorageRepository foodStorageRepository
-//            ,FoodUntouchedRepository foodUntouchedRepository
+            StorageRepository storageRepository,
+            FoodUntouchedRepository foodUntouchedRepository
     ) {
         return args -> {
 
             Storage kelder = new Storage(0, "Kelder", null);
-            foodStorageRepository.save(kelder);
+            storageRepository.save(kelder);
             Storage koelkast = new Storage(0, "Koelkast", null);
-            foodStorageRepository.save(koelkast);
+            storageRepository.save(koelkast);
 
-            Food bloemkool01 = new FoodUntouched(0, "bloemkool", "(vorige week eigenlijk al op)"
+            FoodUntouched bloemkool01 = new FoodUntouched(0, "bloemkool", "(vorige week eigenlijk al op)"
                     , Helper.days2date(-3), 800, kelder);
-            foodRepository.save(bloemkool01);
+            foodUntouchedRepository.save(bloemkool01);//Inferred type 'S' for type parameter 'S' is not within its bound; should extend 'be.intecbrussel.shoppinglist.model.FoodUntouched'
 
             Food bloemkool02 = FoodUntouched.foodUntouchedBuilder()
                     .name("bloemkool")
@@ -54,6 +53,33 @@ public class Config {
                     .storage(koelkast)
                     .build();
             foodRepository.save(miso01);
+
+            Food melkSoja01 = FoodUntouched.foodUntouchedBuilder()
+                    .name("melk soja")
+                    //.remarks(null)
+                    .bestBeforeEnd(Helper.days2date(90))
+                    .ml_g_inPackage(10000)
+                    .storage(kelder)
+                    .build();
+            foodRepository.save(melkSoja01);
+
+            Food melkAmandel01 = FoodUntouched.foodUntouchedBuilder()
+                    .name("melk amandel")
+                    //.remarks(null)
+                    .bestBeforeEnd(Helper.days2date(120))
+                    .ml_g_inPackage(10000)
+                    .storage(kelder)
+                    .build();
+            foodRepository.save(melkAmandel01);
+
+            Food melkKoe01 = FoodUntouched.foodUntouchedBuilder()
+                    .name("melk koe")
+                    //.remarks(null)
+                    .bestBeforeEnd(Helper.days2date(90))
+                    .ml_g_inPackage(10000)
+                    .storage(kelder)
+                    .build();
+            foodRepository.save(melkKoe01);
 
             // Now open existing fresh miso package
             // => copy from FoodUntouched to FoodTouched,
@@ -74,20 +100,20 @@ public class Config {
             foodRepository.save(openedMiso);
             foodRepository.deleteById(miso01.getId());
 
+
+            System.out.println("*** all active foods:");
             List<Food> foods01 = foodRepository.findAll();
             for(Food food : foods01) {
                 System.out.println(food);
             }
 
-            //Optional<Food> f = foodRepository.findById(4L);
-            //System.out.println(f);
-
-            Food f = foodRepository.findById(5L).orElse(null);
+            System.out.println("*** food id 5:");
+            Food f = foodRepository.findById(8L).orElse(null);
             if (f != null) {
                 System.out.println(f);
             }
 
-            //other: Session.createSQLQuery()
+
 
         };
     }

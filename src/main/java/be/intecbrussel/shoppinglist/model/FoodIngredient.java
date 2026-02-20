@@ -1,6 +1,7 @@
 package be.intecbrussel.shoppinglist.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +16,6 @@ import lombok.NoArgsConstructor;
 public class FoodIngredient extends Food{
     double quantity;
     @ManyToOne
-    Food food;
+    @JoinColumn(name = "ingredient_id")
+    Food ingredient;
 }

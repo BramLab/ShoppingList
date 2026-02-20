@@ -1,9 +1,6 @@
 package be.intecbrussel.shoppinglist.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.SoftDeleteType;
@@ -18,7 +15,9 @@ import org.hibernate.annotations.SoftDeleteType;
 public class Food extends AuditModel {
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
+    //@Column(name = "food_id")
 	private long id;
     private String name;
     private String remarks;
+
 }

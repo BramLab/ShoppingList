@@ -9,7 +9,7 @@ import lombok.*;
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @ToString(callSuper=true)
 @Entity
-public class FoodInStorage extends AuditModel {
+public class StoredFood extends AuditModel {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;

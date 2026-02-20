@@ -56,12 +56,16 @@ Hoofddoel is een goed gevulde voorraad die meer flexibiliteit toelaat, zodat zel
 
     -> Menu bestaat uit Componenten (*)
         - Hoofdbestanddeel (Eiwitcomponent): meestal vlees, vis, gevogelte of vegetarisch alternatief.
-        - Garnituur (Bijgerecht): begeleidende componenten, vaak aardappelen (friet, puree), rijst, pasta of granen. (=basisvoedsel?)
+        - Bijgerecht: begeleidende componenten, vaak aardappelen (friet, puree), rijst, pasta of granen. (=basisvoedsel?)
         - Groenten: Verse, gestoomde of gebakken groenten.
         - Saus (of Jus): Vloeibare toevoeging voor smaak en binding.
         - De Garnering (Garnering/Decoratie): Fijne afwerking verse kruiden, eetbare bloemen, croutons. Visuele & textuur.
         e.g.   "The dish consists of a seared salmon (main), roasted asparagus (vegetable), mashed potatoes (starch),
                 and a lemon-dill sauce (sauce), garnished with microgreens."
+
+    Nederlands:
+    Garnituur: de bijgerechten die de maaltijd compleet maken.
+    Garnering: (visuele) versiering op het bord.
 
 - Recipe is what CAN be made: Component of dish, Prepped, Substitute.
 - Substitute is prep that can replace another Ingredient or Prepped.

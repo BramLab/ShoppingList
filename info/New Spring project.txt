@@ -25,6 +25,3 @@ Packages:
 repository, service, model, controller, security, dto (incl mappers), exception, configuration.
 
 
-
-
-
