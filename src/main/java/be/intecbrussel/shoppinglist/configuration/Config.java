@@ -4,6 +4,7 @@ package be.intecbrussel.shoppinglist.configuration;
 import be.intecbrussel.shoppinglist.model.*;
 import be.intecbrussel.shoppinglist.repository.FoodRepository;
 import be.intecbrussel.shoppinglist.repository.FoodUntouchedRepository;
+import be.intecbrussel.shoppinglist.repository.IngredientRepository;
 import be.intecbrussel.shoppinglist.repository.StorageRepository;
 //import be.intecbrussel.shoppinglist.repository.FoodUntouchedRepository;
 
@@ -23,7 +24,8 @@ public class Config {
     CommandLineRunner dataLoader_commandLineRunner(
             FoodRepository foodRepository,
             StorageRepository storageRepository,
-            FoodUntouchedRepository foodUntouchedRepository
+            FoodUntouchedRepository foodUntouchedRepository,
+            IngredientRepository ingredientRepository
     ) {
         return args -> {
 
@@ -33,7 +35,7 @@ public class Config {
             storageRepository.save(koelkast);
 
             FoodUntouched bloemkool01 = new FoodUntouched(0, "bloemkool", "(vorige week eigenlijk al op)"
-                    , Helper.days2date(-3), 800, kelder);
+                    , Helper.days2date(-3), 800);
             foodUntouchedRepository.save(bloemkool01);//Inferred type 'S' for type parameter 'S' is not within its bound; should extend 'be.intecbrussel.shoppinglist.model.FoodUntouched'
 
             Food bloemkool02 = FoodUntouched.foodUntouchedBuilder()
@@ -41,7 +43,7 @@ public class Config {
                     //.remarks(null)
                     .bestBeforeEnd(Helper.days2date(3))
                     .ml_g_inPackage(750)
-                    .storage(kelder)
+                    //.storage(kelder)
                     .build();
             foodRepository.save(bloemkool02);
 
@@ -50,7 +52,7 @@ public class Config {
                     //.remarks(null)
                     .bestBeforeEnd(Helper.days2date(90))
                     .ml_g_inPackage(300)
-                    .storage(koelkast)
+                    //.storage(koelkast)
                     .build();
             foodRepository.save(miso01);
 
@@ -59,7 +61,7 @@ public class Config {
                     //.remarks(null)
                     .bestBeforeEnd(Helper.days2date(90))
                     .ml_g_inPackage(10000)
-                    .storage(kelder)
+                    //.storage(kelder)
                     .build();
             foodRepository.save(melkSoja01);
 
@@ -68,7 +70,7 @@ public class Config {
                     //.remarks(null)
                     .bestBeforeEnd(Helper.days2date(120))
                     .ml_g_inPackage(10000)
-                    .storage(kelder)
+                    //.storage(kelder)
                     .build();
             foodRepository.save(melkAmandel01);
 
@@ -77,7 +79,7 @@ public class Config {
                     //.remarks(null)
                     .bestBeforeEnd(Helper.days2date(90))
                     .ml_g_inPackage(10000)
-                    .storage(kelder)
+                    //.storage(kelder)
                     .build();
             foodRepository.save(melkKoe01);
 
@@ -86,10 +88,20 @@ public class Config {
             // with less content and shorter useBy date,
             // and disable/delete FoodUntouched version of it.
             // Then soft delete original.
+            FoodIngredient foodIngredient01 = new FoodIngredient(0, miso01);
+            ingredientRepository.save(foodIngredient01);
+
+
+
+
+            System.out.println("*** all active foods BEFORE DELETE");
+            List<Food> foods00 = foodRepository.findAll();
+            for(Food food : foods00) {
+                System.out.println(food);
+            }
+
             List<FoodIngredient> foodIngredients01  = new ArrayList<FoodIngredient>();
-            FoodIngredient foodIngredient01 = new FoodIngredient(1.0, miso01);
             foodIngredients01.add(foodIngredient01);
-            foodRepository.save(foodIngredient01);
 
             Food openedMiso = FoodTouched.foodTouchedBuilder()
                     .name(miso01.getName())
@@ -108,13 +120,22 @@ public class Config {
             }
 
             System.out.println("*** food id 5:");
-            Food f = foodRepository.findById(8L).orElse(null);
-            if (f != null) {
-                System.out.println(f);
+            Food f01 = foodRepository.findById(8L).orElse(null);
+            if (f01 != null) {
+                System.out.println(f01);
             }
 
+            Food f02 = foodRepository.findByName("miso licht").orElse(null);
+            if (f02 != null) {
+                System.out.println(f02);
+            }
 
+            Storage s01 = storageRepository.findByName("kelder").orElse(null);
+            if (s01 != null) {
+                System.out.println(s01);
+            }
 
+            System.out.println("*** the end ***");
         };
     }
 

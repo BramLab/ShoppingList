@@ -12,7 +12,7 @@ select
     #FoodUntouched:
     best_before_end,ml_g_in_package,
     #FoodTouched:
-    use_by, ml_g_left,food_ingredients,
+    use_by, ml_g_left, #food_ingredients,
     #FoodIngredient:
     quantity, ingredient_id,
     #FoodSubstitute:

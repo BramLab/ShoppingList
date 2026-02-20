@@ -16,7 +16,7 @@ public class FoodUntouched extends Food {
 
     @Builder(builderMethodName = "foodUntouchedBuilder")
     public FoodUntouched(long id, String name, String remarks
-            , LocalDate bestBeforeEnd, double ml_g_inPackage, Storage storage) {
+            , LocalDate bestBeforeEnd, double ml_g_inPackage) {
         super(id, name, remarks);
         this.bestBeforeEnd = bestBeforeEnd;
         this.ml_g_inPackage = ml_g_inPackage;

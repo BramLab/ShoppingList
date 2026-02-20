@@ -1,0 +1,36 @@
+There are several issues across this codebase:
+
+**1. pom.xml — Non-existent test dependencies**
+`spring-boot-starter-data-jpa-test` and `spring-boot-starter-webmvc-test` don't exist as artifacts.
+They should simply be `spring-boot-starter-test`.
+
+**2. `FoodUntouched.java` — `storage` field is missing**
+The constructor accepts a `Storage storage` parameter but there's no field declared for it and it's never assigned.
+The storage is silently dropped.
+
+**3. `FoodSubstitute.java` — Duplicate `@Id`**
+`Food` already declares `@Id private long id`. `FoodSubstitute` declares another `@Id private long id`,
+which will cause a Hibernate mapping conflict.
+
+**4. Missing JPA relationship annotations on collections**
+Several collection fields have no `@OneToMany`, `@ManyToMany`, or `@ElementCollection` annotation,
+which Hibernate cannot map:
+- `FoodTouched.foodIngredients` (List\<FoodIngredient\>)
+- `FoodInHouse.storedFood` (List\<StoredFood\>)
+- `Recipe.ingredients` (List\<Food\>)
+
+**5. No `@Inheritance` strategy on `Food`**
+`Food` is a base `@Entity` with multiple subclasses (`FoodUntouched`, `FoodTouched`, `FoodIngredient`, `FoodSubstitute`)
+but no `@Inheritance(strategy = ...)` is declared. Hibernate defaults to `SINGLE_TABLE`,
+which may not be your intent, and it should be explicit.
+
+**6. `Config.java` — Logic issue after soft-delete**
+`foodIngredient01` holds a reference to `miso01`, which is then soft-deleted with
+`foodRepository.deleteById(miso01.getId())`.
+The `FoodIngredient` still references the (now deleted) food, which can cause unexpected behaviour when querying.
+
+**7. `FoodUntouched` constructor used as a `FoodUntouched` in `Config`**
+`bloemkool01` is created with `new FoodUntouched(0, ...)` — the 6-arg constructor — but the `@AllArgsConstructor`
+Lombok generates would only include the fields declared directly in `FoodUntouched` (not the inherited ones from `Food`).
+The custom `@Builder` constructor calls `super(id, name, remarks)`, but `@AllArgsConstructor` doesn't,
+so the `name` field will be null when using `new FoodUntouched(0, "bloemkool", ...)` directly.

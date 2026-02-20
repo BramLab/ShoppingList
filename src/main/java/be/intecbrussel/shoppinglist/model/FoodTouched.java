@@ -1,6 +1,9 @@
 package be.intecbrussel.shoppinglist.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -20,6 +23,7 @@ public class FoodTouched extends Food {
 
     private LocalDate useBy; // UseBy = perishable soon (sooner than unopened).
     private double ml_g_Left; // If opened also estimate amount left.
+    @OneToMany(fetch = FetchType.EAGER)
     List<FoodIngredient> foodIngredients; //list of FoodUntouched & FoodTouched (Prepped/Substitutes).
 
     @Builder(builderMethodName = "foodTouchedBuilder")
