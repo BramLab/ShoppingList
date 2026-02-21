@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -15,38 +14,34 @@ import java.time.temporal.ChronoUnit;
 public class FoodOriginal extends Food{
 
     private LocalDate bestBeforeEnd;// = UseBy if perishable soon.
-    private double ml_g_inPackage;
-
+    private double original_ml_g;
     private LocalDate useBy; // UseBy = perishable soon (sooner than unopened).
-    private double ml_g_Left; // If opened also estimate amount left.
+    private double remaining_ml_g; // If opened also estimate amount left.
 
-    @Builder(builderMethodName = "foodUntouchedBuilder")
+    @Builder(builderMethodName = "foodOriginalBuilder")
     public FoodOriginal(long id, String name, String remarks
-            , LocalDate bestBeforeEnd, double ml_g_inPackage
-            , LocalDate useBy, double ml_g_Left) {
+            , LocalDate bestBeforeEnd, double original_ml_g
+            , LocalDate useBy, double remaining_ml_g) {
 
         super(id, name, remarks);
 
         this.bestBeforeEnd = bestBeforeEnd;
-        this.ml_g_inPackage = ml_g_inPackage;
+        this.original_ml_g = original_ml_g;
 
-        this.ml_g_Left = ml_g_Left;
+        this.remaining_ml_g = remaining_ml_g;
         this.useBy = useBy;
     }
 
-    /*
-    // gets the date before
-    dates.stream().min(Comparator.<LocalDate>comparingLong(
-    x -> Math.abs(ChronoUnit.DAYS.between(x, milestoneDate))
-    ).thenComparing(Comparator.naturalOrder()));
-    */
+    // TODO: Using last bit should also softdelete product instead.
+    // If ml_g_Left is realy zero because nothing is left, then problem.
+
     public LocalDate getUseBy(){
         if (useBy != null)  { return useBy; }
         else                { return bestBeforeEnd; }
     }
 
     public double get_ml_g_Left(){
-        if (useBy != null)  { return useBy; }
-        else                { return bestBeforeEnd; }
+        if (remaining_ml_g != 0) { return remaining_ml_g; }
+        else                { return original_ml_g; }
     }
 }
