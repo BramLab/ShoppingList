@@ -38,14 +38,22 @@ public class Config {
 
             FoodOriginal bloemkool01 = FoodOriginal.foodOriginalBuilder()
                     .name("bloemkool")
-                    .bestBeforeEnd(Helper.days2date(3))
+                    .remarks("bloemkool01")
+                    .bestBeforeEnd(Helper.days2date(4))
                     .original_ml_g(750)
                     .build();
             foodOriginalRepository.save(bloemkool01);
 
-            bloemkool01.setUseBy(Helper.days2date(1));
-            bloemkool01.setRemaining_ml_g(200);
-            foodOriginalRepository.save(bloemkool01);
+            FoodOriginal bloemkool02 = FoodOriginal.foodOriginalBuilder()
+                    .name("bloemkool")
+                    .remarks("bloemkool02")
+                    .bestBeforeEnd(Helper.days2date(4))
+                    .original_ml_g(750)
+                    .build();
+            foodOriginalRepository.save(bloemkool02);
+            bloemkool02.setUseBy(Helper.days2date(2));
+            bloemkool02.setRemaining_ml_g(0d);
+            foodOriginalRepository.save(bloemkool02);
 
 //            FoodUntouched bloemkool01 = new FoodUntouched(0, "bloemkool", "(vorige week eigenlijk al op)"
 //                    , Helper.days2date(-3), 800);

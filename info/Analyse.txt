@@ -45,7 +45,17 @@ zodat je weet wat je nog moet bijkopen (boodschappenlijst).
 ---
 
 * Hoofddoel:
-Hoofddoel is een goed gevulde voorraad die meer flexibiliteit toelaat, zodat zelf koken gemakkelijker wordt.*
+Hoofddoel is een goed gevulde voorraad die meer flexibiliteit toelaat, zodat zelf koken gemakkelijker wordt.
+- Bijkopen waarvan er een tekort dreigt.
+- Niet bijkopen als er eenteveel dreigt (niet op vóór verbruiksdatum).
+- Wanneer verbruiksdatum nadert => suggestie eerstvolgende menu's.
+
+Bijkomend:
+- Idem geopende verpakkingen, aangesneden groenten & fruit, etc bijhouden zodat die gebruikt worden voor ze slecht worden.
+
+Extra:
+- Menu's voorstellen.
+- Evt met substituten/vervangingen.
 
 ---
 * Business analysis - from store to plate:
