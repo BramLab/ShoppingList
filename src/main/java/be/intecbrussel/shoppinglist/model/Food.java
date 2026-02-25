@@ -15,8 +15,8 @@ import org.hibernate.annotations.SoftDeleteType;
 public class Food extends AuditModel {
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
-    //@Column(name = "food_id")
 	private long id;
+
     private String name;
     private String remarks;
 

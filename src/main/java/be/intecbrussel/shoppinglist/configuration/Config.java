@@ -17,6 +17,9 @@ import java.util.List;
 
 //@Component, @Controller
 
+// @SpringBootApplication annotation. This annotation represents:
+// @Configuration, @EnableAutoConfiguration and @ComponentScan
+
 @Configuration
 @EnableJpaAuditing
 public class Config {
