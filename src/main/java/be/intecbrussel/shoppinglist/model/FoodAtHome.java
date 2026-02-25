@@ -18,6 +18,8 @@ public class FoodAtHome extends AuditModel{
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
 
+    private String name;//e.g. "home of Bill & Melinda Gates"
+
     @OneToMany
     List<StoredFood> storedFood;
 
