@@ -7,12 +7,13 @@ import jakarta.persistence.Id;
 import lombok.*;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @ToString(callSuper=true)
+@Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
-public class FoodInHouse extends AuditModel{
+public class FoodAtHome extends AuditModel{
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;

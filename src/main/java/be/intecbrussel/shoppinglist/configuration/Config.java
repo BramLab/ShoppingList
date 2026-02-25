@@ -23,11 +23,10 @@ public class Config {
 
     @Bean
     CommandLineRunner dataLoader_commandLineRunner(
-            FoodRepository foodRepository,
-            StorageRepository storageRepository
+              FoodAtHome foodAtHome
+            , FoodRepository foodRepository
+            , StorageRepository storageRepository
             , FoodOriginalRepository foodOriginalRepository
-//            ,FoodUntouchedRepository foodUntouchedRepository,
-//            IngredientRepository ingredientRepository
     ) {
         return args -> {
 
@@ -54,6 +53,8 @@ public class Config {
             bloemkool02.setUseBy(Helper.days2date(2));
             bloemkool02.setRemaining_ml_g(0d);
             foodOriginalRepository.save(bloemkool02);
+
+
 
 //            FoodUntouched bloemkool01 = new FoodUntouched(0, "bloemkool", "(vorige week eigenlijk al op)"
 //                    , Helper.days2date(-3), 800);

@@ -56,14 +56,12 @@ class FoodOriginalRepositoryTest {
 
     @Test
     void testUseByFallsBackToBestBeforeEnd() {
-        // useBy is null, so getUseBy() should return bestBeforeEnd
-        assertNull(bloemkool.getUseBy() == bloemkool.getBestBeforeEnd()
-                ? null : "fallback not working");
+        assertNull(bloemkool.getUseBy()); // confirm useBy was never set
         assertEquals(bloemkool.getBestBeforeEnd(), bloemkool.getUseBy());
     }
 
     @Test
-    void testSetOriginalMlGAlsoSetsRemaining() {
+    void testSetOriginal_ml_g_AlsoSetsRemaining() {
         bloemkool.setOriginal_ml_g(500d);
         assertEquals(500d, bloemkool.getRemaining_ml_g());
     }
