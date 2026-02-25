@@ -33,37 +33,18 @@ public class FoodOriginal extends Food{
         this.useBy = useBy;
     }
 
-//    public LocalDate getBestBeforeEnd() {
-//        return bestBeforeEnd;
-//    }
-//
-//    public double getOriginal_ml_g() {
-//        return original_ml_g;
-//    }
-
     public LocalDate getUseBy(){
         if (useBy != null)  { return useBy; }
         else                { return bestBeforeEnd; }
     }
-
-//    public double getRemaining_ml_g(){
-//        return remaining_ml_g;
-//    }
-//
-//    public void setBestBeforeEnd(LocalDate bestBeforeEnd) {
-//        this.bestBeforeEnd = bestBeforeEnd;
-//    }
 
     public void setOriginal_ml_g(double original_ml_g) {
         this.original_ml_g = original_ml_g;
         this.remaining_ml_g = original_ml_g;
     }
 
-//    public void setUseBy(LocalDate useBy) {
-//        this.useBy = useBy;
-//    }
-
     // TODO: Using last bit should also softdelete product instead.
+    // How to make product deleted when last bit is used?
     // If ml_g_Left is realy zero because nothing is left, then problem.
     public void setRemaining_ml_g(double remaining_ml_g) {
         this.remaining_ml_g = remaining_ml_g;

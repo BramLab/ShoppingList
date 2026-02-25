@@ -9,10 +9,9 @@ select
     dtype,
     #Food:
     id,name,remarks,
-    #FoodUntouched:
-    best_before_end,ml_g_in_package,
-    #FoodTouched:
-    use_by, ml_g_left, #food_ingredients,
+    #FoodOriginal:
+    best_before_end, original_ml_g, use_by, remaining_ml_g,
+    #FoodUntouched:#FoodTouched:# best_before_end, ml_g_left  use_by, ml_g_left, #food_ingredients,
     #FoodIngredient:
     quantity, ingredient_id,
     #FoodSubstitute:
@@ -24,7 +23,9 @@ SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA='shoppinglist' AND TABLE_NAME='food'
 order by COLUMN_NAME asc;
 
-
+# #Drop tables:
+# SELECT table_name FROM information_schema.tables WHERE table_schema = 'shopppinglist';
+# drop table if exists food_food_ingredients;
 # drop table if exists food_in_house;
 # drop table if exists food_in_storage;
 # drop table if exists food_storage;
@@ -33,3 +34,4 @@ order by COLUMN_NAME asc;
 # drop table if exists storage;
 # drop table if exists food;
 # drop table if exists recipe;
+# SELECT table_name FROM information_schema.tables WHERE table_schema = 'shopppinglist';
