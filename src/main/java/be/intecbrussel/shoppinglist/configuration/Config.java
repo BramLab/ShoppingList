@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import java.util.ArrayList;
 import java.util.List;
 
 //@Component, @Controller
@@ -46,6 +47,8 @@ public class Config {
                     .build();
             foodOriginalRepository.save(bloemkool01);
 
+
+
             FoodOriginal bloemkool02 = FoodOriginal.foodOriginalBuilder()
                     .name("bloemkool")
                     .remarks("bloemkool02")
@@ -57,58 +60,45 @@ public class Config {
             bloemkool02.setRemaining_ml_g(0d);
             foodOriginalRepository.save(bloemkool02);
 
+            FoodOriginal miso01 = FoodOriginal.foodOriginalBuilder()
+                    .name("miso licht")
+                    .bestBeforeEnd(Helper.days2date(90))
+                    .original_ml_g(300)
+                    .build();
+            foodRepository.save(miso01);
 
+            FoodOriginal melkSoja01 = FoodOriginal.foodOriginalBuilder()
+                    .name("melk soja")
+                    .bestBeforeEnd(Helper.days2date(90))
+                    .original_ml_g(1000)
+                    .build();
+            foodRepository.save(melkSoja01);
 
-//            FoodUntouched bloemkool01 = new FoodUntouched(0, "bloemkool", "(vorige week eigenlijk al op)"
-//                    , Helper.days2date(-3), 800);
-//            foodUntouchedRepository.save(bloemkool01);//Inferred type 'S' for type parameter 'S' is not within its bound; should extend 'be.intecbrussel.shoppinglist.model.FoodUntouched'
-//
-//            Food bloemkool02 = FoodUntouched.foodUntouchedBuilder()
-//                    .name("bloemkool")
-//                    .bestBeforeEnd(Helper.days2date(3))
-//                    .ml_g_inPackage(750)
-//                    .build();
-//            foodRepository.save(bloemkool02);
-//
-//            Food miso01 = FoodUntouched.foodUntouchedBuilder()
-//                    .name("miso licht")
-//                    .bestBeforeEnd(Helper.days2date(90))
-//                    .ml_g_inPackage(300)
-//                    .build();
-//            foodRepository.save(miso01);
-//
-//            Food melkSoja01 = FoodUntouched.foodUntouchedBuilder()
-//                    .name("melk soja")
-//                    .bestBeforeEnd(Helper.days2date(90))
-//                    .ml_g_inPackage(10000)
-//                    .build();
-//            foodRepository.save(melkSoja01);
-//
-//            Food melkAmandel01 = FoodUntouched.foodUntouchedBuilder()
-//                    .name("melk amandel")
-//                    .bestBeforeEnd(Helper.days2date(120))
-//                    .ml_g_inPackage(10000)
-//                    .build();
-//            foodRepository.save(melkAmandel01);
-//
-//            Food melkKoe01 = FoodUntouched.foodUntouchedBuilder()
-//                    .name("melk koe")
-//                    .bestBeforeEnd(Helper.days2date(90))
-//                    .ml_g_inPackage(10000)
-//                    .build();
-//            foodRepository.save(melkKoe01);
+            FoodOriginal melkAmandel01 = FoodOriginal.foodOriginalBuilder()
+                    .name("melk amandel")
+                    .bestBeforeEnd(Helper.days2date(120))
+                    .original_ml_g(1000)
+                    .build();
+            foodRepository.save(melkAmandel01);
+
+            FoodOriginal melkKoe01 = FoodOriginal.foodOriginalBuilder()
+                    .name("melk koe")
+                    .bestBeforeEnd(Helper.days2date(90))
+                    .original_ml_g(1000)
+                    .build();
+            foodRepository.save(melkKoe01);
 
             // Now open existing fresh miso package
             // => copy from FoodUntouched to FoodTouched,
             // with less content and shorter useBy date,
             // and disable/delete FoodUntouched version of it.
-            // Then soft delete original.
+            // Then (soft) delete original.
 //            FoodIngredient foodIngredient01 = new FoodIngredient(0, miso01);
 //            ingredientRepository.save(foodIngredient01);
 //            List<FoodIngredient> foodIngredients01  = new ArrayList<FoodIngredient>();
 //            foodIngredients01.add(foodIngredient01);
-//
-//            Food openedMiso = FoodTouched.foodTouchedBuilder()
+            //
+//            Food openedMiso = FoodTouched.foodOriginalBuilder()
 //                    .name(miso01.getName())
 //                    .useBy(Helper.days2date(30))
 //                    .ml_g_Left( ((FoodUntouched)miso01).getMl_g_inPackage() - 30)
@@ -116,6 +106,9 @@ public class Config {
 //                    .build();
 //            foodRepository.save(openedMiso);
 //            foodRepository.deleteById(miso01.getId());
+
+
+
 
             System.out.println("*** test getters/setters:");
             Food foodsTestBloemkool02 = foodRepository.getOne(bloemkool02.getId());

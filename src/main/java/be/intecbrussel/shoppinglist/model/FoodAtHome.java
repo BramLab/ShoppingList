@@ -1,10 +1,9 @@
 package be.intecbrussel.shoppinglist.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -13,11 +12,17 @@ import java.util.List;
 @ToString(callSuper=true)
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
+@Component //Why does just this class need @Component?
 public class FoodAtHome extends AuditModel{
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
 
+    @OneToMany
     List<StoredFood> storedFood;
+
+    // Maybe this class belongs in service?
+    // Actually this app is meant for private use. Users of the same family might interchange data, but data never
+    // leaves a family/home (except if they have several homes).
 
 }
