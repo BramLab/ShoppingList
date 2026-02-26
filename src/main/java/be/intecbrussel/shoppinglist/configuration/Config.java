@@ -1,18 +1,14 @@
 package be.intecbrussel.shoppinglist.configuration;
 
-
 import be.intecbrussel.shoppinglist.model.*;
 import be.intecbrussel.shoppinglist.repository.FoodOriginalRepository;
 import be.intecbrussel.shoppinglist.repository.FoodRepository;
-//import be.intecbrussel.shoppinglist.repository.FoodUntouchedRepository;
 import be.intecbrussel.shoppinglist.repository.StorageRepository;
-//import be.intecbrussel.shoppinglist.repository.FoodUntouchedRepository;
-
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-
 import java.util.List;
 
 //@Component, @Controller
@@ -25,6 +21,7 @@ import java.util.List;
 public class Config {
 
     @Bean
+    @Profile("!test") // Prevents running during tests; inserted data interferes with test data.
     CommandLineRunner dataLoader_commandLineRunner(
               UserHome userHome
             , FoodRepository foodRepository
