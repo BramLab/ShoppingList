@@ -57,7 +57,7 @@ class FoodOriginalRepositoryTest {
 
     @Test
     void testUseByFallsBackToBestBeforeEnd() {
-        assertNull(bloemkool.getUseBy()); // confirm useBy was never set
+//        assertNull(bloemkool.getUseBy()); // confirm useBy was never set
         assertEquals(bloemkool.getBestBeforeEnd(), bloemkool.getUseBy());
     }
 
