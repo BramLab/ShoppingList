@@ -49,6 +49,7 @@ class FoodOriginalRepositoryTest {
     void testRemainingMlGSetToNegativeWhenZero() {
         bloemkool.setRemaining_ml_g(0d);
         foodOriginalRepository.save(bloemkool);
+        foodOriginalRepository.flush();
 
         FoodOriginal saved = foodOriginalRepository.findById(bloemkool.getId()).orElseThrow();
         assertEquals(-1d, saved.getRemaining_ml_g());

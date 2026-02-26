@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS storage (
                                        remarks    VARCHAR(255)
 );
 
-create table IF NOT EXISTS shoppinglist.food
+create table IF NOT EXISTS food
 (
     created_at datetime(6)  null,
     deleted_at datetime(6)  null comment 'Soft-delete indicator',
@@ -16,10 +16,10 @@ create table IF NOT EXISTS shoppinglist.food
     dtype      varchar(31)  not null,
     name       varchar(255) null,
     remarks    varchar(255) null,
-    check ('dtype' in ('food_original'))
+    check (dtype in ('food_original'))
 );
 
-create table IF NOT EXISTS shoppinglist.food_original
+create table IF NOT EXISTS food_original
 (
     best_before_end date   null,
     original_ml_g   double not null,
