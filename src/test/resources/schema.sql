@@ -23,3 +23,41 @@ CREATE TABLE IF NOT EXISTS food_original (
                                              CONSTRAINT FK4a1tyhabf5gokqhlqgxtaomb8
                                                  FOREIGN KEY (food_id) REFERENCES food (id)
 );
+
+CREATE TABLE IF NOT EXISTS user_home (
+                                         created_at TIMESTAMP   NULL,
+                                         updated_at TIMESTAMP   NULL,
+                                         id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                         name       VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS user (
+                                    created_at      TIMESTAMP    NULL,
+                                    updated_at      TIMESTAMP    NULL,
+                                    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                    username        VARCHAR(255),
+                                    email           VARCHAR(255),
+                                    user_role       VARCHAR(50),
+                                    password_hashed VARCHAR(255),
+                                    user_home_id    BIGINT,
+                                    FOREIGN KEY (user_home_id) REFERENCES user_home (id)
+);
+
+CREATE TABLE IF NOT EXISTS storage_type (
+                                            id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                            name    VARCHAR(255),
+                                            remarks VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS stored_food (
+                                           created_at       TIMESTAMP NULL,
+                                           updated_at       TIMESTAMP NULL,
+                                           id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                           quantity         INT,
+                                           food_id          BIGINT,
+                                           storage_type_id  BIGINT,
+                                           user_home_id     BIGINT,
+                                           FOREIGN KEY (food_id)         REFERENCES food (id),
+                                           FOREIGN KEY (storage_type_id) REFERENCES storage_type (id),
+                                           FOREIGN KEY (user_home_id)    REFERENCES user_home (id)
+);

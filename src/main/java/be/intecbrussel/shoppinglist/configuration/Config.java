@@ -110,7 +110,8 @@ public class Config {
 
 
             System.out.println("*** test getters/setters:");
-            Food foodsTestBloemkool02 = foodRepository.getOne(bloemkool02.getId());
+            //Food foodsTestBloemkool02 = foodRepository.getOne(bloemkool02.getId());
+            Food foodsTestBloemkool02 = foodRepository.getReferenceById(bloemkool02.getId());
             System.out.println("bloemkool02.getOriginal_ml_g(): " + bloemkool02.getOriginal_ml_g());
             System.out.println("bloemkool02.getBestBeforeEnd(): " + bloemkool02.getBestBeforeEnd());
             System.out.println("bloemkool02.getRemaining_ml_g(): " + bloemkool02.getRemaining_ml_g());
