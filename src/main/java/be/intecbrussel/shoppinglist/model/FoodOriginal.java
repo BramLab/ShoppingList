@@ -1,6 +1,7 @@
 package be.intecbrussel.shoppinglist.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @ToString(callSuper=true)
 @Entity
+@PrimaryKeyJoinColumn(name = "food_id")
 public class FoodOriginal extends Food {
 
     private LocalDate bestBeforeEnd;// = UseBy if perishable soon.

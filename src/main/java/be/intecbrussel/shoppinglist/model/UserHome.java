@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,15 +11,15 @@ import java.util.List;
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
 @Component //Why does just this class need @Component?
-public class FoodAtHome extends AuditModel{
+public class UserHome extends AuditModel{
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
 
     private String name;//e.g. "home of Bill & Melinda Gates"
 
-    @OneToMany
-    List<User> users;
+//    @OneToMany
+//    List<User> users;
 
 //    @OneToMany
 //    List<StoredFood> storedFood;

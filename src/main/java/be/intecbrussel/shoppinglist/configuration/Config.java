@@ -26,7 +26,7 @@ public class Config {
 
     @Bean
     CommandLineRunner dataLoader_commandLineRunner(
-              FoodAtHome foodAtHome
+              UserHome userHome
             , FoodRepository foodRepository
             , StorageRepository storageRepository
             , FoodOriginalRepository foodOriginalRepository

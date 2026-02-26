@@ -9,14 +9,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
-@Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
-@Entity
-public class FoodIngredient extends Food {
-    double quantity;
-    @ManyToOne
-    @JoinColumn(name = "ingredient_id")
-    Food ingredient;
-}
+//@EqualsAndHashCode(callSuper = true)
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
+//@Entity
+//public class FoodIngredient extends Food {
+//    double quantity;
+//    @ManyToOne
+//    @JoinColumn(name = "ingredient_id")
+//    Food ingredient;
+//}

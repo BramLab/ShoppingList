@@ -13,25 +13,25 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import java.util.List;
 
-@Transactional
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
-@Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
-@Entity
-public class Recipe extends AuditModel /*implements Serializable*/ {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    private String title;
-    private List<Food> ingredients;
-    //later: cooking-step with
-    // - resultingFoodproduct (which is itself also a Foodproduct), so it can be a recursive process.
-    // - process-name (String)
-    // - List of ingredient (Foodproduct) + quantity
-    // - process-instructions
-    // - estimated time
-    // - List of utensils (min: recipient)
-
-}
+//@Transactional
+//@EqualsAndHashCode(callSuper = true)
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
+//@Entity
+//public class Recipe extends AuditModel /*implements Serializable*/ {
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private long id;
+//
+//    private String title;
+//    private List<Food> ingredients;
+//    //later: cooking-step with
+//    // - resultingFoodproduct (which is itself also a Foodproduct), so it can be a recursive process.
+//    // - process-name (String)
+//    // - List of ingredient (Foodproduct) + quantity
+//    // - process-instructions
+//    // - estimated time
+//    // - List of utensils (min: recipient)
+//
+//}

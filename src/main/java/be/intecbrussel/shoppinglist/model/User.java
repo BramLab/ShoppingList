@@ -24,4 +24,7 @@ public class User extends AuditModel {
     private UserRole userRole;
 
     private String passwordHashed;
+
+    @ManyToOne
+    private UserHome userHome;
 }
