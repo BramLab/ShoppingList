@@ -11,7 +11,7 @@ import lombok.*;
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
 @ToString(callSuper=true)
-public class Storage {
+public class StorageType {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;

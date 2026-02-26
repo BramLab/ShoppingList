@@ -1,5 +1,7 @@
-package be.intecbrussel.shoppinglist.model;
+package be.intecbrussel.shoppinglist.model.notyet;
 
+import be.intecbrussel.shoppinglist.model.AuditModel;
+import be.intecbrussel.shoppinglist.model.Food;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

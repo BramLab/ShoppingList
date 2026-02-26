@@ -11,12 +11,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
-public class FoodSubstitute extends Food {
-    private long FoodOriginal;
-    private long FoodAlternative;
+public class User extends AuditModel {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Recipe recipe;
+    private String username;
+    private String email;
 
-    private String aspect;
+    // https://stackoverflow.com/questions/67825729/using-enums-in-a-spring-entity
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
+
+    private String passwordHashed;
 }

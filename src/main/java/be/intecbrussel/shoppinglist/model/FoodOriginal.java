@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @ToString(callSuper=true)
 @Entity
-public class FoodOriginal extends Food{
+public class FoodOriginal extends Food {
 
     private LocalDate bestBeforeEnd;// = UseBy if perishable soon.
     private double original_ml_g;

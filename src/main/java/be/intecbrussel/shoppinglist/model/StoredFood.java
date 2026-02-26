@@ -18,7 +18,10 @@ public class StoredFood extends AuditModel {
     Food food;
 
     @ManyToOne(cascade=CascadeType.ALL)
-    Storage storage;
+    StorageType storageType;
+
+    @ManyToOne(cascade=CascadeType.ALL)
+    FoodAtHome foodAtHome;
 
     int quantity;
 

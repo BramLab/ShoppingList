@@ -21,10 +21,13 @@ public class FoodAtHome extends AuditModel{
     private String name;//e.g. "home of Bill & Melinda Gates"
 
     @OneToMany
-    List<StoredFood> storedFood;
+    List<User> users;
+
+//    @OneToMany
+//    List<StoredFood> storedFood;
 
     // Maybe this class belongs in service?
     // Actually this app is meant for private use. Users of the same family might interchange data, but data never
-    // leaves a family/home (except if they have several homes).
+    // leaves a family/home (except if they have several homes). => SOLVED added list of Users.
 
 }

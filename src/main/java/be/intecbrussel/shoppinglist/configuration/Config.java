@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-import java.util.ArrayList;
 import java.util.List;
 
 //@Component, @Controller
@@ -34,15 +33,15 @@ public class Config {
     ) {
         return args -> {
 
-            Storage kelder = new Storage(0, "Kelder", null);
+            StorageType kelder = new StorageType(0, "Kelder", null);
             storageRepository.save(kelder);
-            Storage koelkast = new Storage(0, "Koelkast", null);
+            StorageType koelkast = new StorageType(0, "Koelkast", null);
             storageRepository.save(koelkast);
 
             FoodOriginal bloemkool01 = FoodOriginal.foodOriginalBuilder()
                     .name("bloemkool")
                     .remarks("bloemkool01")
-                    .bestBeforeEnd(Helper.days2date(4))
+                    .bestBeforeEnd(Util.days2date(4))
                     .original_ml_g(750)
                     .build();
             foodOriginalRepository.save(bloemkool01);
@@ -52,38 +51,38 @@ public class Config {
             FoodOriginal bloemkool02 = FoodOriginal.foodOriginalBuilder()
                     .name("bloemkool")
                     .remarks("bloemkool02")
-                    .bestBeforeEnd(Helper.days2date(4))
+                    .bestBeforeEnd(Util.days2date(4))
                     .original_ml_g(750)
                     .build();
             foodOriginalRepository.save(bloemkool02);
-            bloemkool02.setUseBy(Helper.days2date(2));
+            bloemkool02.setUseBy(Util.days2date(2));
             bloemkool02.setRemaining_ml_g(0d);
             foodOriginalRepository.save(bloemkool02);
 
             FoodOriginal miso01 = FoodOriginal.foodOriginalBuilder()
                     .name("miso licht")
-                    .bestBeforeEnd(Helper.days2date(90))
+                    .bestBeforeEnd(Util.days2date(90))
                     .original_ml_g(300)
                     .build();
             foodRepository.save(miso01);
 
             FoodOriginal melkSoja01 = FoodOriginal.foodOriginalBuilder()
                     .name("melk soja")
-                    .bestBeforeEnd(Helper.days2date(90))
+                    .bestBeforeEnd(Util.days2date(90))
                     .original_ml_g(1000)
                     .build();
             foodRepository.save(melkSoja01);
 
             FoodOriginal melkAmandel01 = FoodOriginal.foodOriginalBuilder()
                     .name("melk amandel")
-                    .bestBeforeEnd(Helper.days2date(120))
+                    .bestBeforeEnd(Util.days2date(120))
                     .original_ml_g(1000)
                     .build();
             foodRepository.save(melkAmandel01);
 
             FoodOriginal melkKoe01 = FoodOriginal.foodOriginalBuilder()
                     .name("melk koe")
-                    .bestBeforeEnd(Helper.days2date(90))
+                    .bestBeforeEnd(Util.days2date(90))
                     .original_ml_g(1000)
                     .build();
             foodRepository.save(melkKoe01);

@@ -2,7 +2,7 @@ package be.intecbrussel.shoppinglist.repository;
 
 import be.intecbrussel.shoppinglist.model.Food;
 import be.intecbrussel.shoppinglist.model.FoodOriginal;
-import be.intecbrussel.shoppinglist.model.Helper;
+import be.intecbrussel.shoppinglist.model.Util;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class FoodOriginalRepositoryTest {
         bloemkool = FoodOriginal.foodOriginalBuilder()
                 .name("bloemkool")
                 .remarks("bloemkool01")
-                .bestBeforeEnd(Helper.days2date(4))
+                .bestBeforeEnd(Util.days2date(4))
                 .original_ml_g(750)
                 .build();
         foodOriginalRepository.save(bloemkool);
