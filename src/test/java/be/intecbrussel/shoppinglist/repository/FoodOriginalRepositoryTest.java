@@ -46,7 +46,7 @@ class FoodOriginalRepositoryTest {
     }
 
     @Test
-    void testRemainingMlGSetToNegativeWhenZero() {
+    void testRemaining_ml_g_SetToNegativeWhenZero() {
         bloemkool.setRemaining_ml_g(0d);
         foodOriginalRepository.save(bloemkool);
         foodOriginalRepository.flush();
@@ -56,13 +56,12 @@ class FoodOriginalRepositoryTest {
     }
 
     @Test
-    void testUseByFallsBackToBestBeforeEnd() {
-//        assertNull(bloemkool.getUseBy()); // confirm useBy was never set
-        assertEquals(bloemkool.getBestBeforeEnd(), bloemkool.getUseBy());
+    void test_UseBy_setToSameAs_BestBeforeEnd() {
+        assertEquals(bloemkool.getBestBeforeEnd(), bloemkool.getUseBy()); // confirm useBy set to same as BestBeforeEnd
     }
 
     @Test
-    void testSetOriginal_ml_g_AlsoSetsRemaining() {
+    void testSetOriginal_ml_g_AlsoSets_Remaining_ml_g() {
         bloemkool.setOriginal_ml_g(500d);
         assertEquals(500d, bloemkool.getRemaining_ml_g());
     }
