@@ -2,7 +2,7 @@ package be.intecbrussel.shoppinglist.repository;
 
 import be.intecbrussel.shoppinglist.model.Food;
 import be.intecbrussel.shoppinglist.model.FoodOriginal;
-import be.intecbrussel.shoppinglist.model.Util;
+import be.intecbrussel.shoppinglist.configuration.Util;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

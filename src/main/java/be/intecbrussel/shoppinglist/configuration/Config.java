@@ -27,9 +27,9 @@ public class Config {
             UserHome home01 = new UserHome(0, "home01");
             UserHome home02 = new UserHome(0, "home02");
 
-            User user01 = new User(0, "user01", "u1@g.c", UserRole.ADMIN, "hashed01?", home01);
-            User user02 = new User(0, "user02", "u2@g.c", UserRole.NORMAL, "hashed02?", home01);
-            User user03 = new User(0, "user03", "u3@g.c", UserRole.NORMAL, "hashed03?", home02);
+            AppUser appUser01 = new AppUser(0, "user01", "u1@g.c", UserRole.ADMIN, "hashed01?", home01);
+            AppUser appUser02 = new AppUser(0, "user02", "u2@g.c", UserRole.NORMAL, "hashed02?", home01);
+            AppUser appUser03 = new AppUser(0, "user03", "u3@g.c", UserRole.NORMAL, "hashed03?", home02);
 
             StorageType kelder = new StorageType(0, "Kelder", null);
             storageTypeRepository.save(kelder);

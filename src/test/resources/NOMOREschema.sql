@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS user_home (
 );
 
 // USER is a reserved keyword in H2, quote is quick-fix
-CREATE TABLE IF NOT EXISTS "user" (
+CREATE TABLE IF NOT EXISTS "app_user" (
                                     created_at      TIMESTAMP    NULL,
                                     updated_at      TIMESTAMP    NULL,
                                     id              BIGINT AUTO_INCREMENT PRIMARY KEY,

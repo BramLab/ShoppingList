@@ -1,4 +1,4 @@
-package be.intecbrussel.shoppinglist.model;
+package be.intecbrussel.shoppinglist.configuration;
 
 import java.time.LocalDate;
 
