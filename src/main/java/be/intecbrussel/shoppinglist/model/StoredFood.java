@@ -14,13 +14,16 @@ public class StoredFood extends AuditModel {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional = false)
+    // As a general rule, cascade=CascadeType.ALL (or any cascade) on a @ManyToOne is almost never correct.
+    // Cascading makes sense on @OneToMany — flowing from parent down to children — not from a child up to its parent.
+    // You wouldn't want deleting a StoredFood to also delete the Home or the Food item itself.
+    @ManyToOne(optional = false)
     Home home;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional = false)
+    @ManyToOne(optional = false)
     Food food;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional = false)
+    @ManyToOne(optional = false)
     StorageType storageType;
 
     int quantity;

@@ -111,24 +111,24 @@ public class Config {
 
             StoredFood storedFood01 = new StoredFood(0, home01, bloemkool01,kelder,0);
             storedFoodRepository.save(storedFood01);
-//            StoredFood storedFood02 = new StoredFood(0, home01, bloemkool02,kelder,1);
-//            storedFoodRepository.save(storedFood02);
-//            StoredFood storedFood03 = new StoredFood(0, home01, miso01,koelkast,1);
-//            storedFoodRepository.save(storedFood03);
-//            StoredFood storedFood04 = new StoredFood(0, home01, melkAmandel01,voorraadkast,12);
-//            storedFoodRepository.save(storedFood04);
-//            StoredFood storedFood05 = new StoredFood(0, home01, melkKoe01,voorraadkast,9);
-//            storedFoodRepository.save(storedFood05);
-//            StoredFood storedFood06 = new StoredFood(0, home01, melkSoja01,voorraadkast,20);
-//            storedFoodRepository.save(storedFood06);
+            StoredFood storedFood02 = new StoredFood(0, home01, bloemkool02,kelder,1);
+            storedFoodRepository.save(storedFood02);
+            StoredFood storedFood03 = new StoredFood(0, home01, miso01,koelkast,1);
+            storedFoodRepository.save(storedFood03);
+            StoredFood storedFood04 = new StoredFood(0, home01, melkAmandel01,voorraadkast,12);
+            storedFoodRepository.save(storedFood04);
+            StoredFood storedFood05 = new StoredFood(0, home01, melkKoe01,voorraadkast,9);
+            storedFoodRepository.save(storedFood05);
+            StoredFood storedFood06 = new StoredFood(0, home01, melkSoja01,voorraadkast,20);
+            storedFoodRepository.save(storedFood06);
 
-            System.out.println("*** test getters/setters:");
-            //Food foodsTestBloemkool02 = foodRepository.getOne(bloemkool02.getId());
-            Food foodsTestBloemkool02 = foodRepository.getReferenceById(bloemkool02.getId());
-            System.out.println("bloemkool02.getOriginal_ml_g(): " + bloemkool02.getOriginal_ml_g());
-            System.out.println("bloemkool02.getBestBeforeEnd(): " + bloemkool02.getBestBeforeEnd());
-            System.out.println("bloemkool02.getRemaining_ml_g(): " + bloemkool02.getRemaining_ml_g());
-            System.out.println("bloemkool02.getUseBy(): " + bloemkool02.getUseBy());
+//            System.out.println("*** test getters/setters:");
+//            //Food foodsTestBloemkool02 = foodRepository.getOne(bloemkool02.getId());
+//            Food foodsTestBloemkool02 = foodRepository.getReferenceById(bloemkool02.getId());
+//            System.out.println("bloemkool02.getOriginal_ml_g(): " + bloemkool02.getOriginal_ml_g());
+//            System.out.println("bloemkool02.getBestBeforeEnd(): " + bloemkool02.getBestBeforeEnd());
+//            System.out.println("bloemkool02.getRemaining_ml_g(): " + bloemkool02.getRemaining_ml_g());
+//            System.out.println("bloemkool02.getUseBy(): " + bloemkool02.getUseBy());
 
             System.out.println("*** all active foods:");
             List<Food> foods01 = foodRepository.findAll();
@@ -136,23 +136,7 @@ public class Config {
                 System.out.println(food);
             }
 
-//            System.out.println("*** food id 5:");
-//            Food f01 = foodRepository.findById(8L).orElse(null);
-//            if (f01 != null) {
-//                System.out.println(f01);
-//            }
-//
-//            Food f02 = foodRepository.findByName("miso licht").orElse(null);
-//            if (f02 != null) {
-//                System.out.println(f02);
-//            }
-//
-//            Storage s01 = storageRepository.findByName("kelder").orElse(null);
-//            if (s01 != null) {
-//                System.out.println(s01);
-//            }
-
-            System.out.println("*** the end ***");
+            System.out.println("*** end of config file ***");
         };
     }
 
