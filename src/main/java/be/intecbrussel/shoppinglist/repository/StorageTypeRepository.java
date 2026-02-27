@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface StorageRepository extends JpaRepository<StorageType, Long> {
+public interface StorageTypeRepository extends JpaRepository<StorageType, Long> {
     Optional<StorageType> findByName(String name);
 
     Optional<StorageType> findById(long id);

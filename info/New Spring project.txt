@@ -1,5 +1,10 @@
+* IntelliJ new project:
+* Dependencies:
+* Packages:
+* Spring info scraps:
 
-IntelliJ new project:
+---
+* IntelliJ new project:
 LINKERZIJDE: Generators: Spring Boot
 RECHTERZIJDE:
 Name: OnlineCourseSpringProject
@@ -10,9 +15,10 @@ Group: (org.intecbrussel.be)
 Package name: (org.intecbrussel.onlinecoursespringproject  <- automatisch)
 JDK 17, JAR
 Next
+
 ---
 
-Dependencies:
+* Dependencies:
 Spring Web
 Spring Data JPA
 MySQL Driver
@@ -21,7 +27,15 @@ Lombok
 
 ---
 
-Packages:
+* Packages:
 repository, service, model, controller, security, dto (incl mappers), exception, configuration.
 
+---
+
+* Spring info scraps:
+
+//@Component, @Controller ...
+
+// @SpringBootApplication annotation. This annotation represents:
+// @Configuration, @EnableAutoConfiguration and @ComponentScan
 

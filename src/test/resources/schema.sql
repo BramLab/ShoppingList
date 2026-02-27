@@ -1,3 +1,8 @@
+/* # (number sign, hash, pound sign, hashtag) is NOT RECOGNISED as comment in H2! */
+/* H2 comment */
+// H2 comment
+-- H2 comment
+
 CREATE TABLE IF NOT EXISTS storage (
                                        id      BIGINT AUTO_INCREMENT PRIMARY KEY,
                                        name    VARCHAR(255),
@@ -31,7 +36,8 @@ CREATE TABLE IF NOT EXISTS user_home (
                                          name       VARCHAR(255)
 );
 
-CREATE TABLE IF NOT EXISTS user (
+// USER is a reserved keyword in H2, quote is quick-fix
+CREATE TABLE IF NOT EXISTS "user" (
                                     created_at      TIMESTAMP    NULL,
                                     updated_at      TIMESTAMP    NULL,
                                     id              BIGINT AUTO_INCREMENT PRIMARY KEY,

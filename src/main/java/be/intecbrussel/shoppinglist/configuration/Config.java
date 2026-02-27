@@ -1,20 +1,13 @@
 package be.intecbrussel.shoppinglist.configuration;
 
 import be.intecbrussel.shoppinglist.model.*;
-import be.intecbrussel.shoppinglist.repository.FoodOriginalRepository;
-import be.intecbrussel.shoppinglist.repository.FoodRepository;
-import be.intecbrussel.shoppinglist.repository.StorageRepository;
+import be.intecbrussel.shoppinglist.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import java.util.List;
-
-//@Component, @Controller
-
-// @SpringBootApplication annotation. This annotation represents:
-// @Configuration, @EnableAutoConfiguration and @ComponentScan
 
 @Configuration
 @EnableJpaAuditing
@@ -23,17 +16,25 @@ public class Config {
     @Bean
     @Profile("!test") // Prevents running during tests; inserted data interferes with test data.
     CommandLineRunner dataLoader_commandLineRunner(
-              UserHome userHome
+              UserHomeRepository userHomeRepository
+            , UserRepository userRepository
+            , StorageTypeRepository storageTypeRepository
             , FoodRepository foodRepository
-            , StorageRepository storageRepository
             , FoodOriginalRepository foodOriginalRepository
     ) {
         return args -> {
 
+            UserHome home01 = new UserHome(0, "home01");
+            UserHome home02 = new UserHome(0, "home02");
+
+            User user01 = new User(0, "user01", "u1@g.c", UserRole.ADMIN, "hashed01?", home01);
+            User user02 = new User(0, "user02", "u2@g.c", UserRole.NORMAL, "hashed02?", home01);
+            User user03 = new User(0, "user03", "u3@g.c", UserRole.NORMAL, "hashed03?", home02);
+
             StorageType kelder = new StorageType(0, "Kelder", null);
-            storageRepository.save(kelder);
+            storageTypeRepository.save(kelder);
             StorageType koelkast = new StorageType(0, "Koelkast", null);
-            storageRepository.save(koelkast);
+            storageTypeRepository.save(koelkast);
 
             FoodOriginal bloemkool01 = FoodOriginal.foodOriginalBuilder()
                     .name("bloemkool")
@@ -42,8 +43,6 @@ public class Config {
                     .original_ml_g(750)
                     .build();
             foodOriginalRepository.save(bloemkool01);
-
-
 
             FoodOriginal bloemkool02 = FoodOriginal.foodOriginalBuilder()
                     .name("bloemkool")
@@ -102,9 +101,6 @@ public class Config {
 //                    .build();
 //            foodRepository.save(openedMiso);
 //            foodRepository.deleteById(miso01.getId());
-
-
-
 
             System.out.println("*** test getters/setters:");
             //Food foodsTestBloemkool02 = foodRepository.getOne(bloemkool02.getId());
