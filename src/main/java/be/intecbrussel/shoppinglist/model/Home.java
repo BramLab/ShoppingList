@@ -12,7 +12,7 @@ import java.util.List;
 @ToString(callSuper=true)
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
-@Component //Why does just this class need @Component?
+//@Component //Why does just this class need @Component?
 public class Home extends AuditModel{
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

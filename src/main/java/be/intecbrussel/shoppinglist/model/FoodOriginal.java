@@ -35,7 +35,7 @@ public class FoodOriginal extends Food {
         this.useBy = useBy;
     }
 
-    public LocalDate getUseBy(){
+    public LocalDate getUseByElseBestBeforeEnd(){
         if (useBy != null)  { return useBy; }
         else                { return bestBeforeEnd; }
     }

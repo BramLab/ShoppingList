@@ -18,6 +18,6 @@ public interface AppUserRepository extends JpaRepository<AppUser,Long> {
 
     Optional<Object> findByEmail(String email);
 
-    Optional<AppUser> findById(long instructorId);
+    //Optional<AppUser> findById(long instructorId);
 }
 

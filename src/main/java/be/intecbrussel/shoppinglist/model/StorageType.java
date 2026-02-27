@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import lombok.*;
 
-@Transactional
+//@Transactional
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor

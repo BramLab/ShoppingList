@@ -1,36 +1,56 @@
-There are several issues across this codebase:
+Here's a review of the project. Overall it's a solid learning project with good structure —
+let me walk through the main observations.
 
-**1. pom.xml — Non-existent test dependencies**
-`spring-boot-starter-data-jpa-test` and `spring-boot-starter-webmvc-test` don't exist as artifacts.
-They should simply be `spring-boot-starter-test`.
+Architecture & Design
+The entity model is well thought out. Using JOINED inheritance for Food/FoodOriginal is the right call over a single
+wide table, and @SoftDelete is a nice touch. The separation of bestBeforeEnd vs useBy shows real domain thinking.
 
-**2. `FoodUntouched.java` — `storage` field is missing**
-The constructor accepts a `Storage storage` parameter but there's no field declared for it and it's never assigned.
-The storage is silently dropped.
+However, FoodAtHomeService defines an interface operating on Home objects when it's really about stored food inventory
+— the naming is confusing and the interface is never implemented. The commented-out service files
+(AppUserServiceImpl, AuthServiceImpl, etc.) should either be implemented or deleted; they add noise and create a
+false impression of what the app can actually do.
 
-**3. `FoodSubstitute.java` — Duplicate `@Id`**
-`Food` already declares `@Id private long id`. `FoodSubstitute` declares another `@Id private long id`,
-which will cause a Hibernate mapping conflict.
+The pom.xml has a significant problem
+spring-boot-starter-data-jpa-test and spring.boot.data.jpa.test.autoconfigure.DataJpaTest do not exist in Spring
+Boot 4.0.x. The standard artifact is spring-boot-starter-test with @DataJpaTest from
+org.springframework.boot.test.autoconfigure.orm.jpa. The comments in pom.xml explaining this as intentional are
+incorrect — it will fail to resolve. You should restore spring-boot-starter-test.
 
-**4. Missing JPA relationship annotations on collections**
-Several collection fields have no `@OneToMany`, `@ManyToMany`, or `@ElementCollection` annotation,
-which Hibernate cannot map:
-- `FoodTouched.foodIngredients` (List\<FoodIngredient\>)
-- `FoodInHouse.storedFood` (List\<StoredFood\>)
-- `Recipe.ingredients` (List\<Food\>)
+Config.java
+The @Profile("!test") is the right instinct, but a cleaner approach is an application-test.properties that disables
+the CommandLineRunner or simply relies on @DataJpaTest's isolated context (which doesn't load @Configuration beans
+that aren't JPA-related anyway).
 
-**5. No `@Inheritance` strategy on `Food`**
-`Food` is a base `@Entity` with multiple subclasses (`FoodUntouched`, `FoodTouched`, `FoodIngredient`, `FoodSubstitute`)
-but no `@Inheritance(strategy = ...)` is declared. Hibernate defaults to `SINGLE_TABLE`,
-which may not be your intent, and it should be explicit.
+Also, foodRepository.save(miso01) is called for objects that are FoodOriginal instances — this works due to
+inheritance, but it's inconsistent; some food items use foodOriginalRepository and others use foodRepository.
+Pick one and be consistent.
 
-**6. `Config.java` — Logic issue after soft-delete**
-`foodIngredient01` holds a reference to `miso01`, which is then soft-deleted with
-`foodRepository.deleteById(miso01.getId())`.
-The `FoodIngredient` still references the (now deleted) food, which can cause unexpected behaviour when querying.
+Model issues
+Home has @Component on it with a comment asking why it's needed — it almost certainly isn't needed and shouldn't be
+there. JPA entities are not Spring-managed beans.
 
-**7. `FoodUntouched` constructor used as a `FoodUntouched` in `Config`**
-`bloemkool01` is created with `new FoodUntouched(0, ...)` — the 6-arg constructor — but the `@AllArgsConstructor`
-Lombok generates would only include the fields declared directly in `FoodUntouched` (not the inherited ones from `Food`).
-The custom `@Builder` constructor calls `super(id, name, remarks)`, but `@AllArgsConstructor` doesn't,
-so the `name` field will be null when using `new FoodUntouched(0, "bloemkool", ...)` directly.
+StorageType has @Transactional at the class level on an entity, which is incorrect. @Transactional belongs on service
+methods, not entity classes.
+
+AuditModel also has @Transactional on it for the same reason — remove it.
+
+The AppUserRepository has findById(long id) which shadows the JpaRepository-provided findById(Long id).
+The primitive long version is redundant and could cause confusion with boxing.
+
+Test setup
+NOMOREschema.sql and all the commented-out properties in src/test/resources/application.properties suggest you
+went through several iterations trying to get H2 to work. Once pom.xml is fixed with spring-boot-starter-test,
+@DataJpaTest will spin up H2 and let Hibernate generate the schema automatically — you won't need a manual schema
+file at all.
+
+Minor things
+MakeDatabase.java contains a hardcoded username (intec) and takes a root password via Scanner. This is fine for
+local dev tooling but worth noting it should never end up in any shared/deployed environment.
+getUseBy() silently falls back to bestBeforeEnd — that logic is reasonable, but it means the stored useBy field
+in the DB can be null while getUseBy() returns a value, which could confuse anyone reading the database directly or
+writing queries against it.
+
+Summary of priorities
+The most urgent fix is the pom.xml dependency — the project likely won't compile tests at all as written.
+After that, removing @Transactional from entities and @Component from Home are quick correctness fixes.
+The commented-out service code should be cleaned up once you're ready to build that layer properly.

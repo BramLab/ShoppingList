@@ -48,12 +48,13 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- JUnit 5, Mockito, and the @DataJpaTest infrastructure all at once, so no need for separate starters for JPA and MVC testing -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-test</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
+        <!-- JUnit 5, Mockito, and the @DataJpaTest infrastructure all at once,
+             so no need for separate starters for JPA and MVC testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- The project uses Spring Boot 4.0.2, which reorganized those packages
             spring-boot-starter-data-jpa-test and the new
             org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest  ????

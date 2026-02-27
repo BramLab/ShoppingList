@@ -3,9 +3,9 @@ package be.intecbrussel.shoppinglist.configuration;
 import be.intecbrussel.shoppinglist.model.*;
 import be.intecbrussel.shoppinglist.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import java.util.List;
 
@@ -14,13 +14,16 @@ import java.util.List;
 public class Config {
 
     @Bean
-    @Profile("!test") // Prevents running during tests; inserted data interferes with test data.
+    // Prevent during tests; inserted data interferes with test data; 2 versions:
+    // 1) explicit: "seed data is on by default, but tests opt out":
+    @ConditionalOnProperty(name = "app.seed-data", havingValue = "true", matchIfMissing = true)
+    // @Profile("!test") // 2) shorter version.
     CommandLineRunner dataLoader_commandLineRunner(
               UserHomeRepository userHomeRepository
             , AppUserRepository appUserRepository
             , StorageTypeRepository storageTypeRepository
             , FoodRepository foodRepository
-            , FoodOriginalRepository foodOriginalRepository
+            , FoodOriginalRepository foodOriginalRepository // both this or foodRepository can save FoodOriginal.
             , StoredFoodRepository storedFoodRepository) {
         return args -> {
 
@@ -49,7 +52,7 @@ public class Config {
                     .bestBeforeEnd(Util.days2date(4))
                     .original_ml_g(750)
                     .build();
-            foodOriginalRepository.save(bloemkool01);
+            foodRepository.save(bloemkool01);
 
             FoodOriginal bloemkool02 = FoodOriginal.foodOriginalBuilder()
                     .name("bloemkool")
@@ -57,10 +60,10 @@ public class Config {
                     .bestBeforeEnd(Util.days2date(4))
                     .original_ml_g(750)
                     .build();
-            foodOriginalRepository.save(bloemkool02);
+            foodRepository.save(bloemkool02);
             bloemkool02.setUseBy(Util.days2date(2));
             bloemkool02.setRemaining_ml_g(0d);
-            foodOriginalRepository.save(bloemkool02);
+            foodRepository.save(bloemkool02);
 
             FoodOriginal miso01 = FoodOriginal.foodOriginalBuilder()
                     .name("miso licht")
