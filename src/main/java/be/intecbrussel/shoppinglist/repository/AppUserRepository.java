@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<AppUser,Long> {
+public interface AppUserRepository extends JpaRepository<AppUser,Long> {
 
     // findByUsername is a common method naming convention in programming,
     // especially in Java frameworks like Spring Data JPA,

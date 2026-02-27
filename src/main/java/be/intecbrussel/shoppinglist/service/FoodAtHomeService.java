@@ -1,13 +1,13 @@
 package be.intecbrussel.shoppinglist.service;
 
-import be.intecbrussel.shoppinglist.model.UserHome;
+import be.intecbrussel.shoppinglist.model.Home;
 
 import java.util.List;
 
 public interface FoodAtHomeService {
-    UserHome saveFoodAtHome(UserHome userHome);
-    List<UserHome> findAllFoodAtHomes();
-    UserHome findFoodAtHome(long foodAtHomeId);
-    UserHome updateFoodAtHome(UserHome userHome, long foodAtHomeId);
+    Home saveFoodAtHome(Home home);
+    List<Home> findAllFoodAtHomes();
+    Home findFoodAtHome(long foodAtHomeId);
+    Home updateFoodAtHome(Home home, long foodAtHomeId);
     void deleteFoodAtHome(long foodAtHomeId);
 }

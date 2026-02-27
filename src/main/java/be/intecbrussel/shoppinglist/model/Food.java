@@ -20,4 +20,7 @@ public class Food extends AuditModel {
 	private long id;
     private String name;
     private String remarks;
+
+//	@ManyToOne
+//	private StoredFood storedFood;
 }

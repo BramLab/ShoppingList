@@ -11,7 +11,7 @@ import lombok.*;
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
 @ToString(callSuper=true)
-public class StorageType {
+public class StorageType extends AuditModel{
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;

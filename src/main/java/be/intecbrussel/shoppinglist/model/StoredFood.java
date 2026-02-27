@@ -14,14 +14,14 @@ public class StoredFood extends AuditModel {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne(cascade=CascadeType.ALL)
+    @ManyToOne(cascade=CascadeType.ALL, optional = false)
+    Home home;
+
+    @ManyToOne(cascade=CascadeType.ALL, optional = false)
     Food food;
 
-    @ManyToOne(cascade=CascadeType.ALL)
+    @ManyToOne(cascade=CascadeType.ALL, optional = false)
     StorageType storageType;
-
-    @ManyToOne(cascade=CascadeType.ALL)
-    UserHome userHome;
 
     int quantity;
 

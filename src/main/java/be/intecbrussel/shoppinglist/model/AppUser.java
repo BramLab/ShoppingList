@@ -25,6 +25,7 @@ public class AppUser extends AuditModel {
 
     private String passwordHashed;
 
-    @ManyToOne
-    private UserHome userHome;
+    @ManyToOne (optional = false) // MUST be associated
+    private Home home;
+
 }
