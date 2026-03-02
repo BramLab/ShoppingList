@@ -139,6 +139,17 @@ public class Config {
                 System.out.println(food);
             }
 
+
+            System.out.println("*** all storedFoods:");
+            List<StoredFood> storedFoods = storedFoodRepository.findAll();
+            for(StoredFood storedFood : storedFoods) {
+                System.out.println(storedFood);
+            }
+
+            //StoredFood(
+            // super=AuditModel(createdAt=2026-03-01 11:31:03.578, updatedAt=2026-03-01 11:31:03.578), id=1, home=Home(super=AuditModel(createdAt=2026-03-01 11:31:03.378, updatedAt=2026-03-01 11:31:03.378), id=1, name=home01), food=FoodOriginal(super=Food(super=AuditModel(createdAt=2026-03-01 11:31:03.495, updatedAt=2026-03-01 11:31:03.495), id=1, name=bloemkool, remarks=bloemkool01), bestBeforeEnd=2026-03-05, original_ml_g=750.0, useBy=null, remaining_ml_g=0.0), storageType=StorageType(super=AuditModel(createdAt=2026-03-01 11:31:03.465, updatedAt=2026-03-01 11:31:03.465), id=1, name=Kelder, remarks=null), quantity=0)
+
+
             System.out.println("*** end of config file ***");
         };
     }
