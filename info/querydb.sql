@@ -1,4 +1,28 @@
+select * from user;
+select * from home;
+select * from storage_type;
+select * from stored_food;
 select * from food;
+select * from food_original;
+
+select #*,
+      u.id, u.username
+    , h.id, h.name
+    , sf.id
+    , st.id, st.name
+    , f.id, f.name
+    , fo.best_before_end, fo.original_ml_g, fo.use_by ,fo.remaining_ml_g
+from home h
+left join user u on u.home_id = h.id
+left join stored_food sf on sf.home_id = h.id
+left join storage_type st on sf.storage_type_id = st.id
+left join food f on sf.food_id = f.id
+left join food_original fo on f.id = fo.food_id
+where u.id = 1
+order by u.id, h.id, sf.id, st.id
+;
+
+
 
 select
     #Audit:

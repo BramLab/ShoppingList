@@ -35,20 +35,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
 
-                        // Course management
-                        .requestMatchers(HttpMethod.POST, "/api/courses").hasAnyRole("INSTRUCTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasAnyRole("INSTRUCTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("ADMIN")
-
-                        // Enrollment endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/courses/*/enroll/*").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/courses/*/enroll").authenticated() // Student self-enroll
-                        .requestMatchers("/api/enrollments/me").hasRole("STUDENT")
-                        .requestMatchers("/api/instructor/enrollments").hasRole("INSTRUCTOR")
-                        .requestMatchers("/api/admin/enrollments").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/enrollments/*").authenticated() // Logic in service
+                        //TODO
+//                        .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
+//
+//                        // Course management
+//                        .requestMatchers(HttpMethod.POST, "/api/courses").hasAnyRole("INSTRUCTOR", "ADMIN")
+//                        .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasAnyRole("INSTRUCTOR", "ADMIN")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("ADMIN")
+//
+//                        // Enrollment endpoints
+//                        .requestMatchers(HttpMethod.POST, "/api/courses/*/enroll/*").hasRole("ADMIN")
+//                        .requestMatchers(HttpMethod.POST, "/api/courses/*/enroll").authenticated() // Student self-enroll
+//                        .requestMatchers("/api/enrollments/me").hasRole("STUDENT")
+//                        .requestMatchers("/api/instructor/enrollments").hasRole("INSTRUCTOR")
+//                        .requestMatchers("/api/admin/enrollments").hasRole("ADMIN")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/enrollments/*").authenticated() // Logic in service
 
                         // Admin endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
