@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @Entity
-public class AppUser extends AuditModel {
+public class User extends AuditModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -21,7 +21,7 @@ public class AppUser extends AuditModel {
 
     // https://stackoverflow.com/questions/67825729/using-enums-in-a-spring-entity
     @Enumerated(EnumType.STRING)
-    private UserRole userRole;
+    private Role role;
 
     private String passwordHashed;
 

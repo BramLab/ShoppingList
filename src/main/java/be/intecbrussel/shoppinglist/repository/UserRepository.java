@@ -1,12 +1,12 @@
 package be.intecbrussel.shoppinglist.repository;
 
-import be.intecbrussel.shoppinglist.model.AppUser;
+import be.intecbrussel.shoppinglist.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AppUserRepository extends JpaRepository<AppUser,Long> {
+public interface UserRepository extends JpaRepository<User,Long> {
 
     // findByUsername is a common method naming convention in programming,
     // especially in Java frameworks like Spring Data JPA,
@@ -14,7 +14,7 @@ public interface AppUserRepository extends JpaRepository<AppUser,Long> {
     // often automatically generating SQL like SELECT * FROM users WHERE username = ?,
     // simplifying data access by letting developers define methods in repositories
     // instead of writing boilerplate queries.
-    Optional<AppUser> findByUsername(String username);
+    Optional<User> findByUsername(String username);
 
     Optional<Object> findByEmail(String email);
 

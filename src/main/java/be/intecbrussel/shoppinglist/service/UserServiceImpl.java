@@ -1,16 +1,9 @@
 //package be.intecbrussel.shoppinglist.service;
 //
+//import be.intecbrussel.shoppinglist.model.AppUser;
+//import be.intecbrussel.shoppinglist.repository.AppUserRepository;
 //import jakarta.transaction.Transactional;
 //import lombok.RequiredArgsConstructor;
-//import org.intecbrussel.onlinecoursespringproject.dto.UserChangeRoleRequest;
-//import org.intecbrussel.onlinecoursespringproject.dto.UserMapper;
-//import org.intecbrussel.onlinecoursespringproject.dto.UserResponse;
-//import org.intecbrussel.onlinecoursespringproject.exception.ResourceNotFoundException;
-//import org.intecbrussel.onlinecoursespringproject.exception.UnauthorizedActionException;
-//import org.intecbrussel.onlinecoursespringproject.model.User;
-//import org.intecbrussel.onlinecoursespringproject.repository.UserRepository;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.context.SecurityContextHolder;
 //import org.springframework.stereotype.Service;
 //
 //import java.util.List;
@@ -19,9 +12,9 @@
 //@Service
 //@Transactional
 //@RequiredArgsConstructor
-//public class UserServiceImpl implements UserService {
+//public class AppUserServiceImpl implements AppUserService {
 //
-//    private final UserRepository userRepository;
+//    private final AppUserRepository appUserRepository;
 //
 //    @Override
 //    public List<UserResponse> getAllUsers() {
@@ -64,4 +57,23 @@
 //        return optionalUser.get();
 //    }
 //
+//    @Override
+//    public List<AppUserResponse> getAllAppUsers() {
+//        return List.of();
+//    }
+//
+//    @Override
+//    public AppUserResponse updateAppUserChangeRole(long id, UserChangeRoleRequest userChangeRoleRequest) {
+//        return null;
+//    }
+//
+//    @Override
+//    public void deleteAppUser(long id) {
+//
+//    }
+//
+//    @Override
+//    public AppUser getLoggedInAppUser() {
+//        return null;
+//    }
 //}

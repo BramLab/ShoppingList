@@ -20,7 +20,7 @@ public class Config {
     // @Profile("!test") // 2) shorter version.
     CommandLineRunner dataLoader_commandLineRunner(
               UserHomeRepository userHomeRepository
-            , AppUserRepository appUserRepository
+            , UserRepository userRepository
             , StorageTypeRepository storageTypeRepository
             , FoodRepository foodRepository
             , FoodOriginalRepository foodOriginalRepository // both this or foodRepository can save FoodOriginal.
@@ -32,12 +32,12 @@ public class Config {
             Home home02 = new Home(0, "home02");
             userHomeRepository.save(home02);
 
-            AppUser appUser01 = new AppUser(0, "user01", "u1@g.c", UserRole.ADMIN, "hashed01?", home01);
-            appUserRepository.save(appUser01);
-            AppUser appUser02 = new AppUser(0, "user02", "u2@g.c", UserRole.NORMAL, "hashed02?", home01);
-            appUserRepository.save(appUser02);
-            AppUser appUser03 = new AppUser(0, "user03", "u3@g.c", UserRole.NORMAL, "hashed03?", home02);
-            appUserRepository.save(appUser03);
+            User user01 = new User(0, "user01", "u1@g.c", Role.ADMIN, "hashed01?", home01);
+            userRepository.save(user01);
+            User user02 = new User(0, "user02", "u2@g.c", Role.NORMAL, "hashed02?", home01);
+            userRepository.save(user02);
+            User user03 = new User(0, "user03", "u3@g.c", Role.NORMAL, "hashed03?", home02);
+            userRepository.save(user03);
 
             StorageType kelder = new StorageType(0, "Kelder", null);
             storageTypeRepository.save(kelder);

@@ -1,6 +1,6 @@
 package be.intecbrussel.shoppinglist.model;
 
-public enum UserRole {
+public enum Role {
     ADMIN,
     NORMAL
 }
