@@ -9,9 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import java.util.List;
 
-@Configuration
-@EnableJpaAuditing
-public class Config {
+//@Configuration
+//@EnableJpaAuditing
+public class ConfigViaRepository {
 
     @Bean
     // Prevent during tests; inserted data interferes with test data; 2 versions:

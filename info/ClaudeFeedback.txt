@@ -54,3 +54,97 @@ Summary of priorities
 The most urgent fix is the pom.xml dependency — the project likely won't compile tests at all as written.
 After that, removing @Transactional from entities and @Component from Home are quick correctness fixes.
 The commented-out service code should be cleaned up once you're ready to build that layer properly.
+
+---
+
+* Service:
+
+HomeServiceImpl — implements your existing HomeService interface; straightforward CRUD wrapping UserHomeRepository.
+FoodService + FoodServiceImpl — two domain-aware methods beyond CRUD:
+
+consume(id, amount) — reduces remaining_ml_g and relies on your existing setter's auto-soft-delete when it hits zero.
+openPackage(id, useBy, initialConsumption) — models the real-world action of opening a sealed product;
+    validates that useBy doesn't exceed bestBeforeEnd.
+
+StorageTypeService + StorageTypeServiceImpl — simple CRUD;
+    the service is deliberately thin since StorageType has no domain logic.
+
+StoredFoodService + StoredFoodServiceImpl — includes findAllByHomeId
+    (useful for scoping a user's view) and adjustQuantity(id, delta)
+    which auto-deletes the StoredFood row when quantity reaches zero (a pack is gone).
+    Home and Food on a stored entry are treated as immutable after creation
+        — if a user moves food to a different storage location, that's a new entry.
+
+UserService + UserServiceImpl — replaces the commented-out version;
+    getLoggedInUser() reads the principal from SecurityContextHolder,
+    consistent with how your JwtAuthFilter sets the authentication context.
+
+One small thing to note: StoredFoodServiceImpl injects HomeService for an existence
+    check in findAllByHomeId.
+    Spring will handle that circular-free since they're in different beans,
+    but if you'd prefer to keep it flat you can inject UserHomeRepository directly instead.
+
+---
+
+* DTO's
+
+Looking at the models, services, and existing DTOs, I'll create request/response
+    records plus mappers for all remaining entities
+    — Home, FoodOriginal, StorageType, and StoredFood —
+    keeping the same style as your existing auth DTOs.
+
+Created 17 files, read a fileCreated 17 files, read a file17 files —
+    all go in src/main/java/be/intecbrussel/shoppinglist/dto/.
+
+A few design decisions worth noting:
+Separate request vs update requests — FoodOriginalUpdateRequest uses boxed Double (nullable)
+    instead of primitive double so the service can distinguish "caller didn't send this field"
+    from "caller sent zero".
+
+Same logic for StoredFoodUpdateRequest using Integer.
+    This gives you clean PATCH semantics without needing Optional fields.
+
+FoodOriginalResponse computed fields — includes effectiveUseBy
+    (mirrors getUseByElseBestBeforeEnd()) and empty (true when remaining_ml_g == -1)
+    so the frontend never has to re-implement that logic.
+StoredFoodResponse nests full responses — rather than just returning flat IDs,
+    it embeds HomeResponse, FoodOriginalResponse, and StorageTypeResponse.
+
+A single API call gives the frontend everything it needs to render a pantry row.
+
+StoredFoodMapper is a @Component — the only stateful mapper, because resolving a
+    StoredFoodRequest requires three repository lookups
+    (homeId → Home, foodId → FoodOriginal, storageTypeId → StorageType).
+
+The static mapToStoredFoodResponse uses a Java 16 pattern-match cast
+    (food instanceof FoodOriginal fo) to safely downcast the Food base type stored on the entity.
+
+Domain-action DTOs — ConsumeRequest, OpenPackageRequest, and AdjustQuantityRequest
+    are thin wrappers so those endpoints get the same @Valid validation as everything else.
+
+---
+
+
+Looking at your existing Config.java, here's how to replace the direct repository calls with the service layer:
+Created a file, read a fileCreated a file, read a fileThe key differences from your original Config.java:
+Inject services, not repositories.
+
+The @Bean method parameters change from UserHomeRepository, FoodRepository, etc.
+    to HomeService, AuthService, FoodService, and so on. Spring wires them the same way.
+
+Work with DTOs and response IDs.
+Each save call returns a response DTO (e.g. HomeResponse, FoodOriginalResponse), and you use .id()
+from that response when building the next request — exactly as a real controller would chain calls.
+This is what replaces manually tracking entity references like home01, bloemkool01, etc.
+
+StoredFoodMapper is injected as a parameter because it's a @Component with repository dependencies.
+The other mappers (HomeMapper, FoodOriginalMapper, StorageTypeMapper) are plain static classes
+so they're called directly.
+
+authService.registerUser is used instead of new User(...) + repository.save() — this means passwords
+go through BCrypt hashing just like real registrations, so the seed users are actually loginable.
+
+Domain actions chain naturally. bloemkool02 shows the real flow: saveFood → openPackage → consume,
+which mirrors what a controller would do across three separate HTTP requests.
+
+---

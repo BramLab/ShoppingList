@@ -1,79 +1,70 @@
-//package be.intecbrussel.shoppinglist.service;
-//
-//import be.intecbrussel.shoppinglist.model.AppUser;
-//import be.intecbrussel.shoppinglist.repository.AppUserRepository;
-//import jakarta.transaction.Transactional;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.List;
-//import java.util.Optional;
-//
-//@Service
-//@Transactional
-//@RequiredArgsConstructor
-//public class AppUserServiceImpl implements AppUserService {
-//
-//    private final AppUserRepository appUserRepository;
-//
-//    @Override
-//    public List<UserResponse> getAllUsers() {
-//        return userRepository.findAll()
-//                .stream()
-//                .map(u -> UserMapper.mapToUserResponse(u))
-//                //.map(UserMapper::mapToUserResponse) //method reference not intuitive yet
-//                .toList();
-//    }
-//
-//    @Override
-//    public UserResponse updateUserChangeRole(long id, UserChangeRoleRequest userChangeRoleRequest) {
-//        User user = userRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-//        user.setRole(userChangeRoleRequest.role());
-//        User updatedUser = userRepository.save(user);
-//        return UserMapper.mapToUserResponse(updatedUser);
-//    }
-//
-//    @Override
-//    public void deleteUser(long id) {
-//        userRepository.deleteById(id);
-//    }
-//
-//    @Override
-//    public User getLoggedInUser() {
-//        // Find currently logged-in user:
-//        String currentUsernameFromSecurityContext;
-//        try{
-//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//            currentUsernameFromSecurityContext = authentication.getName();
-//        }catch(Exception e){
-//            throw new UnauthorizedActionException("You are not authenticated. Please login (again).");
-//        }
-//
-//        Optional<User> optionalUser = userRepository.findByUsername(currentUsernameFromSecurityContext);
-//        if(optionalUser.isEmpty()){
-//            throw new UnauthorizedActionException("User not found.");
-//        }
-//        return optionalUser.get();
-//    }
-//
-//    @Override
-//    public List<AppUserResponse> getAllAppUsers() {
-//        return List.of();
-//    }
-//
-//    @Override
-//    public AppUserResponse updateAppUserChangeRole(long id, UserChangeRoleRequest userChangeRoleRequest) {
-//        return null;
-//    }
-//
-//    @Override
-//    public void deleteAppUser(long id) {
-//
-//    }
-//
-//    @Override
-//    public AppUser getLoggedInAppUser() {
-//        return null;
-//    }
-//}
+package be.intecbrussel.shoppinglist.service;
+
+import be.intecbrussel.shoppinglist.dto.UserChangeRoleRequest;
+import be.intecbrussel.shoppinglist.dto.UserMapper;
+import be.intecbrussel.shoppinglist.dto.UserResponse;
+import be.intecbrussel.shoppinglist.exception.ResourceNotFoundException;
+import be.intecbrussel.shoppinglist.exception.UnauthorizedActionException;
+import be.intecbrussel.shoppinglist.model.User;
+import be.intecbrussel.shoppinglist.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::mapToUserResponse)
+                .toList();
+    }
+
+    @Override
+    public UserResponse getUserById(long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        return UserMapper.mapToUserResponse(user);
+    }
+
+    @Override
+    public UserResponse updateUserChangeRole(long id, UserChangeRoleRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        user.setRole(request.role());
+        return UserMapper.mapToUserResponse(userRepository.save(user));
+    }
+
+    @Override
+    public void deleteUser(long id) {
+        userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public User getLoggedInUser() {
+        String username;
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            username = authentication.getName();
+        } catch (Exception e) {
+            throw new UnauthorizedActionException("You are not authenticated. Please log in.");
+        }
+
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        return optionalUser
+                .orElseThrow(() -> new UnauthorizedActionException("Authenticated user not found in database."));
+    }
+}
