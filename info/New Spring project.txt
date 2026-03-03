@@ -7,12 +7,12 @@
 * IntelliJ new project:
 LINKERZIJDE: Generators: Spring Boot
 RECHTERZIJDE:
-Name: OnlineCourseSpringProject
+Name: ShoppingList
 Location: ~\IdeaProjects
 Create Git repository.
 Type: Maven
-Group: (org.intecbrussel.be)
-Package name: (org.intecbrussel.onlinecoursespringproject  <- automatisch)
+Group: (be.intecbrussel.be)
+Package name: (be.intecbrussel.shoppinglist  <- automatisch)
 JDK 17, JAR
 Next
 
