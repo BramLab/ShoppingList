@@ -1,17 +1,21 @@
 package be.intecbrussel.shoppinglist.service;
 
-import be.intecbrussel.shoppinglist.model.StoredFood;
+import be.intecbrussel.shoppinglist.dto.AdjustQuantityRequest;
+import be.intecbrussel.shoppinglist.dto.StoredFoodRequest;
+import be.intecbrussel.shoppinglist.dto.StoredFoodResponse;
+import be.intecbrussel.shoppinglist.dto.StoredFoodUpdateRequest;
 
 import java.util.List;
 
 public interface StoredFoodService {
-    StoredFood saveStoredFood(StoredFood storedFood);
-    List<StoredFood> findAllStoredFoods();
-    List<StoredFood> findAllByHomeId(long homeId);
-    StoredFood findStoredFoodById(long id);
-    StoredFood updateStoredFood(StoredFood storedFood, long id);
+    StoredFoodResponse saveStoredFood(StoredFoodRequest request);
+    List<StoredFoodResponse> findAllStoredFoods();
+    List<StoredFoodResponse> findAllByHomeId(long homeId);
+    StoredFoodResponse findStoredFoodById(long id);
+    StoredFoodResponse updateStoredFood(long id, StoredFoodUpdateRequest request);
     void deleteStoredFood(long id);
 
-    /** Increase/decrease quantity by {@code delta} (negative = decrement). Deletes when quantity reaches 0. */
-    StoredFood adjustQuantity(long id, int delta);
+    /** Increase or decrease quantity by delta (negative = consume from stock).
+     *  Deletes the entry automatically when quantity reaches 0. */
+    StoredFoodResponse adjustQuantity(long id, AdjustQuantityRequest request);
 }

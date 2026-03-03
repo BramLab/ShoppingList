@@ -1,33 +1,23 @@
 package be.intecbrussel.shoppinglist.service;
 
-import be.intecbrussel.shoppinglist.model.Food;
-import be.intecbrussel.shoppinglist.model.FoodOriginal;
+import be.intecbrussel.shoppinglist.dto.ConsumeRequest;
+import be.intecbrussel.shoppinglist.dto.FoodOriginalRequest;
+import be.intecbrussel.shoppinglist.dto.FoodOriginalResponse;
+import be.intecbrussel.shoppinglist.dto.FoodOriginalUpdateRequest;
+import be.intecbrussel.shoppinglist.dto.OpenPackageRequest;
 
 import java.util.List;
 
 public interface FoodService {
-
-    // ── Generic Food (read-only across the hierarchy) ──────────────────────────
-    List<Food> findAllFoods();
-    Food findFoodById(long id);
-
-    // ── FoodOriginal CRUD ───────────────────────────────────────────────────────
-    FoodOriginal saveFood(FoodOriginal food);
-    FoodOriginal updateFood(FoodOriginal food, long id);
-
-    /** Soft-delete via Hibernate @SoftDelete */
+    FoodOriginalResponse saveFood(FoodOriginalRequest request);
+    List<FoodOriginalResponse> findAllFoods();
+    FoodOriginalResponse findFoodById(long id);
+    FoodOriginalResponse updateFood(long id, FoodOriginalUpdateRequest request);
     void deleteFood(long id);
 
-    // ── Domain actions ──────────────────────────────────────────────────────────
-    /**
-     * Record consumption: reduce remaining_ml_g by {@code amount}.
-     * Soft-deletes the item automatically when nothing is left.
-     */
-    FoodOriginal consume(long id, double amount);
+    /** Record consumption: reduce remaining_ml_g. Auto-soft-deletes when empty. */
+    FoodOriginalResponse consume(long id, ConsumeRequest request);
 
-    /**
-     * Open a sealed package: set a shorter useBy date and optionally
-     * reduce remaining_ml_g to reflect an initial serving already taken.
-     */
-    FoodOriginal openPackage(long id, java.time.LocalDate useBy, double initialConsumption);
+    /** Open a sealed package: set a shorter useBy and optionally take an initial serving. */
+    FoodOriginalResponse openPackage(long id, OpenPackageRequest request);
 }

@@ -14,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -33,38 +32,39 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return UserMapper.mapToUserResponse(user);
+        return UserMapper.mapToUserResponse(findEntity(id));
     }
 
     @Override
     public UserResponse updateUserChangeRole(long id, UserChangeRoleRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        User user = findEntity(id);
         user.setRole(request.role());
         return UserMapper.mapToUserResponse(userRepository.save(user));
     }
 
     @Override
     public void deleteUser(long id) {
-        userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        findEntity(id);
         userRepository.deleteById(id);
     }
 
     @Override
-    public User getLoggedInUser() {
+    public UserResponse getLoggedInUser() {
         String username;
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            username = authentication.getName();
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            username = auth.getName();
         } catch (Exception e) {
             throw new UnauthorizedActionException("You are not authenticated. Please log in.");
         }
+        return UserMapper.mapToUserResponse(
+                userRepository.findByUsername(username)
+                        .orElseThrow(() -> new UnauthorizedActionException(
+                                "Authenticated user not found in database.")));
+    }
 
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        return optionalUser
-                .orElseThrow(() -> new UnauthorizedActionException("Authenticated user not found in database."));
+    private User findEntity(long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 }

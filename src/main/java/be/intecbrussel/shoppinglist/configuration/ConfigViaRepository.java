@@ -13,10 +13,10 @@ import java.util.List;
 //@EnableJpaAuditing
 public class ConfigViaRepository {
 
-    @Bean
+    //@Bean
     // Prevent during tests; inserted data interferes with test data; 2 versions:
     // 1) explicit: "seed data is on by default, but tests opt out":
-    @ConditionalOnProperty(name = "app.seed-data", havingValue = "true", matchIfMissing = true)
+    //@ConditionalOnProperty(name = "app.seed-data", havingValue = "true", matchIfMissing = true)
     // @Profile("!test") // 2) shorter version.
     CommandLineRunner dataLoader_commandLineRunner(
               UserHomeRepository userHomeRepository

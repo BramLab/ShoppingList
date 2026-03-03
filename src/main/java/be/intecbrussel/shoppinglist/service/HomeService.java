@@ -1,13 +1,14 @@
 package be.intecbrussel.shoppinglist.service;
 
-import be.intecbrussel.shoppinglist.model.Home;
+import be.intecbrussel.shoppinglist.dto.HomeRequest;
+import be.intecbrussel.shoppinglist.dto.HomeResponse;
 
 import java.util.List;
 
 public interface HomeService {
-    Home saveHome(Home home);
-    List<Home> findAllHomes();
-    Home findHome(long foodAtHomeId);
-    Home updateHome(Home home, long foodAtHomeId);
-    void deleteHome(long foodAtHomeId);
+    HomeResponse saveHome(HomeRequest request);
+    List<HomeResponse> findAllHomes();
+    HomeResponse findHomeById(long id);
+    HomeResponse updateHome(long id, HomeRequest request);
+    void deleteHome(long id);
 }

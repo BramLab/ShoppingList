@@ -1,13 +1,14 @@
 package be.intecbrussel.shoppinglist.service;
 
-import be.intecbrussel.shoppinglist.model.StorageType;
+import be.intecbrussel.shoppinglist.dto.StorageTypeRequest;
+import be.intecbrussel.shoppinglist.dto.StorageTypeResponse;
 
 import java.util.List;
 
 public interface StorageTypeService {
-    StorageType saveStorageType(StorageType storageType);
-    List<StorageType> findAllStorageTypes();
-    StorageType findStorageTypeById(long id);
-    StorageType updateStorageType(StorageType storageType, long id);
+    StorageTypeResponse saveStorageType(StorageTypeRequest request);
+    List<StorageTypeResponse> findAllStorageTypes();
+    StorageTypeResponse findStorageTypeById(long id);
+    StorageTypeResponse updateStorageType(long id, StorageTypeRequest request);
     void deleteStorageType(long id);
 }

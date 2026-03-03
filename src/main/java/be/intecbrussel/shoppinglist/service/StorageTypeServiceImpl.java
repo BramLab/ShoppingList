@@ -1,6 +1,8 @@
 package be.intecbrussel.shoppinglist.service;
 
-import be.intecbrussel.shoppinglist.exception.MissingDataException;
+import be.intecbrussel.shoppinglist.dto.StorageTypeMapper;
+import be.intecbrussel.shoppinglist.dto.StorageTypeRequest;
+import be.intecbrussel.shoppinglist.dto.StorageTypeResponse;
 import be.intecbrussel.shoppinglist.exception.ResourceNotFoundException;
 import be.intecbrussel.shoppinglist.model.StorageType;
 import be.intecbrussel.shoppinglist.repository.StorageTypeRepository;
@@ -18,39 +20,46 @@ public class StorageTypeServiceImpl implements StorageTypeService {
     private final StorageTypeRepository storageTypeRepository;
 
     @Override
-    public StorageType saveStorageType(StorageType storageType) {
-        if (storageType.getName() == null || storageType.getName().isBlank()) {
-            throw new MissingDataException("StorageType name is required");
-        }
-        return storageTypeRepository.save(storageType);
+    public StorageTypeResponse saveStorageType(StorageTypeRequest request) {
+        StorageType saved = storageTypeRepository.save(
+                StorageTypeMapper.mapToStorageType(request));
+        return StorageTypeMapper.mapToStorageTypeResponse(saved);
     }
 
     @Override
-    public List<StorageType> findAllStorageTypes() {
-        return storageTypeRepository.findAll();
+    public List<StorageTypeResponse> findAllStorageTypes() {
+        return storageTypeRepository.findAll()
+                .stream()
+                .map(StorageTypeMapper::mapToStorageTypeResponse)
+                .toList();
     }
 
     @Override
-    public StorageType findStorageTypeById(long id) {
-        return storageTypeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("StorageType not found with id: " + id));
+    public StorageTypeResponse findStorageTypeById(long id) {
+        return StorageTypeMapper.mapToStorageTypeResponse(findEntity(id));
     }
 
     @Override
-    public StorageType updateStorageType(StorageType incoming, long id) {
-        StorageType existing = findStorageTypeById(id);
-        if (incoming.getName() != null && !incoming.getName().isBlank()) {
-            existing.setName(incoming.getName());
+    public StorageTypeResponse updateStorageType(long id, StorageTypeRequest request) {
+        StorageType existing = findEntity(id);
+        if (request.name() != null && !request.name().isBlank()) {
+            existing.setName(request.name());
         }
-        if (incoming.getRemarks() != null) {
-            existing.setRemarks(incoming.getRemarks());
+        if (request.remarks() != null) {
+            existing.setRemarks(request.remarks());
         }
-        return storageTypeRepository.save(existing);
+        return StorageTypeMapper.mapToStorageTypeResponse(storageTypeRepository.save(existing));
     }
 
     @Override
     public void deleteStorageType(long id) {
-        findStorageTypeById(id);
+        findEntity(id);
         storageTypeRepository.deleteById(id);
+    }
+
+    // Package-private: lets StoredFoodServiceImpl resolve a StorageType entity.
+    StorageType findEntity(long id) {
+        return storageTypeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("StorageType not found with id: " + id));
     }
 }
