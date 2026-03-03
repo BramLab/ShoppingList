@@ -24,6 +24,6 @@ import org.hibernate.dialect.H2Dialect;
 public class TestH2Dialect extends H2Dialect {
     @Override
     public boolean supportsColumnCheck() {
-        return false; // prevents Hibernate from emitting the problematic CHECK (dtype IN (...))
+        return false; // prevent Hibernate do problematic CHECK (dtype IN (...))
     }
 }

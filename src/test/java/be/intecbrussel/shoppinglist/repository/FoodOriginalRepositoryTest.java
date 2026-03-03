@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // use YOUR datasource config
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // use own datasource config
 class FoodOriginalRepositoryTest {
 
     @Autowired
