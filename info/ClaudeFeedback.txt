@@ -226,3 +226,17 @@ All mutating endpoints use @Valid and rely on GlobalExceptionHandler
     for 400/403/404/500 responses — no try/catch needed in the controllers themselves.
 
 ---
+
+*
+
+Spring Boot 4.x changed how Jackson auto-configuration properties are bound
+    — spring.jackson.serialization.* keys are no longer accepted in application.properties.
+    The fix is to configure it via a @Bean instead.
+    Created 2 files, edited a file, read a fileCreated 2 files, edited a file, read a fileTwo changes:
+        Revert application.properties back to the original — remove the spring.jackson.* line that crashed Spring Boot 4.
+        The file is now identical to what you had before.
+
+Add JacksonConfig.java to src/main/java/be/intecbrussel/shoppinglist/configuration/.
+    This achieves the same result (ISO date strings) using a Jackson2ObjectMapperBuilderCustomizer bean,
+    which is the correct approach for Spring Boot 4.
+    It also explicitly registers JavaTimeModule so Hibernate's LocalDate → JSON serialization is guaranteed to work.

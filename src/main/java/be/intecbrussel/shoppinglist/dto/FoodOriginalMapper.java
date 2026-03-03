@@ -20,7 +20,10 @@ public class FoodOriginalMapper {
 
     /**
      * Maps a create request to a new FoodOriginal.
-     * Note: setOriginal_ml_g also initialises remaining_ml_g — intentional.
+     *
+     * IMPORTANT: Lombok's @Builder calls the all-args constructor directly and bypasses
+     * the custom setOriginal_ml_g() setter (which would also initialise remaining_ml_g).
+     * remaining_ml_g must therefore be set explicitly here.
      */
     public static FoodOriginal mapToFoodOriginal(FoodOriginalRequest request) {
         return FoodOriginal.foodOriginalBuilder()
@@ -28,6 +31,7 @@ public class FoodOriginalMapper {
                 .remarks(request.remarks())
                 .bestBeforeEnd(request.bestBeforeEnd())
                 .original_ml_g(request.original_ml_g())
+                .remaining_ml_g(request.original_ml_g()) // explicit — builder bypasses setter
                 .build();
     }
 
@@ -42,7 +46,7 @@ public class FoodOriginalMapper {
         food.setBestBeforeEnd(request.bestBeforeEnd());
         food.setUseBy(request.useBy());
         if (request.original_ml_g() != null) {
-            food.setOriginal_ml_g(request.original_ml_g());
+            food.setOriginal_ml_g(request.original_ml_g()); // setter also resets remaining_ml_g
         }
         if (request.remaining_ml_g() != null) {
             food.setRemaining_ml_g(request.remaining_ml_g());
