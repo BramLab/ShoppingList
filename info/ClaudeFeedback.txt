@@ -1,3 +1,16 @@
+
+* Review:
+* Service:
+* DTO's:
+* Use CommandLineRunner for services instead of repositories:
+* Adapt: 1 user 1 home (limit complexity):
+
+* Controller layer:
+
+---
+
+* Review:
+
 Here's a review of the project. Overall it's a solid learning project with good structure —
 let me walk through the main observations.
 
@@ -86,7 +99,7 @@ One small thing to note: StoredFoodServiceImpl injects HomeService for an existe
 
 ---
 
-* DTO's
+* DTO's:
 
 Looking at the models, services, and existing DTOs, I'll create request/response
     records plus mappers for all remaining entities
@@ -124,6 +137,7 @@ Domain-action DTOs — ConsumeRequest, OpenPackageRequest, and AdjustQuantityReq
 
 ---
 
+* Use CommandLineRunner for services instead of repositories:
 
 Looking at your existing Config.java, here's how to replace the direct repository calls with the service layer:
 Created a file, read a fileCreated a file, read a fileThe key differences from your original Config.java:
@@ -146,5 +160,69 @@ go through BCrypt hashing just like real registrations, so the seed users are ac
 
 Domain actions chain naturally. bloemkool02 shows the real flow: saveFood → openPackage → consume,
 which mirrors what a controller would do across three separate HTTP requests.
+
+---
+
+* Adapt: 1 user 1 home (limit complexity):
+
+Looking at the code, User has @ManyToOne(optional = false) on home, but registerUser never sets one.
+The fix: add a homeName to RegisterRequest, create the Home inside registerUser, and thread the home ID
+through UserResponse so ConfigViaService can reference it for stored foods.
+
+Files to change: RegisterRequest, AuthServiceImpl, UserResponse, UserMapper, ConfigViaService.
+Architected service modifications to synchronize user and home registrationArchitected service modifications
+to synchronize user and home registrationThe source files are in the conversation context only.
+
+I'll create all the modified files directly.Created 5 files, read a fileCreated 5 files, read a file
+
+Here's a summary of every change and why it was made:
+
+RegisterRequest.java — added a @NotBlank String homeName field.
+    Registration now carries everything needed to create both the user and their home in one call.
+AuthServiceImpl.java — injected UserHomeRepository, then at the end of registerUser
+    (after all other validation passes) a Home is created with the provided name, saved, and assigned
+    to the new user via newUser.setHome(savedHome).
+    This satisfies the @ManyToOne(optional = false) constraint that was causing the null-column error.
+UserResponse.java — added long homeId so callers can immediately reference the newly-created home
+    (e.g. to create stored-food entries for it).
+UserMapper.java — updated to read user.getHome().getId() into the new homeId field.
+ConfigViaService.java — removed the separate homeService.saveHome(...) calls since homes are now
+    created during registration.
+    The primaryHomeId is read from user01.homeId() and used for all stored-food entries.
+    Note that HomeService is no longer needed as a dependency here.
+
+---
+
+* Controller layer:
+
+Six controllers, all in be.intecbrussel.shoppinglist.controller. Here's the full endpoint map:
+AuthController — public (/api/auth/** per SecurityConfig)
+
+POST /api/auth/register → 201 + UserResponse
+POST /api/auth/login → 200 + LoginAuthResponse (JWT)
+
+UserController — split by role
+
+GET /api/users/me → authenticated, returns own profile
+GET /api/admin/users → ADMIN only
+GET /api/admin/users/{id} → ADMIN only
+PATCH /api/admin/users/{id}/role → ADMIN only, body { "id": 1, "role": "ADMIN" }
+DELETE /api/admin/users/{id} → ADMIN only
+
+HomeController — /api/homes, full CRUD (PUT to rename)
+StorageTypeController — /api/storage-types, full CRUD (PUT to update)
+FoodController — /api/foods, CRUD + two action endpoints:
+
+POST /api/foods/{id}/open — marks package as opened, sets useBy
+POST /api/foods/{id}/consume — reduces remaining_ml_g, auto soft-deletes at 0
+
+StoredFoodController — /api/stored-foods, CRUD + two extras:
+
+GET /api/stored-foods?homeId=1 — optional query param to filter by home
+    (avoids a separate /homes/{id}/stored-foods route)
+PATCH /api/stored-foods/{id}/quantity — delta-based restock/consume, auto-removes entry at 0
+
+All mutating endpoints use @Valid and rely on GlobalExceptionHandler
+    for 400/403/404/500 responses — no try/catch needed in the controllers themselves.
 
 ---

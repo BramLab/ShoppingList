@@ -16,7 +16,6 @@ public class ConfigViaService {
     @Bean
     @ConditionalOnProperty(name = "app.seed-data", havingValue = "true", matchIfMissing = true)
     CommandLineRunner dataLoader_commandLineRunner(
-            HomeService homeService,
             AuthService authService,
             StorageTypeService storageTypeService,
             FoodService foodService,
@@ -24,14 +23,19 @@ public class ConfigViaService {
     ) {
         return args -> {
 
-            // ── Homes ─────────────────────────────────────────────────────────────────
-            HomeResponse home01 = homeService.saveHome(new HomeRequest("home01"));
-            HomeResponse home02 = homeService.saveHome(new HomeRequest("home02"));
+            // ── Users (each registration also creates 1 home) ─────────────────────────
+            // user01 and user02 share a home name but each gets their own home row —
+            // if you want a shared physical home, one user must register and the other
+            // must be added via a separate "join home" flow (out of scope here).
+            UserResponse user01 = authService.registerUser(
+                    new RegisterRequest(0, "user01", "u1@g.c", Role.ADMIN,  "hashed01?", "home01"));
+            UserResponse user02 = authService.registerUser(
+                    new RegisterRequest(0, "user02", "u2@g.c", Role.NORMAL, "hashed02?", "home01-user02"));
+            UserResponse user03 = authService.registerUser(
+                    new RegisterRequest(0, "user03", "u3@g.c", Role.NORMAL, "hashed03?", "home02"));
 
-            // ── Users ─────────────────────────────────────────────────────────────────
-            authService.registerUser(new RegisterRequest(0, "user01", "u1@g.c", Role.ADMIN,  "hashed01?"));
-            authService.registerUser(new RegisterRequest(0, "user02", "u2@g.c", Role.NORMAL, "hashed02?"));
-            authService.registerUser(new RegisterRequest(0, "user03", "u3@g.c", Role.NORMAL, "hashed03?"));
+            // Convenience: use user01's home as the primary home for stored foods
+            long primaryHomeId = user01.homeId();
 
             // ── Storage types ─────────────────────────────────────────────────────────
             StorageTypeResponse kelder       = storageTypeService.saveStorageType(new StorageTypeRequest("Kelder",       null));
@@ -52,13 +56,13 @@ public class ConfigViaService {
             FoodOriginalResponse melkAmandel01 = foodService.saveFood(new FoodOriginalRequest("melk amandel", null, Util.days2date(120), 1000));
             FoodOriginalResponse melkKoe01     = foodService.saveFood(new FoodOriginalRequest("melk koe",     null, Util.days2date(90),  1000));
 
-            // ── Stored foods ──────────────────────────────────────────────────────────
-            storedFoodService.saveStoredFood(new StoredFoodRequest(home01.id(), bloemkool01.id(),   kelder.id(),       0));
-            storedFoodService.saveStoredFood(new StoredFoodRequest(home01.id(), bloemkool02.id(),   kelder.id(),       1));
-            storedFoodService.saveStoredFood(new StoredFoodRequest(home01.id(), miso01.id(),        koelkast.id(),     1));
-            storedFoodService.saveStoredFood(new StoredFoodRequest(home01.id(), melkAmandel01.id(), voorraadkast.id(), 12));
-            storedFoodService.saveStoredFood(new StoredFoodRequest(home01.id(), melkKoe01.id(),     voorraadkast.id(), 9));
-            storedFoodService.saveStoredFood(new StoredFoodRequest(home01.id(), melkSoja01.id(),    voorraadkast.id(), 20));
+            // ── Stored foods (all linked to user01's home) ────────────────────────────
+            storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, bloemkool01.id(),   kelder.id(),       0));
+            storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, bloemkool02.id(),   kelder.id(),       1));
+            storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, miso01.id(),        koelkast.id(),     1));
+            storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, melkAmandel01.id(), voorraadkast.id(), 12));
+            storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, melkKoe01.id(),     voorraadkast.id(), 9));
+            storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, melkSoja01.id(),    voorraadkast.id(), 20));
 
             // ── Verification output ───────────────────────────────────────────────────
             System.out.println("*** all active foods:");

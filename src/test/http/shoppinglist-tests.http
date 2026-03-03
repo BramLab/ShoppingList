@@ -1,0 +1,1177 @@
+# ==================== SHOPPINGLIST API — AUTOMATED TEST SUITE ====================
+# Run all tests sequentially or individually.
+# Seed data (ConfigViaService) must be loaded before running:
+#   user01 / hashed01? → ADMIN    → home "home01"
+#   user02 / hashed02? → NORMAL   → home "home01-user02"
+#   user03 / hashed03? → NORMAL   → home "home02"
+# Results appear in the "Run" tool window.
+
+# ==================== SETUP ====================
+
+### SETUP: Clear globals from previous runs
+GET http://localhost:8080/api/foods
+
+> {%
+    client.global.clear("admin_token");
+    client.global.clear("normal_token");
+    client.global.clear("test_user_id");
+    client.global.clear("admin_home_id");
+    client.global.clear("test_home_id");
+    client.global.clear("test_storage_type_id");
+    client.global.clear("test_food_id");
+    client.global.clear("test_stored_food_id");
+    client.log("=== ShoppingList Test Suite Started ===");
+%}
+
+# ====================================================================================
+# AUTH TESTS
+# ====================================================================================
+
+### AUTH-1: Register a new user — should return 201
+# @name auth_register
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "id": 0,
+  "userName": "test_user_{{$random.integer(1000, 9999)}}",
+  "email": "test_{{$random.integer(1000, 9999)}}@example.com",
+  "role": "NORMAL",
+  "password": "testpass123",
+  "homeName": "test_home_{{$random.integer(1000, 9999)}}"
+}
+
+> {%
+    client.test("Register: Status is 201", function() {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+    });
+
+    client.test("Register: Response has id, userName, email, role, homeId", function() {
+        client.assert(response.body.id        !== undefined, "id should be present");
+        client.assert(response.body.userName  !== undefined, "userName should be present");
+        client.assert(response.body.email     !== undefined, "email should be present");
+        client.assert(response.body.role      === "NORMAL",  "role should be NORMAL");
+        client.assert(response.body.homeId    !== undefined, "homeId should be present");
+    });
+
+    client.test("Register: Password not returned", function() {
+        client.assert(response.body.password       === undefined, "password must not be in response");
+        client.assert(response.body.passwordHashed === undefined, "passwordHashed must not be in response");
+    });
+
+    client.global.set("test_user_id",   response.body.id);
+    client.global.set("test_user_name", response.body.userName);
+    client.log("✓ Test user registered: " + response.body.userName + " (id=" + response.body.id + ")");
+%}
+
+### AUTH-2: Register with duplicate username — should return 400
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "id": 0,
+  "userName": "user01",
+  "email": "another_{{$random.integer(1000,9999)}}@example.com",
+  "role": "NORMAL",
+  "password": "testpass123",
+  "homeName": "some home"
+}
+
+> {%
+    client.test("Duplicate username: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.test("Duplicate username: Has error message", function() {
+        client.assert(response.body.message === "Username already exists.",
+            "Expected 'Username already exists.', got: " + response.body.message);
+    });
+
+    client.log("✓ Duplicate username correctly rejected");
+%}
+
+### AUTH-3: Register with missing homeName — should return 400
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "id": 0,
+  "userName": "no_home_user",
+  "email": "nohome@example.com",
+  "role": "NORMAL",
+  "password": "testpass123",
+  "homeName": ""
+}
+
+> {%
+    client.test("Missing homeName: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.log("✓ Missing homeName correctly rejected");
+%}
+
+### AUTH-4: Login with valid credentials — should return 200 + JWT
+# @name login_admin
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "user01",
+  "password": "hashed01?"
+}
+
+> {%
+    client.test("Admin login: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Admin login: Response has JWT token", function() {
+        client.assert(response.body.token           !== undefined, "token should be present");
+        client.assert(response.body.token.length    > 50,          "token should be a JWT string");
+    });
+
+    client.test("Admin login: Response has correct user fields", function() {
+        client.assert(response.body.id       !== undefined, "id should be present");
+        client.assert(response.body.userName === "user01",  "userName should be user01");
+        client.assert(response.body.role     === "ADMIN",   "role should be ADMIN");
+        client.assert(response.body.email    !== undefined, "email should be present");
+    });
+
+    client.global.set("admin_token",   response.body.token);
+    client.global.set("admin_user_id", response.body.id);
+    client.log("✓ Admin logged in (id=" + response.body.id + ")");
+%}
+
+### AUTH-5: Login as NORMAL user
+# @name login_normal
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "user02",
+  "password": "hashed02?"
+}
+
+> {%
+    client.test("Normal login: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.global.set("normal_token",   response.body.token);
+    client.global.set("normal_user_id", response.body.id);
+    client.log("✓ Normal user logged in (id=" + response.body.id + ")");
+%}
+
+### AUTH-6: Login with wrong password — should return 404
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "user01",
+  "password": "wrong_password"
+}
+
+> {%
+    client.test("Wrong password: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.test("Wrong password: Has error message", function() {
+        client.assert(response.body.message === "Invalid password",
+            "Expected 'Invalid password', got: " + response.body.message);
+    });
+
+    client.log("✓ Wrong password correctly rejected");
+%}
+
+### AUTH-7: Login with non-existent user — should return 404
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "ghost_user_99999",
+  "password": "somepassword"
+}
+
+> {%
+    client.test("Non-existent user: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.test("Non-existent user: Has error message", function() {
+        client.assert(response.body.message !== undefined, "Error message should be present");
+    });
+
+    client.log("✓ Non-existent user login correctly rejected");
+%}
+
+# ====================================================================================
+# USER TESTS
+# ====================================================================================
+
+### USER-1: Get own profile — should return 200
+GET http://localhost:8080/api/users/me
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get me: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get me: Returns correct user", function() {
+        client.assert(response.body.userName  === "user01", "userName should be user01");
+        client.assert(response.body.role      === "ADMIN",  "role should be ADMIN");
+        client.assert(response.body.password  === undefined, "password must not be in response");
+    });
+
+    client.global.set("admin_home_id", response.body.homeId);
+    client.log("✓ /me returned user01, homeId=" + response.body.homeId);
+%}
+
+### USER-2: Get own profile without auth — should return 401 or 403
+GET http://localhost:8080/api/users/me
+
+> {%
+    client.test("Get me unauthenticated: Status is 401 or 403", function() {
+        client.assert(response.status === 401 || response.status === 403,
+            "Expected 401 or 403, got " + response.status);
+    });
+
+    client.log("✓ Unauthenticated /me correctly rejected");
+%}
+
+### USER-3: Admin gets all users — should return 200
+GET http://localhost:8080/api/admin/users
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Admin get all users: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Admin get all users: Returns array with entries", function() {
+        client.assert(Array.isArray(response.body),      "Response should be an array");
+        client.assert(response.body.length > 0,          "Should have at least one user");
+    });
+
+    client.test("Admin get all users: User has correct structure", function() {
+        const u = response.body[0];
+        client.assert(u.id       !== undefined, "User should have id");
+        client.assert(u.userName !== undefined, "User should have userName");
+        client.assert(u.email    !== undefined, "User should have email");
+        client.assert(u.role     !== undefined, "User should have role");
+        client.assert(u.password === undefined, "User must not expose password");
+    });
+
+    client.log("✓ Admin retrieved " + response.body.length + " users");
+%}
+
+### USER-4: Normal user tries to access admin endpoint — should return 403
+GET http://localhost:8080/api/admin/users
+Authorization: Bearer {{normal_token}}
+
+> {%
+    client.test("Normal user admin access: Status is 403", function() {
+        client.assert(response.status === 403, "Expected 403, got " + response.status);
+    });
+
+    client.log("✓ Normal user blocked from admin/users");
+%}
+
+### USER-5: Admin gets user by ID — should return 200
+GET http://localhost:8080/api/admin/users/{{test_user_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get user by ID: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get user by ID: Returns correct user", function() {
+        client.assert(response.body.id === parseInt(client.global.get("test_user_id")),
+            "Returned id should match requested id");
+    });
+
+    client.log("✓ Admin retrieved user id=" + client.global.get("test_user_id"));
+%}
+
+### USER-6: Admin gets non-existent user — should return 404
+GET http://localhost:8080/api/admin/users/99999
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Non-existent user: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.log("✓ Non-existent user id=99999 correctly returns 404");
+%}
+
+### USER-7: Admin changes test user role to ADMIN — should return 200
+PATCH http://localhost:8080/api/admin/users/{{test_user_id}}/role
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "id": {{test_user_id}},
+  "role": "ADMIN"
+}
+
+> {%
+    client.test("Change role: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Change role: Role updated to ADMIN", function() {
+        client.assert(response.body.role === "ADMIN", "role should be ADMIN");
+    });
+
+    client.log("✓ Test user role changed to ADMIN");
+%}
+
+### USER-8: Admin changes test user role back to NORMAL — cleanup
+PATCH http://localhost:8080/api/admin/users/{{test_user_id}}/role
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "id": {{test_user_id}},
+  "role": "NORMAL"
+}
+
+> {%
+    client.test("Revert role: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Revert role: Role is NORMAL again", function() {
+        client.assert(response.body.role === "NORMAL", "role should be NORMAL");
+    });
+
+    client.log("✓ Test user role reverted to NORMAL");
+%}
+
+# ====================================================================================
+# HOME TESTS
+# ====================================================================================
+
+### HOME-1: Get all homes — should return 200
+GET http://localhost:8080/api/homes
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get all homes: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get all homes: Returns array", function() {
+        client.assert(Array.isArray(response.body), "Response should be an array");
+        client.assert(response.body.length > 0,     "Should have at least one home from seed data");
+    });
+
+    client.test("Get all homes: Home has correct structure", function() {
+        const h = response.body[0];
+        client.assert(h.id   !== undefined, "Home should have id");
+        client.assert(h.name !== undefined, "Home should have name");
+    });
+
+    client.log("✓ Retrieved " + response.body.length + " homes");
+%}
+
+### HOME-2: Get home by ID (admin's own home) — should return 200
+GET http://localhost:8080/api/homes/{{admin_home_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get home by ID: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get home by ID: Returns correct home", function() {
+        client.assert(response.body.id === parseInt(client.global.get("admin_home_id")),
+            "Returned id should match admin_home_id");
+        client.assert(response.body.name !== undefined, "Home should have a name");
+    });
+
+    client.log("✓ Home id=" + client.global.get("admin_home_id") + " retrieved: " + response.body.name);
+%}
+
+### HOME-3: Get non-existent home — should return 404
+GET http://localhost:8080/api/homes/99999
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Non-existent home: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.log("✓ Non-existent home correctly returns 404");
+%}
+
+### HOME-4: Create a new home — should return 201
+POST http://localhost:8080/api/homes
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "Test Home {{$random.integer(100, 999)}}"
+}
+
+> {%
+    client.test("Create home: Status is 201", function() {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+    });
+
+    client.test("Create home: Returns created home", function() {
+        client.assert(response.body.id   !== undefined, "id should be present");
+        client.assert(response.body.name !== undefined, "name should be present");
+    });
+
+    client.global.set("test_home_id", response.body.id);
+    client.log("✓ Home created id=" + response.body.id + " name=" + response.body.name);
+%}
+
+### HOME-5: Create home with blank name — should return 400
+POST http://localhost:8080/api/homes
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": ""
+}
+
+> {%
+    client.test("Blank home name: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.log("✓ Blank home name correctly rejected");
+%}
+
+### HOME-6: Rename home — should return 200
+PUT http://localhost:8080/api/homes/{{test_home_id}}
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "Renamed Test Home"
+}
+
+> {%
+    client.test("Rename home: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Rename home: Name updated", function() {
+        client.assert(response.body.name === "Renamed Test Home",
+            "name should be 'Renamed Test Home', got: " + response.body.name);
+    });
+
+    client.log("✓ Home renamed successfully");
+%}
+
+### HOME-7: Get homes without auth — should return 401 or 403
+GET http://localhost:8080/api/homes
+
+> {%
+    client.test("Homes unauthenticated: Status is 401 or 403", function() {
+        client.assert(response.status === 401 || response.status === 403,
+            "Expected 401 or 403, got " + response.status);
+    });
+
+    client.log("✓ Unauthenticated homes request correctly rejected");
+%}
+
+# ====================================================================================
+# STORAGE TYPE TESTS
+# ====================================================================================
+
+### STORAGE-1: Create a storage type — should return 201
+POST http://localhost:8080/api/storage-types
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "TestKast {{$random.integer(100,999)}}",
+  "remarks": "for automated tests"
+}
+
+> {%
+    client.test("Create storage type: Status is 201", function() {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+    });
+
+    client.test("Create storage type: Returns created object", function() {
+        client.assert(response.body.id      !== undefined, "id should be present");
+        client.assert(response.body.name    !== undefined, "name should be present");
+        client.assert(response.body.remarks !== undefined, "remarks should be present");
+    });
+
+    client.global.set("test_storage_type_id", response.body.id);
+    client.log("✓ StorageType created id=" + response.body.id);
+%}
+
+### STORAGE-2: Create storage type with blank name — should return 400
+POST http://localhost:8080/api/storage-types
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "",
+  "remarks": null
+}
+
+> {%
+    client.test("Blank storage type name: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.log("✓ Blank storage type name correctly rejected");
+%}
+
+### STORAGE-3: Get all storage types — should return 200
+GET http://localhost:8080/api/storage-types
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get all storage types: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get all storage types: Returns array", function() {
+        client.assert(Array.isArray(response.body), "Response should be an array");
+        client.assert(response.body.length > 0,     "Should have at least one storage type");
+    });
+
+    client.log("✓ Retrieved " + response.body.length + " storage types");
+%}
+
+### STORAGE-4: Get storage type by ID — should return 200
+GET http://localhost:8080/api/storage-types/{{test_storage_type_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get storage type by ID: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get storage type by ID: Correct object", function() {
+        client.assert(response.body.id === parseInt(client.global.get("test_storage_type_id")),
+            "id should match test_storage_type_id");
+    });
+
+    client.log("✓ StorageType id=" + client.global.get("test_storage_type_id") + " retrieved");
+%}
+
+### STORAGE-5: Get non-existent storage type — should return 404
+GET http://localhost:8080/api/storage-types/99999
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Non-existent storage type: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.log("✓ Non-existent storage type correctly returns 404");
+%}
+
+### STORAGE-6: Update storage type — should return 200
+PUT http://localhost:8080/api/storage-types/{{test_storage_type_id}}
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "UpdatedKast",
+  "remarks": "updated remarks"
+}
+
+> {%
+    client.test("Update storage type: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Update storage type: Name updated", function() {
+        client.assert(response.body.name === "UpdatedKast",
+            "name should be 'UpdatedKast', got: " + response.body.name);
+    });
+
+    client.log("✓ StorageType updated");
+%}
+
+# ====================================================================================
+# FOOD TESTS
+# ====================================================================================
+
+### FOOD-1: Create a food item — should return 201
+POST http://localhost:8080/api/foods
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "Test Melk",
+  "remarks": "for automated test",
+  "bestBeforeEnd": "2026-12-31",
+  "original_ml_g": 1000
+}
+
+> {%
+    client.test("Create food: Status is 201", function() {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+    });
+
+    client.test("Create food: Returns created food", function() {
+        client.assert(response.body.id              !== undefined, "id should be present");
+        client.assert(response.body.name            === "Test Melk", "name should be 'Test Melk'");
+        client.assert(response.body.original_ml_g   === 1000,     "original_ml_g should be 1000");
+        client.assert(response.body.remaining_ml_g  === 1000,     "remaining_ml_g should equal original on creation");
+        client.assert(response.body.useBy           === null,     "useBy should be null on a sealed package");
+        client.assert(response.body.empty           === false,    "empty should be false on creation");
+    });
+
+    client.global.set("test_food_id", response.body.id);
+    client.log("✓ Food created id=" + response.body.id);
+%}
+
+### FOOD-2: Create food with missing name — should return 400
+POST http://localhost:8080/api/foods
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "",
+  "bestBeforeEnd": "2026-12-31",
+  "original_ml_g": 500
+}
+
+> {%
+    client.test("Missing food name: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.log("✓ Missing food name correctly rejected");
+%}
+
+### FOOD-3: Create food with negative original_ml_g — should return 400
+POST http://localhost:8080/api/foods
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "Bad Food",
+  "bestBeforeEnd": "2026-12-31",
+  "original_ml_g": -100
+}
+
+> {%
+    client.test("Negative original_ml_g: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.log("✓ Negative original_ml_g correctly rejected");
+%}
+
+### FOOD-4: Get all foods — should return 200
+GET http://localhost:8080/api/foods
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get all foods: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get all foods: Returns array", function() {
+        client.assert(Array.isArray(response.body), "Response should be an array");
+        client.assert(response.body.length > 0,     "Should have at least one food from seed data");
+    });
+
+    client.test("Get all foods: Food has correct structure", function() {
+        const f = response.body[0];
+        client.assert(f.id             !== undefined, "Food should have id");
+        client.assert(f.name           !== undefined, "Food should have name");
+        client.assert(f.bestBeforeEnd  !== undefined, "Food should have bestBeforeEnd");
+        client.assert(f.original_ml_g  !== undefined, "Food should have original_ml_g");
+        client.assert(f.remaining_ml_g !== undefined, "Food should have remaining_ml_g");
+        client.assert(f.empty          !== undefined, "Food should have empty flag");
+    });
+
+    client.log("✓ Retrieved " + response.body.length + " foods");
+%}
+
+### FOOD-5: Get food by ID — should return 200
+GET http://localhost:8080/api/foods/{{test_food_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get food by ID: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get food by ID: Correct object", function() {
+        client.assert(response.body.id   === parseInt(client.global.get("test_food_id")), "id should match");
+        client.assert(response.body.name === "Test Melk", "name should be 'Test Melk'");
+    });
+
+    client.log("✓ Food id=" + client.global.get("test_food_id") + " retrieved");
+%}
+
+### FOOD-6: Get non-existent food — should return 404
+GET http://localhost:8080/api/foods/99999
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Non-existent food: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.log("✓ Non-existent food correctly returns 404");
+%}
+
+### FOOD-7: Partial update (PATCH) food — should return 200
+PATCH http://localhost:8080/api/foods/{{test_food_id}}
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "remarks": "updated remarks only"
+}
+
+> {%
+    client.test("Patch food: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Patch food: Only remarks changed, name intact", function() {
+        client.assert(response.body.remarks === "updated remarks only", "remarks should be updated");
+        client.assert(response.body.name    === "Test Melk",            "name should still be 'Test Melk'");
+    });
+
+    client.log("✓ Food remarks patched");
+%}
+
+### FOOD-8: Open a sealed package — should set useBy and return 200
+POST http://localhost:8080/api/foods/{{test_food_id}}/open
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "useBy": "2026-07-15",
+  "initialConsumption": 50
+}
+
+> {%
+    client.test("Open package: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Open package: useBy is set", function() {
+        client.assert(response.body.useBy !== null, "useBy should not be null after opening");
+    });
+
+    client.test("Open package: remaining decreased by initialConsumption", function() {
+        client.assert(response.body.remaining_ml_g === 950,
+            "remaining_ml_g should be 950 (1000 - 50), got: " + response.body.remaining_ml_g);
+    });
+
+    client.test("Open package: effectiveUseBy equals useBy", function() {
+        client.assert(response.body.effectiveUseBy === response.body.useBy,
+            "effectiveUseBy should equal useBy when useBy is set");
+    });
+
+    client.log("✓ Package opened, remaining_ml_g=" + response.body.remaining_ml_g);
+%}
+
+### FOOD-9: Open package with useBy after bestBeforeEnd — should return 400
+POST http://localhost:8080/api/foods/{{test_food_id}}/open
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "useBy": "2099-01-01",
+  "initialConsumption": 0
+}
+
+> {%
+    client.test("useBy after bestBeforeEnd: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.log("✓ useBy after bestBeforeEnd correctly rejected");
+%}
+
+### FOOD-10: Consume from an opened package — should return 200
+POST http://localhost:8080/api/foods/{{test_food_id}}/consume
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "amount": 200
+}
+
+> {%
+    client.test("Consume: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Consume: remaining decreased by amount", function() {
+        client.assert(response.body.remaining_ml_g === 750,
+            "remaining_ml_g should be 750 (950 - 200), got: " + response.body.remaining_ml_g);
+        client.assert(response.body.empty === false, "empty should still be false");
+    });
+
+    client.log("✓ Consumed 200ml, remaining=" + response.body.remaining_ml_g);
+%}
+
+### FOOD-11: Consume with amount = 0 — should return 400 (must be > 0)
+POST http://localhost:8080/api/foods/{{test_food_id}}/consume
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "amount": 0
+}
+
+> {%
+    client.test("Consume zero: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.log("✓ Zero consumption correctly rejected");
+%}
+
+### FOOD-12: Consume entire remaining amount — package should become empty
+POST http://localhost:8080/api/foods/{{test_food_id}}/consume
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "amount": 750
+}
+
+> {%
+    client.test("Consume all: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Consume all: Package is empty (remaining = -1, empty = true)", function() {
+        client.assert(response.body.remaining_ml_g === -1,   "remaining_ml_g should be -1 when empty");
+        client.assert(response.body.empty          === true, "empty flag should be true");
+    });
+
+    client.log("✓ Package emptied, remaining=" + response.body.remaining_ml_g + " empty=" + response.body.empty);
+%}
+
+# ====================================================================================
+# STORED FOOD TESTS
+# ====================================================================================
+
+### STORED-SETUP: Create a fresh food item for stored-food tests
+POST http://localhost:8080/api/foods
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "Stored Test Kaas",
+  "remarks": null,
+  "bestBeforeEnd": "2026-10-01",
+  "original_ml_g": 400
+}
+
+> {%
+    client.global.set("stored_test_food_id", response.body.id);
+    client.log("✓ Fresh food for stored-food tests: id=" + response.body.id);
+%}
+
+### STORED-1: Create a stored food entry — should return 201
+POST http://localhost:8080/api/stored-foods
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "homeId":        {{admin_home_id}},
+  "foodId":        {{stored_test_food_id}},
+  "storageTypeId": {{test_storage_type_id}},
+  "quantity":      3
+}
+
+> {%
+    client.test("Create stored food: Status is 201", function() {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+    });
+
+    client.test("Create stored food: Returns correct entry", function() {
+        client.assert(response.body.id                     !== undefined,              "id should be present");
+        client.assert(response.body.quantity               === 3,                      "quantity should be 3");
+        client.assert(response.body.home.id                === parseInt(client.global.get("admin_home_id")),   "homeId should match");
+        client.assert(response.body.food.id                === parseInt(client.global.get("stored_test_food_id")), "foodId should match");
+        client.assert(response.body.storageType.id         === parseInt(client.global.get("test_storage_type_id")), "storageTypeId should match");
+    });
+
+    client.global.set("test_stored_food_id", response.body.id);
+    client.log("✓ StoredFood created id=" + response.body.id);
+%}
+
+### STORED-2: Create stored food with non-existent home — should return 404
+POST http://localhost:8080/api/stored-foods
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "homeId":        99999,
+  "foodId":        {{stored_test_food_id}},
+  "storageTypeId": {{test_storage_type_id}},
+  "quantity":      1
+}
+
+> {%
+    client.test("Non-existent home in stored food: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.log("✓ Non-existent home correctly returns 404");
+%}
+
+### STORED-3: Get all stored foods — should return 200
+GET http://localhost:8080/api/stored-foods
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get all stored foods: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get all stored foods: Returns array", function() {
+        client.assert(Array.isArray(response.body), "Response should be an array");
+        client.assert(response.body.length > 0,     "Should have at least one entry");
+    });
+
+    client.log("✓ Retrieved " + response.body.length + " stored food entries");
+%}
+
+### STORED-4: Filter stored foods by homeId — should return only that home's entries
+GET http://localhost:8080/api/stored-foods?homeId={{admin_home_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Filter by homeId: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Filter by homeId: All entries belong to that home", function() {
+        response.body.forEach(function(sf) {
+            client.assert(sf.home.id === parseInt(client.global.get("admin_home_id")),
+                "All entries should belong to admin_home_id");
+        });
+    });
+
+    client.log("✓ Filtered to " + response.body.length + " entries for homeId=" + client.global.get("admin_home_id"));
+%}
+
+### STORED-5: Get stored food by ID — should return 200
+GET http://localhost:8080/api/stored-foods/{{test_stored_food_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Get stored food by ID: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Get stored food by ID: Correct object", function() {
+        client.assert(response.body.id === parseInt(client.global.get("test_stored_food_id")), "id should match");
+    });
+
+    client.log("✓ StoredFood id=" + client.global.get("test_stored_food_id") + " retrieved");
+%}
+
+### STORED-6: Get non-existent stored food — should return 404
+GET http://localhost:8080/api/stored-foods/99999
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Non-existent stored food: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404, got " + response.status);
+    });
+
+    client.log("✓ Non-existent stored food correctly returns 404");
+%}
+
+### STORED-7: Patch stored food — move to different storage type — should return 200
+PATCH http://localhost:8080/api/stored-foods/{{test_stored_food_id}}
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "storageTypeId": {{test_storage_type_id}},
+  "quantity": 5
+}
+
+> {%
+    client.test("Patch stored food: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Patch stored food: Quantity updated to 5", function() {
+        client.assert(response.body.quantity === 5, "quantity should be 5, got: " + response.body.quantity);
+    });
+
+    client.log("✓ StoredFood patched, quantity=" + response.body.quantity);
+%}
+
+### STORED-8: Adjust quantity — restock (+2) — should return 200
+PATCH http://localhost:8080/api/stored-foods/{{test_stored_food_id}}/quantity
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "delta": 2
+}
+
+> {%
+    client.test("Restock (+2): Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Restock (+2): Quantity increased to 7", function() {
+        client.assert(response.body.quantity === 7, "quantity should be 7 (5+2), got: " + response.body.quantity);
+    });
+
+    client.log("✓ Restocked +2, quantity=" + response.body.quantity);
+%}
+
+### STORED-9: Adjust quantity — consume (-3) — should return 200
+PATCH http://localhost:8080/api/stored-foods/{{test_stored_food_id}}/quantity
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "delta": -3
+}
+
+> {%
+    client.test("Consume (-3): Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.test("Consume (-3): Quantity decreased to 4", function() {
+        client.assert(response.body.quantity === 4, "quantity should be 4 (7-3), got: " + response.body.quantity);
+    });
+
+    client.log("✓ Consumed -3, quantity=" + response.body.quantity);
+%}
+
+### STORED-10: Adjust quantity below zero — should return 400
+PATCH http://localhost:8080/api/stored-foods/{{test_stored_food_id}}/quantity
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "delta": -999
+}
+
+> {%
+    client.test("Quantity below zero: Status is 400", function() {
+        client.assert(response.status === 400, "Expected 400, got " + response.status);
+    });
+
+    client.test("Quantity below zero: Has error message", function() {
+        client.assert(response.body.message !== undefined, "Error message should be present");
+    });
+
+    client.log("✓ Negative quantity correctly rejected");
+%}
+
+### STORED-11: Adjust quantity to exactly zero — entry should be auto-deleted
+PATCH http://localhost:8080/api/stored-foods/{{test_stored_food_id}}/quantity
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "delta": -4
+}
+
+> {%
+    client.test("Deplete to zero: Status is 200", function() {
+        client.assert(response.status === 200, "Expected 200, got " + response.status);
+    });
+
+    client.log("✓ StoredFood depleted to zero, entry should now be gone");
+%}
+
+### STORED-12: Verify auto-deleted entry is gone — should return 404
+GET http://localhost:8080/api/stored-foods/{{test_stored_food_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Auto-deleted entry: Status is 404", function() {
+        client.assert(response.status === 404, "Expected 404 after depletion, got " + response.status);
+    });
+
+    client.log("✓ Auto-deletion at quantity=0 confirmed");
+%}
+
+# ====================================================================================
+# CLEANUP
+# ====================================================================================
+
+### CLEANUP-1: Delete test food (empty package)
+DELETE http://localhost:8080/api/foods/{{test_food_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Delete test food: Status is 204", function() {
+        client.assert(response.status === 204, "Expected 204, got " + response.status);
+    });
+
+    client.log("✓ Test food (empty package) deleted");
+%}
+
+### CLEANUP-2: Delete fresh food used for stored-food tests
+DELETE http://localhost:8080/api/foods/{{stored_test_food_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Delete stored-test food: Status is 204", function() {
+        client.assert(response.status === 204, "Expected 204, got " + response.status);
+    });
+
+    client.log("✓ Stored-test food deleted");
+%}
+
+### CLEANUP-3: Delete test storage type
+DELETE http://localhost:8080/api/storage-types/{{test_storage_type_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Delete test storage type: Status is 204", function() {
+        client.assert(response.status === 204, "Expected 204, got " + response.status);
+    });
+
+    client.log("✓ Test storage type deleted");
+%}
+
+### CLEANUP-4: Delete test home
+DELETE http://localhost:8080/api/homes/{{test_home_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Delete test home: Status is 204", function() {
+        client.assert(response.status === 204, "Expected 204, got " + response.status);
+    });
+
+    client.log("✓ Test home deleted");
+%}
+
+### CLEANUP-5: Delete test user (registered in AUTH-1)
+DELETE http://localhost:8080/api/admin/users/{{test_user_id}}
+Authorization: Bearer {{admin_token}}
+
+> {%
+    client.test("Delete test user: Status is 204", function() {
+        client.assert(response.status === 204, "Expected 204, got " + response.status);
+    });
+
+    client.log("✓ Test user deleted");
+    client.log("=== ShoppingList Test Suite Completed ===");
+%}
+
+###

@@ -9,8 +9,8 @@ public class UserMapper {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole(),
+                user.getHome().getId()   // included so callers can link stored-food to the right home
         );
     }
-
 }
