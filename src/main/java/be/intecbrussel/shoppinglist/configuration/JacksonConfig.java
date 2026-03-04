@@ -13,7 +13,6 @@ public class JacksonConfig {
     /**
      * Serialize LocalDate / LocalDateTime as ISO-8601 strings ("2026-07-15")
      * instead of JSON arrays ([2026, 7, 15]).
-     *
      * spring.jackson.serialization.write-dates-as-timestamps=false no longer
      * works in Spring Boot 4.x — configure programmatically instead.
      */
