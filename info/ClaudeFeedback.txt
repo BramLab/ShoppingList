@@ -4,8 +4,9 @@
 * DTO's:
 * Use CommandLineRunner for services instead of repositories:
 * Adapt: 1 user 1 home (limit complexity):
-
 * Controller layer:
+* React project:
+* Full scaffolding:
 
 ---
 
@@ -240,3 +241,87 @@ Add JacksonConfig.java to src/main/java/be/intecbrussel/shoppinglist/configurati
     This achieves the same result (ISO date strings) using a Jackson2ObjectMapperBuilderCustomizer bean,
     which is the correct approach for Spring Boot 4.
     It also explicitly registers JavaTimeModule so Hibernate's LocalDate → JSON serialization is guaranteed to work.
+
+---
+
+* React project:
+
+How to start a react project for this in intellij?14:102 / 2
+
+Deciphered React project setup requirements for IntelliJ integrationDeciphered React project setup requirements
+    for IntelliJ integration
+Here's how to set up a React frontend for this project in IntelliJ:
+
+Option 1: Create React app inside the existing project
+    Open a terminal in IntelliJ (Alt+F12) and run:
+    bashnpm create vite@latest frontend -- --template react
+    cd frontend
+    npm install
+    npm run dev
+```
+This creates a `frontend/` folder alongside your `src/` folder.
+Vite is the right choice here since your CORS config already allows `http://localhost:5173` (Vite's default port).
+
+**Option 2: Separate project**
+If you prefer keeping frontend and backend fully separate, create it outside the Spring Boot project directory
+and open it as a second project in IntelliJ.
+
+**Connecting to your backend**
+
+In your React project, create a `src/api/` folder and set the base URL to `http://localhost:8080`.
+To avoid hardcoding it, add a `.env` file: VITE_API_URL=http://localhost:8080
+Then use it like: javascriptconst BASE_URL = import.meta.env.VITE_API_URL;
+
+IntelliJ tip
+IntelliJ Ultimate has built-in support for React/Vite projects — it'll automatically recognize
+the project structure and offer code completion.
+If you're on IntelliJ Community, you'd need to install the JavaScript plugin or use VS Code for the frontend instead.
+
+Running both together
+You'll need two terminal tabs — one running ./mvnw spring-boot:run for the backend
+and one running npm run dev for the frontend.
+IntelliJ Ultimate lets you configure both as run configurations so you can launch them with one click
+    via Run → Edit Configurations.
+
+---
+* Full scaffolding:
+
+Would you like help scaffolding any specific part of the React app, like the authentication flow or the food/storage views?
+yes14:33Sought clarification on React scaffolding requirementsSought clarification on React scaffolding requirements
+
+What would you like to start with?Let me know your preferences and I'll generate the scaffolding code for you!
+
+Q: Which parts do you want to scaffold first? (Select all that apply)
+A: Authentication (login/register), Food management, Storage & inventory views, Navigation & layout
+
+Q:What's your preferred approach?
+A: Plain React + fetch
+
+Q: Styling preference?
+A: Tailwind CSS14:34
+Architected comprehensive React scaffold with curated design system
+Architected comprehensive React scaffold with curated design system
+I'll scaffold the full project now — all files ready to drop into a Vite React app.
+Created 16 files, ran 2 commands, read a fileCreated 16 files, ran 2 commands, read a file
+
+Here's what was generated — 14 files covering the full frontend:
+
+Setup (read SETUP.md first):
+bashnpm create vite@latest frontend -- --template react
+cd frontend
+npm install
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+npm install react-router-dom
+
+# then copy all these files in
+npm run dev
+What's included:
+api/api.js — a clean fetch wrapper with JWT injection for every endpoint your backend exposes (auth, foods, storage types, stored foods, homes, admin).
+context/AuthContext.jsx — stores the JWT in localStorage, auto-restores session on page reload via /api/users/me, exposes login, logout, register.
+components/Layout.jsx — dark green sidebar with nav links, admin section appears only for ADMIN role users.
+pages/Login.jsx / Register.jsx — split-panel login, full register form.
+pages/Dashboard.jsx — stat cards (total items, inventory entries, expiring soon, empty packages) plus a "expiring this week" list.
+pages/Foods.jsx — full table with search, add/edit modals, open-package and consume flows, delete.
+pages/Inventory.jsx — cards grouped by storage location, quantity adjustment modal (+ restock / − consume), auto-removal when qty hits 0.
+pages/AdminUsers.jsx — user table with role toggle and delete, only reachable by admins.
