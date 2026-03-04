@@ -325,3 +325,38 @@ pages/Dashboard.jsx — stat cards (total items, inventory entries, expiring soo
 pages/Foods.jsx — full table with search, add/edit modals, open-package and consume flows, delete.
 pages/Inventory.jsx — cards grouped by storage location, quantity adjustment modal (+ restock / − consume), auto-removal when qty hits 0.
 pages/AdminUsers.jsx — user table with role toggle and delete, only reachable by admins.
+
+
+---
+* fix
+
+How to fix — run these commands from your project root:
+bash# Step 1 — create the Vite project (if not done yet)
+npm create vite@latest frontend -- --template react
+cd frontend
+npm install
+npm install react-router-dom
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+# Step 2 — create the missing subdirectories
+mkdir -p src/pages src/components src/context src/api
+
+# Step 3 — move files to the right places
+mv src/AuthContext.jsx   src/context/AuthContext.jsx
+mv src/Layout.jsx        src/components/Layout.jsx
+mv src/Login.jsx         src/pages/Login.jsx
+mv src/Register.jsx      src/pages/Register.jsx
+mv src/Dashboard.jsx     src/pages/Dashboard.jsx
+mv src/Foods.jsx         src/pages/Foods.jsx
+mv src/Inventory.jsx     src/pages/Inventory.jsx
+mv src/AdminUsers.jsx    src/pages/AdminUsers.jsx
+mv src/api.js            src/api/api.js
+
+# Step 4 — move tailwind config to project root
+mv src/tailwind.config.js tailwind.config.js
+# Also move .env to project root (not src)
+mv src/.env .env
+Then update tailwind.config.js content (already in your project root now) and run:
+bashnpm run dev
+The backend needs to be running on port 8080 simultaneously. Visit http://localhost:5173 and log in with user01 / hashed01?.
