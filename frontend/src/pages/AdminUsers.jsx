@@ -20,13 +20,13 @@ export default function AdminUsers() {
 
   async function handleRoleToggle(user) {
     const newRole = user.role === 'ADMIN' ? 'NORMAL' : 'ADMIN';
-    if (!confirm(`Change ${user.userName}'s role to ${newRole}?`)) return;
+    if (!confirm(`Change ${user.username}'s role to ${newRole}?`)) return;
     await adminApi.changeRole(user.id, { id: user.id, role: newRole });
     await load();
   }
 
   async function handleDelete(user) {
-    if (!confirm(`Delete user "${user.userName}"? This cannot be undone.`)) return;
+    if (!confirm(`Delete user "${user.username}"? This cannot be undone.`)) return;
     await adminApi.deleteUser(user.id);
     setUsers(prev => prev.filter(u => u.id !== user.id));
   }
@@ -58,7 +58,7 @@ export default function AdminUsers() {
               {users.map(u => (
                 <tr key={u.id} className="border-b border-gray-100 hover:bg-cream transition-colors">
                   <td className="py-3 px-4 font-mono text-xs text-ink-muted">{u.id}</td>
-                  <td className="py-3 px-4 font-body font-medium text-ink">{u.userName}</td>
+                  <td className="py-3 px-4 font-body font-medium text-ink">{u.username}</td>
                   <td className="py-3 px-4 font-body text-ink-muted">{u.email}</td>
                   <td className="py-3 px-4">
                     <span className={`badge font-mono ${u.role === 'ADMIN'

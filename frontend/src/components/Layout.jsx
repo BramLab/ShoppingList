@@ -30,7 +30,7 @@ export default function Layout() {
             Pantry
           </h1>
           <p className="font-mono text-xs text-green-400 mt-0.5 opacity-70">
-            {user?.userName}
+            {user?.username}
           </p>
         </div>
 

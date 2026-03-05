@@ -18,8 +18,8 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
-  async function login(username, password) {
-    const data = await authApi.login({ username, password });
+  async function login(userName, password) {
+    const data = await authApi.login({ username: userName, password });
     localStorage.setItem('token', data.token);
     // Fetch full user profile (includes homeId)
     const me = await authApi.me();

@@ -7,7 +7,7 @@ export default function Register() {
   const navigate     = useNavigate();
 
   const [form, setForm] = useState({
-    userName: '', email: '', password: '', homeName: '', role: 'NORMAL',
+    username: '', email: '', password: '', homeName: '', role: 'NORMAL',
   });
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,7 +57,7 @@ export default function Register() {
             <div>
               <label className="label">Username</label>
               <input className="input" type="text" placeholder="janedoe"
-                value={form.userName} onChange={set('userName')} required />
+                     value={form.username} onChange={set('userName')} required />
             </div>
             <div>
               <label className="label">Role</label>

@@ -40,7 +40,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-8">
         <h2 className="font-display text-3xl font-bold text-ink">
-          Good to see you, {user?.userName}.
+          Good to see you, {user?.username}.
         </h2>
         <p className="font-body text-ink-muted mt-1">Here's a snapshot of your pantry.</p>
       </div>

@@ -63,7 +63,7 @@ export default function Login() {
                 type="text"
                 placeholder="user01"
                 value={form.username}
-                onChange={set('username')}
+                onChange={set('userName')}
                 required
                 autoFocus
               />
