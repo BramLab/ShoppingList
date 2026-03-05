@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { foodApi, storedFoodApi } from '../api.js';
+import { foodApi, storedFoodApi } from '../api/api';
 
 function StatCard({ label, value, sub, color = 'forest' }) {
   const border = color === 'terra' ? 'border-terra' : 'border-forest';
