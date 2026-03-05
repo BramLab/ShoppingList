@@ -46,9 +46,9 @@ Content-Type: application/json
         client.assert(response.status === 201, "Expected 201, got " + response.status);
     });
 
-    client.test("Register: Response has id, userName, email, role, homeId", function() {
+    client.test("Register: Response has id, username, email, role, homeId", function() {
         client.assert(response.body.id        !== undefined, "id should be present");
-        client.assert(response.body.username  !== undefined, "userName should be present");
+        client.assert(response.body.username  !== undefined, "username should be present");
         client.assert(response.body.email     !== undefined, "email should be present");
         client.assert(response.body.role      === "NORMAL",  "role should be NORMAL");
         client.assert(response.body.homeId    !== undefined, "homeId should be present");
@@ -133,7 +133,7 @@ Content-Type: application/json
 
     client.test("Admin login: Response has correct user fields", function() {
         client.assert(response.body.id       !== undefined, "id should be present");
-        client.assert(response.body.username === "user01",  "userName should be user01");
+        client.assert(response.body.username === "user01",  "username should be user01");
         client.assert(response.body.role     === "ADMIN",   "role should be ADMIN");
         client.assert(response.body.email    !== undefined, "email should be present");
     });
@@ -220,7 +220,7 @@ Authorization: Bearer {{admin_token}}
     });
 
     client.test("Get me: Returns correct user", function() {
-        client.assert(response.body.username  === "user01", "userName should be user01");
+        client.assert(response.body.username  === "user01", "username should be user01");
         client.assert(response.body.role      === "ADMIN",  "role should be ADMIN");
         client.assert(response.body.password  === undefined, "password must not be in response");
     });
@@ -258,7 +258,7 @@ Authorization: Bearer {{admin_token}}
     client.test("Admin get all users: User has correct structure", function() {
         const u = response.body[0];
         client.assert(u.id       !== undefined, "User should have id");
-        client.assert(u.username !== undefined, "User should have userName");
+        client.assert(u.username !== undefined, "User should have username");
         client.assert(u.email    !== undefined, "User should have email");
         client.assert(u.role     !== undefined, "User should have role");
         client.assert(u.password === undefined, "User must not expose password");
