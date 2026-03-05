@@ -70,7 +70,7 @@ Content-Type: application/json
 
 {
   "id": 0,
-  "userName": "user01",
+  "username": "user01",
   "email": "another_{{$random.integer(1000,9999)}}@example.com",
   "role": "NORMAL",
   "password": "testpass123",
@@ -96,7 +96,7 @@ Content-Type: application/json
 
 {
   "id": 0,
-  "userName": "no_home_user",
+  "username": "no_home_user",
   "email": "nohome@example.com",
   "role": "NORMAL",
   "password": "testpass123",

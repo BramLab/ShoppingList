@@ -12,6 +12,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -19,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final CorsConfig config;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -26,44 +33,30 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                //.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Link config
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                                // Public endpoints
-                                .requestMatchers("/api/auth/**").permitAll()
+                        // TEST
+//                        .requestMatchers("/api/**").permitAll()
 
-                                .requestMatchers("/api/foods/**").hasAnyRole("NORMAL", "ADMIN")
-                                .requestMatchers("/api/homes/**").hasAnyRole("NORMAL", "ADMIN")
-                                .requestMatchers("/api/storage-types/**").hasAnyRole("NORMAL", "ADMIN")
-                                .requestMatchers("/api/stored-foods/**").hasAnyRole("NORMAL", "ADMIN")
+                        // Public endpoints
+                        .requestMatchers("/api/auth/**").permitAll()
 
-
-                        //TODO
-//                        .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
-//
-//                        // Course management
-//                        .requestMatchers(HttpMethod.POST, "/api/courses").hasAnyRole("INSTRUCTOR", "ADMIN")
-//                        .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasAnyRole("INSTRUCTOR", "ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("ADMIN")
-//
-//                        // Enrollment endpoints
-//                        .requestMatchers(HttpMethod.POST, "/api/courses/*/enroll/*").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.POST, "/api/courses/*/enroll").authenticated() // Student self-enroll
-//                        .requestMatchers("/api/enrollments/me").hasRole("STUDENT")
-//                        .requestMatchers("/api/instructor/enrollments").hasRole("INSTRUCTOR")
-//                        .requestMatchers("/api/admin/enrollments").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/enrollments/*").authenticated() // Logic in service
-
-                        // Admin endpoints
+                        // Authenticated NORMAL or ADMIN:
+                        .requestMatchers("/api/foods/**").hasAnyRole("NORMAL", "ADMIN")
+                        .requestMatchers("/api/homes/**").hasAnyRole("NORMAL", "ADMIN")
+                        .requestMatchers("/api/storage-types/**").hasAnyRole("NORMAL", "ADMIN")
+                        .requestMatchers("/api/stored-foods/**").hasAnyRole("NORMAL", "ADMIN")
+                        // Authenticated ADMIN:
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
                 )
-
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -75,6 +68,31 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+//    @Bean
+//    public CorsFilter corsFilter() {
+//        CorsConfiguration corsConfig = new CorsConfiguration();
+//        corsConfig.setAllowedOrigins(List.of("http://localhost:5173"));
+//        corsConfig.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+//        corsConfig.setAllowedHeaders(List.of("*"));
+//        corsConfig.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", corsConfig);
+//        return new CorsFilter(source);
+//    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.setAllowedOrigins(List.of("http://localhost:5173"));
+        corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        corsConfig.setAllowedHeaders(List.of("*"));
+        corsConfig.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        return source;
     }
 
 }
