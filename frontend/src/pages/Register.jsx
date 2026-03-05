@@ -57,7 +57,7 @@ export default function Register() {
             <div>
               <label className="label">Username</label>
               <input className="input" type="text" placeholder="janedoe"
-                     value={form.username} onChange={set('userName')} required />
+                     value={form.username} onChange={set('username')} required />
             </div>
             <div>
               <label className="label">Role</label>
