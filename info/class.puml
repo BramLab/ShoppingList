@@ -42,7 +42,7 @@ class be.intecbrussel.shoppinglist.model.Home {
 
 class be.intecbrussel.shoppinglist.model.AppUser {
 - long id
-- String userName
+- String username
 - String email
 - UserRole userRole
 - String passwordHashed

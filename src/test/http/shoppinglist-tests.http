@@ -34,7 +34,7 @@ Content-Type: application/json
 
 {
   "id": 0,
-  "userName": "test_user_{{$random.integer(1000, 9999)}}",
+  "username": "test_user_{{$random.integer(1000, 9999)}}",
   "email": "test_{{$random.integer(1000, 9999)}}@example.com",
   "role": "NORMAL",
   "password": "testpass123",

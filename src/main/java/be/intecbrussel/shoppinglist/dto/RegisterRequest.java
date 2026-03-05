@@ -8,7 +8,7 @@ public record RegisterRequest(
         long id,
 
         @NotBlank(message = "Username is required")
-        String userName,
+        String username,
 
         @NotBlank(message = "Email is required")
         String email,
@@ -19,7 +19,6 @@ public record RegisterRequest(
         @NotBlank(message = "Password is required")
         String password,
 
-        /** Name for the home that is created together with this user. */
         @NotBlank(message = "Home name is required")
         String homeName
 ) {}

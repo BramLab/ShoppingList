@@ -31,12 +31,12 @@ public class AuthServiceImpl implements AuthService {
         User newUser = new User();
 
         // ── Validate & set username ───────────────────────────────────────────────
-        if (registerRequest.userName().isBlank()) {
+        if (registerRequest.username().isBlank()) {
             throw new MissingDataException("Username is required");
-        } else if (userRepository.findByUsername(registerRequest.userName()).isPresent()) {
+        } else if (userRepository.findByUsername(registerRequest.username()).isPresent()) {
             throw new DuplicateEnrollmentException("Username already exists.");
         } else {
-            newUser.setUsername(registerRequest.userName());
+            newUser.setUsername(registerRequest.username());
         }
 
         // ── Validate & set email ──────────────────────────────────────────────────
