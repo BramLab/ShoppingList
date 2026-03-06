@@ -1,0 +1,75 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+
+package "root" {
+    [index.html]
+}
+
+package "src" {
+    [App.css]
+    [App.jsx]
+    [index.css]
+    [main.jsx]
+
+    package "pages" {
+        [Login.jsx]
+        [Register.jsx]
+        [AdminUsers.jsx]
+
+        [Dashboard.jsx]
+        [Foods.jsx]
+        [Inventory.jsx]
+    }
+
+    package "api" {
+        [api.js]
+    }
+
+    package "assets" {
+        [react.svg]
+    }
+
+    package "components" {
+        [Layout.jsx]
+        [ProtectedRoute.jsx]
+    }
+
+    package "context" {
+        [AuthContext.jsx]
+    }
+}
+
+[index.html] --> [main.jsx]
+[main.jsx] --> [App.jsx]
+[main.jsx] -> [index.css]
+
+[App.jsx] --> [Login.jsx]
+[App.jsx] --> [Register.jsx]
+
+[App.jsx] --> [AuthContext.jsx]
+[App.jsx] --> [ProtectedRoute.jsx]
+[App.jsx] --> [Layout.jsx]
+[App.jsx] --> [Dashboard.jsx]
+[App.jsx] --> [Foods.jsx]
+[App.jsx] --> [Inventory.jsx]
+[App.jsx] --> [AdminUsers.jsx]
+
+[ProtectedRoute.jsx] --> [AuthContext.jsx]
+[Layout.jsx] --> [AuthContext.jsx]
+
+[AuthContext.jsx] --> [api.js]
+
+[AdminUsers.jsx] --> [api.js]
+
+[Dashboard.jsx] --> [AuthContext.jsx]
+[Dashboard.jsx] --> [api.js]
+[Foods.jsx] --> [api.js]
+[Inventory.jsx] --> [AuthContext.jsx]
+[Inventory.jsx] --> [api.js]
+[Login.jsx] --> [AuthContext.jsx]
+[Register.jsx] --> [AuthContext.jsx]
+
+[react-router-dom]
+[react]
+@enduml
