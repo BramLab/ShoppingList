@@ -5,7 +5,10 @@ const NAV = [
   { to: '/',          label: 'Dashboard',  icon: '⌂' },
   { to: '/foods',     label: 'Catalogue',  icon: '◈' },
   { to: '/inventory', label: 'Inventory',  icon: '▤' },
+  { to: '/stored-foods', label: 'Stored Foods',  icon: '▤' },
 ];
+
+// <NavLink to="/stored-foods">Stored Foods</NavLink>
 
 const ADMIN_NAV = [
   { to: '/admin/users', label: 'Users', icon: '◎' },

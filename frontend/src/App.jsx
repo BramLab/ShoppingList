@@ -8,6 +8,7 @@ import Dashboard   from './pages/Dashboard';
 import Foods       from './pages/Foods';
 import Inventory   from './pages/Inventory';
 import AdminUsers  from './pages/AdminUsers';
+import StoredFoods from './pages/StoredFoods';
 
 export default function App() {
   return (
@@ -17,6 +18,8 @@ export default function App() {
           {/* Public */}
           <Route path="/login"    element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          <Route path="/stored-foods" element={<StoredFoods />} />
 
           {/* Protected — wrapped in persistent sidebar Layout */}
           <Route path="/" element={

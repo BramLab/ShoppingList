@@ -365,3 +365,22 @@ mv src/.env .env
 Then update tailwind.config.js content (already in your project root now) and run:
 npm run dev
 The backend needs to be running on port 8080 simultaneously. Visit http://localhost:5173 and log in with user01 / hashed01?.
+
+---
+Services, Controller, Frontend claude queries:
+
+Make the service layer, so that i can consume a Food from the StoredFood (e.g. open a package and take some content or cut and use a part of a vegetable):
+- If the StoredFood comes from a package of several (e.g. milkbottles often come in quantity of 12) and i take one, then that quantity is diminished by one.
+- That one Food is then added as a separate StoredFood.
+- For that Food i have to indicate how much is left (remaining_ml_g) , and how much it wil probably still be ok (useBy).
+- I can consume from that same food later and have to indicate how much is left and optionally adapt the UseBy.
+- If the food is empty (remaining_ml_g = 0) then it must be softdeleted.
+
+At registration, a User must be linked to a Home. Several Users can share a Home. The Home is the central place where their StoredFood is stored.
+
+
+Make a frontoffice page where i can:
+- See a list (with columns) of FoodOriginal that is stored as StoredFood at the Home of the currently logged in User.
+- When i click on a StoredFood, i can consume it via StoredFoodService.consume() where i can fill in or change UseBy, remainingMlG, storageTypeId. As a shortcut i can also indicate that i consume it completely, i.e. remainingMlG is set at 0 so that it can be softdeleted by the service.
+- I can also add new FoodOriginal via FoodOriginalController.addToStorage.
+- When i add new FoodOriginal, i can also add new StorageType.
