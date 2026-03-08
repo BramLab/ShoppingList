@@ -12,14 +12,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/food-originals")
+@RequestMapping("/api/food-originals")   // was "/food-originals" — outside security rules
 @RequiredArgsConstructor
 public class FoodOriginalController {
 
     private final FoodOriginalService foodOriginalService;
 
     /**
-     * POST /food-originals
+     * POST /api/food-originals
      *
      * Create a FoodOriginal and register it in storage in one step.
      *

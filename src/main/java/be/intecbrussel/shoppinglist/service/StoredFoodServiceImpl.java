@@ -25,9 +25,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StoredFoodServiceImpl implements StoredFoodService {
 
-    private final StoredFoodRepository storedFoodRepository;
-    private final StoredFoodMapper storedFoodMapper;       // @Component — resolves IDs → entities on create
-    private final StorageTypeServiceImpl storageTypeService; // concrete Impl to reach findEntity()
+    private final StoredFoodRepository   storedFoodRepository;
+    private final StoredFoodMapper       storedFoodMapper;       // @Component — resolves IDs → entities on create
+    private final StorageTypeServiceImpl storageTypeService;     // concrete Impl to reach findEntity()
+    private final FoodOriginalRepository foodOriginalRepository;
+    private final StorageTypeRepository  storageTypeRepository;
 
     @Override
     public StoredFoodResponse saveStoredFood(StoredFoodRequest request) {
@@ -44,11 +46,13 @@ public class StoredFoodServiceImpl implements StoredFoodService {
                 .toList();
     }
 
+    /**
+     * Uses the repository-level query instead of an in-memory stream filter.
+     */
     @Override
     public List<StoredFoodResponse> findAllByHomeId(long homeId) {
-        return storedFoodRepository.findAll()
+        return storedFoodRepository.findAllByHomeId(homeId)
                 .stream()
-                .filter(sf -> sf.getHome().getId() == homeId)
                 .map(StoredFoodMapper::mapToStoredFoodResponse)
                 .toList();
     }
@@ -100,17 +104,6 @@ public class StoredFoodServiceImpl implements StoredFoodService {
         return StoredFoodMapper.mapToStoredFoodResponse(storedFoodRepository.save(existing));
     }
 
-    private StoredFood findEntity(long id) {
-        return storedFoodRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("StoredFood not found with id: " + id));
-    }
-
-
-
-
-    private final FoodOriginalRepository foodOriginalRepository;
-    private final StorageTypeRepository storageTypeRepository;
-
     /**
      * Take one unit out of a stored pack.
      *
@@ -120,15 +113,13 @@ public class StoredFoodServiceImpl implements StoredFoodService {
      *
      *   consume(id, { remainingMlG=1000, useBy=2026-03-15 })
      *
-     *   After:  StoredFood{ food=Milk,   qty=11 }          ← original pack, decremented
-     *           StoredFood{ food=FoodOriginal(Milk, 1000ml, useBy=15/03), qty=1 }
-     *                                                       ← newly opened bottle
+     *   After:  StoredFood{ food=Milk, qty=11 }                    ← original pack, decremented
+     *           StoredFood{ food=FoodOriginal(Milk, 1000ml), qty=1 } ← newly opened bottle
      * </pre>
      *
      * <h3>Empty-on-open edge case</h3>
-     * If the caller passes {@code remainingMlG = 0} the opened {@code FoodOriginal} is
-     * immediately soft-deleted (Hibernate sets {@code deleted_at}) and no matching
-     * {@code StoredFood} row is created.
+     * If {@code remainingMlG = 0} the opened {@code FoodOriginal} is immediately
+     * soft-deleted and no matching {@code StoredFood} row is created.
      */
     @Override
     @Transactional
@@ -140,14 +131,13 @@ public class StoredFoodServiceImpl implements StoredFoodService {
                         "StoredFood not found with id: " + storedFoodId));
 
         Food baseFood = source.getFood();
-        int oldQty    = source.getQuantity();
+        int  oldQty   = source.getQuantity();
 
         // ── 2. Decrement source quantity ─────────────────────────────────────────
-        int newQty = oldQty - 1;
+        int  newQty      = oldQty - 1;
         Long sourceIdAfter;
 
         if (newQty <= 0) {
-            // Last unit taken out → the "sealed pack" StoredFood is gone.
             log.debug("StoredFood {} was the last unit; deleting it.", storedFoodId);
             storedFoodRepository.delete(source);
             sourceIdAfter = null;
@@ -158,23 +148,13 @@ public class StoredFoodServiceImpl implements StoredFoodService {
             log.debug("StoredFood {} decremented to qty={}.", storedFoodId, newQty);
         }
 
-        // ── 3. Build a FoodOriginal for the opened unit ───────────────────────────
-        //
-        // We always create a *new* FoodOriginal rather than mutating the base Food,
-        // because the base Food (or FoodOriginal) may still be referenced by other
-        // StoredFood rows (e.g. other packs in the pantry).
-        //
-        // We copy name + remarks from the base food so the user does not have to
-        // re-enter them.  If the base food was already a FoodOriginal we also carry
-        // over bestBeforeEnd and original_ml_g.
-
+        // ── 3. Build a FoodOriginal for the opened unit ──────────────────────────
         FoodOriginal opened = buildOpenedFoodOriginal(baseFood, request);
 
         // ── 4. Handle the empty-on-open case ─────────────────────────────────────
         double remaining = opened.getRemaining_ml_g();
 
         if (remaining <= 0) {
-            // Save first so that Hibernate can set deleted_at on a real row.
             FoodOriginal saved = foodOriginalRepository.save(opened);
             foodOriginalRepository.delete(saved);   // @SoftDelete → sets deleted_at
             log.debug("Opened unit of '{}' was immediately empty; soft-deleted FoodOriginal {}.",
@@ -193,18 +173,15 @@ public class StoredFoodServiceImpl implements StoredFoodService {
         FoodOriginal savedOpened = foodOriginalRepository.save(opened);
 
         // ── 6. Determine which StorageType the opened unit goes into ──────────────
-        //
-        // The caller can override; e.g. move an opened milk bottle from "pantry" to "fridge".
-        // When no override is given we reuse the source's StorageType.
         StorageType targetStorageType = resolveStorageType(request, source);
 
         // ── 7. Create the new StoredFood for the opened unit ──────────────────────
         StoredFood openedStoredFood = new StoredFood(
-                0L,                     // id generated by DB
-                source.getHome(),       // stays in the same Home
-                savedOpened,            // the new FoodOriginal
-                targetStorageType,      // fridge / pantry / freezer …
-                1                       // exactly one opened unit
+                0L,
+                source.getHome(),
+                savedOpened,
+                targetStorageType,
+                1
         );
         StoredFood savedOpenedStoredFood = storedFoodRepository.save(openedStoredFood);
 
@@ -222,31 +199,15 @@ public class StoredFoodServiceImpl implements StoredFoodService {
 
     // ── Private helpers ───────────────────────────────────────────────────────────
 
-    /**
-     * Build a transient (not yet persisted) {@code FoodOriginal} for the newly
-     * opened unit.
-     *
-     * <ul>
-     *   <li>{@code name} and {@code remarks} are always copied from the source food.</li>
-     *   <li>If the source food was already a {@code FoodOriginal}, its
-     *       {@code bestBeforeEnd} and {@code original_ml_g} are also inherited.</li>
-     *   <li>The caller-supplied {@code remainingMlG} and {@code useBy} always win
-     *       over the inherited values.</li>
-     * </ul>
-     */
     private FoodOriginal buildOpenedFoodOriginal(Food baseFood, ConsumeRequest request) {
+        double    originalMlG = 0;
+        LocalDate bestBefore  = null;
 
-        double originalMlG  = 0;
-        LocalDate bestBefore = null;
-
-        // Carry over sealed-pack metadata when available.
         if (baseFood instanceof FoodOriginal fo) {
-            originalMlG  = fo.getOriginal_ml_g();
-            bestBefore    = fo.getBestBeforeEnd();
+            originalMlG = fo.getOriginal_ml_g();
+            bestBefore  = fo.getBestBeforeEnd();
         }
 
-        // FoodOriginal.setOriginal_ml_g() also sets remaining_ml_g as a side-effect,
-        // so we call setRemaining_ml_g() afterwards to apply the caller's override.
         FoodOriginal opened = new FoodOriginal();
         opened.setName(baseFood.getName());
         opened.setRemarks(baseFood.getRemarks());
@@ -258,20 +219,17 @@ public class StoredFoodServiceImpl implements StoredFoodService {
         return opened;
     }
 
-
-    /**
-     * Return the {@code StorageType} to use for the opened unit.
-     * Falls back to the source's {@code StorageType} when the request provides no override.
-     */
     private StorageType resolveStorageType(ConsumeRequest request, StoredFood source) {
-
         if (request.getStorageTypeId() == null) {
             return source.getStorageType();
         }
-
         return storageTypeRepository.findById(request.getStorageTypeId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "StorageType not found with id: " + request.getStorageTypeId()));
     }
 
+    private StoredFood findEntity(long id) {
+        return storedFoodRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("StoredFood not found with id: " + id));
+    }
 }

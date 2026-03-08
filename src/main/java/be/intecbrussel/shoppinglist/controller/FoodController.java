@@ -4,6 +4,7 @@ import be.intecbrussel.shoppinglist.dto.FoodOriginalConsumeRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalResponse;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalUpdateRequest;
+import be.intecbrussel.shoppinglist.dto.OpenPackageRequest;
 import be.intecbrussel.shoppinglist.service.FoodService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -72,21 +73,34 @@ public class FoodController {
      * Mark a sealed package as opened: sets a shorter useBy date and
      * optionally records an initial serving taken from it.
      *
-     * Body: { "useBy": "2026-03-10", "initialConsumption": 50 }
+     * Body example:
+     * <pre>
+     * { "useBy": "2026-07-15", "initialConsumption": 50 }
+     * </pre>
+     *
+     * Rules enforced by the service:
+     * <ul>
+     *   <li>{@code useBy} must not be after {@code bestBeforeEnd}.</li>
+     *   <li>{@code initialConsumption} is subtracted from {@code remaining_ml_g};
+     *       the package is soft-deleted automatically if it reaches ≤ 0.</li>
+     * </ul>
      */
-//    @PostMapping("/{id}/open")
-//    public ResponseEntity<FoodOriginalResponse> openPackage(
-//            @PathVariable long id,
-//            @Valid @RequestBody OpenPackageRequest request) {
-//        return ResponseEntity.ok(foodService.openPackage(id, request));
-//    }
+    @PostMapping("/{id}/open")
+    public ResponseEntity<FoodOriginalResponse> openPackage(
+            @PathVariable long id,
+            @Valid @RequestBody OpenPackageRequest request) {
+        return ResponseEntity.ok(foodService.openPackage(id, request));
+    }
 
     /**
      * POST /api/foods/{id}/consume
-     * Record that some ml_g_left was used from an opened package.
-     * Soft-deletes the item automatically when remaining reaches 0.
+     * Record that some ml/g was used from an already-opened package.
+     * Soft-deletes the item automatically when remaining reaches ≤ 0.
      *
-     * Body: { "ml_g_left": 100 }
+     * Body example:
+     * <pre>
+     * { "useBy": "2026-07-15", "ml_g_left": 100 }
+     * </pre>
      */
     @PostMapping("/{id}/consume")
     public ResponseEntity<FoodOriginalResponse> consume(

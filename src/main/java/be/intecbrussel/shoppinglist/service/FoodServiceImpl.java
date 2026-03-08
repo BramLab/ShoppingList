@@ -5,6 +5,8 @@ import be.intecbrussel.shoppinglist.dto.FoodOriginalMapper;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalResponse;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalUpdateRequest;
+import be.intecbrussel.shoppinglist.dto.OpenPackageRequest;
+import be.intecbrussel.shoppinglist.exception.MissingDataException;
 import be.intecbrussel.shoppinglist.exception.ResourceNotFoundException;
 import be.intecbrussel.shoppinglist.model.FoodOriginal;
 import be.intecbrussel.shoppinglist.repository.FoodOriginalRepository;
@@ -32,7 +34,6 @@ public class FoodServiceImpl implements FoodService {
 
     @Override
     public List<FoodOriginalResponse> findAllFoods() {
-        // FoodRepository covers the full hierarchy; cast to FoodOriginal where applicable.
         return foodRepository.findAll()
                 .stream()
                 .filter(f -> f instanceof FoodOriginal)
@@ -76,31 +77,48 @@ public class FoodServiceImpl implements FoodService {
         foodOriginalRepository.deleteById(id); // triggers @SoftDelete
     }
 
-    /** Consumption: If multiple products, take 1 away from multiple (presumably oldest first) and add separately again
-     * with shorter useBy, reduced remaining_ml_g.
-     * Auto-soft-delete when empty. */
+    /**
+     * Mark a sealed package as opened.
+     *
+     * <ul>
+     *   <li>Sets {@code useBy} (must not exceed {@code bestBeforeEnd}).</li>
+     *   <li>Deducts {@code initialConsumption} from {@code remaining_ml_g}.
+     *       The package is auto-soft-deleted when remaining drops to ≤ 0.</li>
+     * </ul>
+     */
     @Override
-    public FoodOriginalResponse consume(long id, FoodOriginalConsumeRequest request) {
+    public FoodOriginalResponse openPackage(long id, OpenPackageRequest request) {
         FoodOriginal food = findEntity(id);
-        double newRemaining = request.ml_g_left();
-        food.setRemaining_ml_g(newRemaining); // setter soft-deletes at ≤ 0
+
+        if (food.getBestBeforeEnd() != null
+                && request.useBy().isAfter(food.getBestBeforeEnd())) {
+            throw new MissingDataException(
+                    "useBy date (" + request.useBy()
+                    + ") cannot be after bestBeforeEnd (" + food.getBestBeforeEnd() + ")");
+        }
+
+        food.setUseBy(request.useBy());
+
+        if (request.initialConsumption() > 0) {
+            // setRemaining_ml_g() handles the ≤ 0 → -1 sentinel automatically
+            food.setRemaining_ml_g(food.getRemaining_ml_g() - request.initialConsumption());
+        }
+
         return FoodOriginalMapper.mapToFoodOriginalResponse(foodOriginalRepository.save(food));
     }
 
-//    @Override
-//    public FoodOriginalResponse openPackage(long id, OpenPackageRequest request) {
-//        FoodOriginal food = findEntity(id);
-//
-//        if (request.useBy().isAfter(food.getBestBeforeEnd())) {
-//            throw new MissingDataException("useBy date cannot be after bestBeforeEnd");
-//        }
-//        food.setUseBy(request.useBy());
-//
-//        if (request.initialConsumption() > 0) {
-//            food.setRemaining_ml_g(food.getRemaining_ml_g() - request.initialConsumption());
-//        }
-//        return FoodOriginalMapper.mapToFoodOriginalResponse(foodOriginalRepository.save(food));
-//    }
+    /**
+     * Record how much product remains after a serving.
+     * {@code ml_g_left} becomes the new {@code remaining_ml_g}.
+     * The setter converts ≤ 0 to -1 (empty sentinel) automatically.
+     */
+    @Override
+    public FoodOriginalResponse consume(long id, FoodOriginalConsumeRequest request) {
+        FoodOriginal food = findEntity(id);
+        food.setUseBy(request.useBy());
+        food.setRemaining_ml_g(request.ml_g_left()); // setter soft-deletes at ≤ 0
+        return FoodOriginalMapper.mapToFoodOriginalResponse(foodOriginalRepository.save(food));
+    }
 
     // Package-private: lets StoredFoodServiceImpl resolve a FoodOriginal entity.
     FoodOriginal findEntity(long id) {
