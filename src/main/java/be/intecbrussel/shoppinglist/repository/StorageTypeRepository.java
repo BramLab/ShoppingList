@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface StorageTypeRepository extends JpaRepository<StorageType, Long> {
     Optional<StorageType> findByName(String name);
 
-    Optional<StorageType> findById(long id);
+    //already by JPA: Optional<StorageType> findById(long id);
 }

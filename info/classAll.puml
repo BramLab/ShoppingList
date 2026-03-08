@@ -1,0 +1,596 @@
+@startuml
+abstract class be.intecbrussel.shoppinglist.model.AuditModel {
+- Date createdAt
+- Date updatedAt
+}
+
+class be.intecbrussel.shoppinglist.dto.AdjustQuantityRequest {
+- int delta
++ int delta()
+}
+
+
+class be.intecbrussel.shoppinglist.security.JwtAuthFilter {
+- JwtUtil jwtUtil
+- UserDetailsService userDetailsService
+# void doFilterInternal(HttpServletRequest,HttpServletResponse,FilterChain)
+}
+
+
+class be.intecbrussel.shoppinglist.configuration.ConfigViaService {
+~ CommandLineRunner dataLoader_commandLineRunner(AuthService,StorageTypeService,FoodService,StoredFoodService)
+}
+
+class be.intecbrussel.shoppinglist.dto.FoodOriginalMapper {
++ {static} FoodOriginalResponse mapToFoodOriginalResponse(FoodOriginal)
++ {static} FoodOriginal mapToFoodOriginal(FoodOriginalRequest)
++ {static} FoodOriginal mapToFoodOriginal(FoodOriginalUpdateRequest)
+}
+
+class be.intecbrussel.shoppinglist.dto.StorageTypeResponse {
+- long id
+- String name
+- String remarks
++ long id()
++ String remarks()
++ String name()
+}
+
+
+class be.intecbrussel.shoppinglist.model.FoodOriginal {
+- LocalDate bestBeforeEnd
+- double original_ml_g
+- LocalDate useBy
+- double remaining_ml_g
++ LocalDate getUseByElseBestBeforeEnd()
++ void setOriginal_ml_g(double)
++ void setRemaining_ml_g(double)
+}
+
+
+class be.intecbrussel.shoppinglist.dto.OpenPackageRequest {
+- LocalDate useBy
+- double initialConsumption
++ double initialConsumption()
++ LocalDate useBy()
+}
+
+
+interface be.intecbrussel.shoppinglist.repository.StoredFoodRepository {
+}
+class be.intecbrussel.shoppinglist.dto.UserChangeRoleRequest {
+- long id
+- Role role
++ long id()
++ Role role()
+}
+
+
+class be.intecbrussel.shoppinglist.exception.MissingDataException {
+}
+class be.intecbrussel.shoppinglist.dto.RegisterRequest {
+- long id
+- String username
+- String email
+- Role role
+- String password
+- String homeName
++ Role role()
++ String username()
++ String email()
++ long id()
++ String homeName()
++ String password()
+}
+
+
+class be.intecbrussel.shoppinglist.security.SecurityConfig {
+- JwtAuthFilter jwtAuthFilter
+- CorsConfig config
++ PasswordEncoder passwordEncoder()
++ SecurityFilterChain securityFilterChain(HttpSecurity,CorsConfigurationSource)
++ CorsConfigurationSource corsConfigurationSource()
+}
+
+
+class be.intecbrussel.shoppinglist.model.StoredFood {
+- long id
+~ Home home
+~ Food food
+~ StorageType storageType
+~ int quantity
+}
+
+class be.intecbrussel.shoppinglist.dto.StoredFoodMapper {
+- UserHomeRepository homeRepository
+- FoodOriginalRepository foodOriginalRepository
+- StorageTypeRepository storageTypeRepository
++ StoredFood mapToStoredFood(StoredFoodRequest)
++ {static} StoredFoodResponse mapToStoredFoodResponse(StoredFood)
+}
+
+
+class be.intecbrussel.shoppinglist.controller.AuthController {
+- AuthService authService
++ ResponseEntity<UserResponse> register(RegisterRequest)
++ ResponseEntity<LoginAuthResponse> login(LoginAuthRequest)
+}
+
+
+class be.intecbrussel.shoppinglist.dto.LoginAuthResponse {
+- long id
+- String username
+- String email
+- Role role
+- String token
++ String token()
++ String username()
++ long id()
++ String email()
++ Role role()
+}
+
+
+class be.intecbrussel.shoppinglist.dto.HomeResponse {
+- long id
+- String name
++ long id()
++ String name()
+}
+
+
+class be.intecbrussel.shoppinglist.service.UserServiceImpl {
+- UserRepository userRepository
++ List<UserResponse> getAllUsers()
++ UserResponse getUserById(long)
++ UserResponse updateUserChangeRole(long,UserChangeRoleRequest)
++ void deleteUser(long)
++ UserResponse getLoggedInUser()
+- User findEntity(long)
+}
+
+
+class be.intecbrussel.shoppinglist.service.HomeServiceImpl {
+- UserHomeRepository userHomeRepository
++ HomeResponse saveHome(HomeRequest)
++ List<HomeResponse> findAllHomes()
++ HomeResponse findHomeById(long)
++ HomeResponse updateHome(long,HomeRequest)
++ void deleteHome(long)
+~ Home findEntity(long)
+}
+
+
+class be.intecbrussel.shoppinglist.model.Food {
+- long id
+- String name
+- String remarks
+}
+
+class be.intecbrussel.shoppinglist.controller.HomeController {
+- HomeService homeService
++ ResponseEntity<HomeResponse> createHome(HomeRequest)
++ ResponseEntity<List<HomeResponse>> getAllHomes()
++ ResponseEntity<HomeResponse> getHomeById(long)
++ ResponseEntity<HomeResponse> updateHome(long,HomeRequest)
++ ResponseEntity<Void> deleteHome(long)
+}
+
+
+interface be.intecbrussel.shoppinglist.repository.FoodRepository {
+~ Optional<Food> findByName(String)
+~ Optional<Food> findById(long)
+}
+
+class be.intecbrussel.shoppinglist.model.User {
+- long id
+- String username
+- String email
+- Role role
+- String passwordHashed
+- Home home
+}
+
+class be.intecbrussel.shoppinglist.configuration.Util {
++ {static} LocalDate days2date(int)
+}
+
+class be.intecbrussel.shoppinglist.dto.FoodOriginalResponse {
+- long id
+- String name
+- String remarks
+- LocalDate bestBeforeEnd
+- double original_ml_g
+- LocalDate useBy
+- double remaining_ml_g
+- LocalDate effectiveUseBy
+- boolean empty
++ boolean empty()
++ double original_ml_g()
++ LocalDate bestBeforeEnd()
++ double remaining_ml_g()
++ long id()
++ LocalDate useBy()
++ String remarks()
++ String name()
++ LocalDate effectiveUseBy()
+}
+
+
+class be.intecbrussel.shoppinglist.dto.FoodOriginalRequest {
+- String name
+- String remarks
+- LocalDate bestBeforeEnd
+- double original_ml_g
++ double original_ml_g()
++ LocalDate bestBeforeEnd()
++ String remarks()
++ String name()
+}
+
+
+class be.intecbrussel.shoppinglist.ShoppingListApplication {
++ {static} void main(String[])
+}
+
+class be.intecbrussel.shoppinglist.model.Home {
+- long id
+- String name
+}
+
+class be.intecbrussel.shoppinglist.controller.UserController {
+- UserService userService
++ ResponseEntity<UserResponse> getMe()
++ ResponseEntity<List<UserResponse>> getAllUsers()
++ ResponseEntity<UserResponse> getUserById(long)
++ ResponseEntity<UserResponse> changeRole(long,UserChangeRoleRequest)
++ ResponseEntity<Void> deleteUser(long)
+}
+
+
+class be.intecbrussel.shoppinglist.security.CustomUserDetailsService {
+- UserRepository userRepository
++ UserDetails loadUserByUsername(String)
+}
+
+
+class be.intecbrussel.shoppinglist.dto.StoredFoodRequest {
+- Long homeId
+- Long foodId
+- Long storageTypeId
+- int quantity
++ Long storageTypeId()
++ int quantity()
++ Long foodId()
++ Long homeId()
+}
+
+
+class be.intecbrussel.shoppinglist.dto.UserResponse {
+- long id
+- String username
+- String email
+- Role role
+- long homeId
++ String username()
++ long id()
++ String email()
++ long homeId()
++ Role role()
+}
+
+
+class be.intecbrussel.shoppinglist.security.JwtUtil {
+- {static} String SECRET
+- SecretKey getSignKey()
++ String generateToken(String,String)
++ String extractUsername(String)
++ boolean isTokenValid(String,UserDetails)
+- boolean isTokenExpired(String)
+- Claims extractAllClaims(String)
+}
+
+
+class be.intecbrussel.shoppinglist.controller.FoodController {
+- FoodService foodService
++ ResponseEntity<FoodOriginalResponse> createFood(FoodOriginalRequest)
++ ResponseEntity<List<FoodOriginalResponse>> getAllFoods()
++ ResponseEntity<FoodOriginalResponse> getFoodById(long)
++ ResponseEntity<FoodOriginalResponse> updateFood(long,FoodOriginalUpdateRequest)
++ ResponseEntity<Void> deleteFood(long)
++ ResponseEntity<FoodOriginalResponse> openPackage(long,OpenPackageRequest)
++ ResponseEntity<FoodOriginalResponse> consume(long,ConsumeRequest)
+}
+
+
+class be.intecbrussel.shoppinglist.service.StorageTypeServiceImpl {
+- StorageTypeRepository storageTypeRepository
++ StorageTypeResponse saveStorageType(StorageTypeRequest)
++ List<StorageTypeResponse> findAllStorageTypes()
++ StorageTypeResponse findStorageTypeById(long)
++ StorageTypeResponse updateStorageType(long,StorageTypeRequest)
++ void deleteStorageType(long)
+~ StorageType findEntity(long)
+}
+
+
+class be.intecbrussel.shoppinglist.exception.ResourceNotFoundException {
+}
+class be.intecbrussel.shoppinglist.dto.StorageTypeRequest {
+- String name
+- String remarks
++ String name()
++ String remarks()
+}
+
+
+class be.intecbrussel.shoppinglist.dto.FoodOriginalUpdateRequest {
+- String name
+- String remarks
+- LocalDate bestBeforeEnd
+- LocalDate useBy
+- Double original_ml_g
+- Double remaining_ml_g
++ Double remaining_ml_g()
++ LocalDate bestBeforeEnd()
++ LocalDate useBy()
++ String remarks()
++ String name()
++ Double original_ml_g()
+}
+
+
+class be.intecbrussel.shoppinglist.model.StorageType {
+- long id
+- String name
+- String remarks
+}
+
+class be.intecbrussel.shoppinglist.dto.HomeMapper {
++ {static} HomeResponse mapToHomeResponse(Home)
++ {static} Home mapToHome(HomeRequest)
+}
+
+interface be.intecbrussel.shoppinglist.repository.UserRepository {
+~ Optional<User> findByUsername(String)
+~ Optional<Object> findByEmail(String)
+}
+
+class be.intecbrussel.shoppinglist.controller.StorageTypeController {
+- StorageTypeService storageTypeService
++ ResponseEntity<StorageTypeResponse> createStorageType(StorageTypeRequest)
++ ResponseEntity<List<StorageTypeResponse>> getAllStorageTypes()
++ ResponseEntity<StorageTypeResponse> getStorageTypeById(long)
++ ResponseEntity<StorageTypeResponse> updateStorageType(long,StorageTypeRequest)
++ ResponseEntity<Void> deleteStorageType(long)
+}
+
+
+interface be.intecbrussel.shoppinglist.service.StorageTypeService {
+~ StorageTypeResponse saveStorageType(StorageTypeRequest)
+~ List<StorageTypeResponse> findAllStorageTypes()
+~ StorageTypeResponse findStorageTypeById(long)
+~ StorageTypeResponse updateStorageType(long,StorageTypeRequest)
+~ void deleteStorageType(long)
+}
+
+class be.intecbrussel.shoppinglist.exception.UnauthorizedActionException {
+}
+class be.intecbrussel.shoppinglist.configuration.JacksonConfig {
++ ObjectMapper objectMapper()
+}
+
+class be.intecbrussel.shoppinglist.configuration.MakeDatabase {
++ {static} void main(String[])
+}
+
+interface be.intecbrussel.shoppinglist.service.AuthService {
+~ UserResponse registerUser(RegisterRequest)
+~ LoginAuthResponse login(LoginAuthRequest)
+}
+
+class be.intecbrussel.shoppinglist.service.StoredFoodServiceImpl {
+- StoredFoodRepository storedFoodRepository
+- StoredFoodMapper storedFoodMapper
+- StorageTypeServiceImpl storageTypeService
++ StoredFoodResponse saveStoredFood(StoredFoodRequest)
++ List<StoredFoodResponse> findAllStoredFoods()
++ List<StoredFoodResponse> findAllByHomeId(long)
++ StoredFoodResponse findStoredFoodById(long)
++ StoredFoodResponse updateStoredFood(long,StoredFoodUpdateRequest)
++ void deleteStoredFood(long)
++ StoredFoodResponse adjustQuantity(long,AdjustQuantityRequest)
+- StoredFood findEntity(long)
+}
+
+
+class be.intecbrussel.shoppinglist.exception.GlobalExceptionHandler {
++ ResponseEntity<Map<String,String>> handleMissingDataException(MissingDataException)
++ ResponseEntity<Map<String,String>> handleValidationExceptions(MethodArgumentNotValidException)
++ ResponseEntity<Map<String,String>> handleDuplicateEnrollmentException(DuplicateEnrollmentException)
++ ResponseEntity<Map<String,String>> handleUnauthorizedActionException(UnauthorizedActionException)
++ ResponseEntity<Map<String,String>> handleResourceNotFoundException(ResourceNotFoundException)
++ ResponseEntity<Object> handleRuntimeException(RuntimeException)
+}
+
+class be.intecbrussel.shoppinglist.dto.ConsumeRequest {
+- double amount
++ double amount()
+}
+
+
+class be.intecbrussel.shoppinglist.controller.StoredFoodController {
+- StoredFoodService storedFoodService
++ ResponseEntity<StoredFoodResponse> createStoredFood(StoredFoodRequest)
++ ResponseEntity<List<StoredFoodResponse>> getAllStoredFoods(Long)
++ ResponseEntity<StoredFoodResponse> getStoredFoodById(long)
++ ResponseEntity<StoredFoodResponse> updateStoredFood(long,StoredFoodUpdateRequest)
++ ResponseEntity<Void> deleteStoredFood(long)
++ ResponseEntity<StoredFoodResponse> adjustQuantity(long,AdjustQuantityRequest)
+}
+
+
+interface be.intecbrussel.shoppinglist.service.StoredFoodService {
+~ StoredFoodResponse saveStoredFood(StoredFoodRequest)
+~ List<StoredFoodResponse> findAllStoredFoods()
+~ List<StoredFoodResponse> findAllByHomeId(long)
+~ StoredFoodResponse findStoredFoodById(long)
+~ StoredFoodResponse updateStoredFood(long,StoredFoodUpdateRequest)
+~ void deleteStoredFood(long)
+~ StoredFoodResponse adjustQuantity(long,AdjustQuantityRequest)
+}
+
+enum be.intecbrussel.shoppinglist.model.Role {
++  ADMIN
++  NORMAL
+}
+
+interface be.intecbrussel.shoppinglist.service.HomeService {
+~ HomeResponse saveHome(HomeRequest)
+~ List<HomeResponse> findAllHomes()
+~ HomeResponse findHomeById(long)
+~ HomeResponse updateHome(long,HomeRequest)
+~ void deleteHome(long)
+}
+
+class be.intecbrussel.shoppinglist.dto.UserMapper {
++ {static} UserResponse mapToUserResponse(User)
+}
+
+interface be.intecbrussel.shoppinglist.service.UserService {
+~ List<UserResponse> getAllUsers()
+~ UserResponse getUserById(long)
+~ UserResponse updateUserChangeRole(long,UserChangeRoleRequest)
+~ void deleteUser(long)
+~ UserResponse getLoggedInUser()
+}
+
+class be.intecbrussel.shoppinglist.service.AuthServiceImpl {
+- UserRepository userRepository
+- UserHomeRepository userHomeRepository
+- PasswordEncoder passwordEncoder
+- JwtUtil jwtUtil
++ UserResponse registerUser(RegisterRequest)
++ LoginAuthResponse login(LoginAuthRequest)
+}
+
+
+class be.intecbrussel.shoppinglist.dto.StoredFoodResponse {
+- long id
+- HomeResponse home
+- FoodOriginalResponse food
+- StorageTypeResponse storageType
+- int quantity
++ HomeResponse home()
++ StorageTypeResponse storageType()
++ int quantity()
++ long id()
++ FoodOriginalResponse food()
+}
+
+
+class be.intecbrussel.shoppinglist.security.CorsConfig {
++ CorsFilter corsFilter()
+}
+
+class be.intecbrussel.shoppinglist.dto.LoginAuthRequest {
+- String username
+- String password
++ String username()
++ String password()
+}
+
+
+interface be.intecbrussel.shoppinglist.repository.StorageTypeRepository {
+~ Optional<StorageType> findByName(String)
+~ Optional<StorageType> findById(long)
+}
+
+class be.intecbrussel.shoppinglist.configuration.ConfigViaRepository {
+~ CommandLineRunner dataLoader_commandLineRunner(UserHomeRepository,UserRepository,StorageTypeRepository,FoodRepository,FoodOriginalRepository,StoredFoodRepository)
+}
+
+interface be.intecbrussel.shoppinglist.service.FoodService {
+~ FoodOriginalResponse saveFood(FoodOriginalRequest)
+~ List<FoodOriginalResponse> findAllFoods()
+~ FoodOriginalResponse findFoodById(long)
+~ FoodOriginalResponse updateFood(long,FoodOriginalUpdateRequest)
+~ void deleteFood(long)
+~ FoodOriginalResponse consume(long,ConsumeRequest)
+~ FoodOriginalResponse openPackage(long,OpenPackageRequest)
+~ FoodOriginalResponse consumeEntirePackage(long)
+}
+
+class be.intecbrussel.shoppinglist.dto.StorageTypeMapper {
++ {static} StorageTypeResponse mapToStorageTypeResponse(StorageType)
++ {static} StorageType mapToStorageType(StorageTypeRequest)
+}
+
+class be.intecbrussel.shoppinglist.service.FoodServiceImpl {
+- FoodRepository foodRepository
+- FoodOriginalRepository foodOriginalRepository
++ FoodOriginalResponse saveFood(FoodOriginalRequest)
++ List<FoodOriginalResponse> findAllFoods()
++ FoodOriginalResponse findFoodById(long)
++ FoodOriginalResponse updateFood(long,FoodOriginalUpdateRequest)
++ void deleteFood(long)
++ FoodOriginalResponse consume(long,ConsumeRequest)
++ FoodOriginalResponse openPackage(long,OpenPackageRequest)
+~ FoodOriginal findEntity(long)
+}
+
+
+interface be.intecbrussel.shoppinglist.repository.FoodOriginalRepository {
+}
+interface be.intecbrussel.shoppinglist.repository.UserHomeRepository {
+}
+class be.intecbrussel.shoppinglist.dto.StoredFoodUpdateRequest {
+- Long storageTypeId
+- Integer quantity
++ Long storageTypeId()
++ Integer quantity()
+}
+
+
+class be.intecbrussel.shoppinglist.dto.HomeRequest {
+- String name
++ String name()
+}
+
+
+class be.intecbrussel.shoppinglist.exception.DuplicateEnrollmentException {
+}
+
+
+java.io.Serializable <|.. be.intecbrussel.shoppinglist.model.AuditModel
+org.springframework.web.filter.OncePerRequestFilter <|-- be.intecbrussel.shoppinglist.security.JwtAuthFilter
+be.intecbrussel.shoppinglist.model.Food <|-- be.intecbrussel.shoppinglist.model.FoodOriginal
+org.springframework.data.jpa.repository.JpaRepository <|-- be.intecbrussel.shoppinglist.repository.StoredFoodRepository
+be.intecbrussel.shoppinglist.exception.RuntimeException <|-- be.intecbrussel.shoppinglist.exception.MissingDataException
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.StoredFood
+be.intecbrussel.shoppinglist.service.UserService <|.. be.intecbrussel.shoppinglist.service.UserServiceImpl
+be.intecbrussel.shoppinglist.service.HomeService <|.. be.intecbrussel.shoppinglist.service.HomeServiceImpl
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Food
+org.springframework.data.jpa.repository.JpaRepository <|-- be.intecbrussel.shoppinglist.repository.FoodRepository
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.User
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Home
+org.springframework.security.core.userdetails.UserDetailsService <|.. be.intecbrussel.shoppinglist.security.CustomUserDetailsService
+be.intecbrussel.shoppinglist.service.StorageTypeService <|.. be.intecbrussel.shoppinglist.service.StorageTypeServiceImpl
+be.intecbrussel.shoppinglist.exception.RuntimeException <|-- be.intecbrussel.shoppinglist.exception.ResourceNotFoundException
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.StorageType
+org.springframework.data.jpa.repository.JpaRepository <|-- be.intecbrussel.shoppinglist.repository.UserRepository
+be.intecbrussel.shoppinglist.exception.RuntimeException <|-- be.intecbrussel.shoppinglist.exception.UnauthorizedActionException
+be.intecbrussel.shoppinglist.service.StoredFoodService <|.. be.intecbrussel.shoppinglist.service.StoredFoodServiceImpl
+be.intecbrussel.shoppinglist.service.AuthService <|.. be.intecbrussel.shoppinglist.service.AuthServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- be.intecbrussel.shoppinglist.repository.StorageTypeRepository
+be.intecbrussel.shoppinglist.service.FoodService <|.. be.intecbrussel.shoppinglist.service.FoodServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- be.intecbrussel.shoppinglist.repository.FoodOriginalRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- be.intecbrussel.shoppinglist.repository.UserHomeRepository
+be.intecbrussel.shoppinglist.exception.RuntimeException <|-- be.intecbrussel.shoppinglist.exception.DuplicateEnrollmentException
+
+
+be.intecbrussel.shoppinglist.controller.FoodController ---> be.intecbrussel.shoppinglist.service.FoodService
+
+be.intecbrussel.shoppinglist.service.FoodServiceImpl ---> be.intecbrussel.shoppinglist.repository.FoodRepository
+
+@enduml

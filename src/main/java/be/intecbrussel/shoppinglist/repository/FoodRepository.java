@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface FoodRepository extends JpaRepository<Food, Long> {
     Optional<Food> findByName(String name);
 
-    Optional<Food> findById(long id);
+    //already by JPA: Optional<Food> findById(long id);
 }
