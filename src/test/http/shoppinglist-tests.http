@@ -800,44 +800,39 @@ Authorization: Bearer {{admin_token}}
 %}
 
 ### FOOD-10: Consume from an opened package — should return 200
+# ml_g_left = new remaining (not amount consumed)
+# Package is at 950 ml after opening; record 200 ml left.
 POST http://localhost:8080/api/foods/{{test_food_id}}/consume
 Content-Type: application/json
 Authorization: Bearer {{admin_token}}
 
 {
   "useBy": "2026-07-15",
-  "ml_g_left": 50
+  "ml_g_left": 200
 }
 
 > {%
     client.test("Consume: Status is 200", function() {
         client.assert(response.status === 200, "Expected 200, got " + response.status);
     });
-
-    client.test("Consume: remaining decreased by ml_g_left", function() {
-        client.assert(response.body.remaining_ml_g === 750,
-            "remaining_ml_g should be 750 (950 - 200), got: " + response.body.remaining_ml_g);
+    client.test("Consume: remaining_ml_g set to ml_g_left", function() {
+        client.assert(response.body.remaining_ml_g === 200,
+            "remaining_ml_g should be 200, got: " + response.body.remaining_ml_g);
         client.assert(response.body.empty === false, "empty should still be false");
     });
-
-    client.log("✓ Consumed 200ml, remaining=" + response.body.remaining_ml_g);
 %}
 
-### FOOD-11: Consume with amount = 0 — should return 400 (must be > 0)
+## FOOD-11: Consume with missing required fields — should return 400
 POST http://localhost:8080/api/foods/{{test_food_id}}/consume
 Content-Type: application/json
 Authorization: Bearer {{admin_token}}
 
-{
-  "amount": 0
-}
+{}
 
 > {%
-    client.test("Consume zero: Status is 400", function() {
+    client.test("Missing fields: Status is 400", function() {
         client.assert(response.status === 400, "Expected 400, got " + response.status);
     });
-
-    client.log("✓ Zero consumption correctly rejected");
 %}
 
 ### FOOD-12: Consume entire remaining amount — package should become empty
@@ -846,21 +841,21 @@ Content-Type: application/json
 Authorization: Bearer {{admin_token}}
 
 {
-  "amount": 750
+  "useBy": "2026-07-15",
+  "ml_g_left": 200
 }
 
 > {%
     client.test("Consume all: Status is 200", function() {
         client.assert(response.status === 200, "Expected 200, got " + response.status);
     });
-
     client.test("Consume all: Package is empty (remaining = -1, empty = true)", function() {
-        client.assert(response.body.remaining_ml_g === -1,   "remaining_ml_g should be -1 when empty");
-        client.assert(response.body.empty          === true, "empty flag should be true");
+        client.assert(response.body.remaining_ml_g === -1,
+            "remaining_ml_g should be -1 when empty");
+        client.assert(response.body.empty === true, "empty flag should be true");
     });
-
-    client.log("✓ Package emptied, remaining=" + response.body.remaining_ml_g + " empty=" + response.body.empty);
 %}
+
 
 # ====================================================================================
 # STORED FOOD TESTS

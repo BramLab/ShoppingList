@@ -27,7 +27,7 @@ public class StoredFoodServiceImpl implements StoredFoodService {
 
     private final StoredFoodRepository   storedFoodRepository;
     private final StoredFoodMapper       storedFoodMapper;       // @Component — resolves IDs → entities on create
-    private final StorageTypeServiceImpl storageTypeService;     // concrete Impl to reach findEntity()
+    //private final StorageTypeServiceImpl storageTypeService;     // concrete Impl to reach findEntity()
     private final FoodOriginalRepository foodOriginalRepository;
     private final StorageTypeRepository  storageTypeRepository;
 
@@ -68,7 +68,10 @@ public class StoredFoodServiceImpl implements StoredFoodService {
 
         // Home and Food are immutable after creation.
         if (request.storageTypeId() != null) {
-            StorageType storageType = storageTypeService.findEntity(request.storageTypeId());
+            //StorageType storageType = storageTypeService.findEntity(request.storageTypeId());
+            StorageType storageType = storageTypeRepository.findById(request.storageTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "StorageType not found with id: " + request.storageTypeId()));
             existing.setStorageType(storageType);
         }
         if (request.quantity() != null) {
