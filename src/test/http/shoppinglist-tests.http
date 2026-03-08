@@ -805,7 +805,8 @@ Content-Type: application/json
 Authorization: Bearer {{admin_token}}
 
 {
-  "amount": 200
+  "useBy": "2026-07-15",
+  "ml_g_left": 50
 }
 
 > {%
@@ -813,7 +814,7 @@ Authorization: Bearer {{admin_token}}
         client.assert(response.status === 200, "Expected 200, got " + response.status);
     });
 
-    client.test("Consume: remaining decreased by amount", function() {
+    client.test("Consume: remaining decreased by ml_g_left", function() {
         client.assert(response.body.remaining_ml_g === 750,
             "remaining_ml_g should be 750 (950 - 200), got: " + response.body.remaining_ml_g);
         client.assert(response.body.empty === false, "empty should still be false");

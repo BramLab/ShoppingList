@@ -1,12 +1,10 @@
 package be.intecbrussel.shoppinglist.service;
 
-import be.intecbrussel.shoppinglist.dto.ConsumeRequest;
+import be.intecbrussel.shoppinglist.dto.FoodOriginalConsumeRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalMapper;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalResponse;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalUpdateRequest;
-import be.intecbrussel.shoppinglist.dto.OpenPackageRequest;
-import be.intecbrussel.shoppinglist.exception.MissingDataException;
 import be.intecbrussel.shoppinglist.exception.ResourceNotFoundException;
 import be.intecbrussel.shoppinglist.model.FoodOriginal;
 import be.intecbrussel.shoppinglist.repository.FoodOriginalRepository;
@@ -78,28 +76,31 @@ public class FoodServiceImpl implements FoodService {
         foodOriginalRepository.deleteById(id); // triggers @SoftDelete
     }
 
+    /** Consumption: If multiple products, take 1 away from multiple (presumably oldest first) and add separately again
+     * with shorter useBy, reduced remaining_ml_g.
+     * Auto-soft-delete when empty. */
     @Override
-    public FoodOriginalResponse consume(long id, ConsumeRequest request) {
+    public FoodOriginalResponse consume(long id, FoodOriginalConsumeRequest request) {
         FoodOriginal food = findEntity(id);
-        double newRemaining = food.getRemaining_ml_g() - request.amount();
+        double newRemaining = request.ml_g_left();
         food.setRemaining_ml_g(newRemaining); // setter soft-deletes at ≤ 0
         return FoodOriginalMapper.mapToFoodOriginalResponse(foodOriginalRepository.save(food));
     }
 
-    @Override
-    public FoodOriginalResponse openPackage(long id, OpenPackageRequest request) {
-        FoodOriginal food = findEntity(id);
-
-        if (request.useBy().isAfter(food.getBestBeforeEnd())) {
-            throw new MissingDataException("useBy date cannot be after bestBeforeEnd");
-        }
-        food.setUseBy(request.useBy());
-
-        if (request.initialConsumption() > 0) {
-            food.setRemaining_ml_g(food.getRemaining_ml_g() - request.initialConsumption());
-        }
-        return FoodOriginalMapper.mapToFoodOriginalResponse(foodOriginalRepository.save(food));
-    }
+//    @Override
+//    public FoodOriginalResponse openPackage(long id, OpenPackageRequest request) {
+//        FoodOriginal food = findEntity(id);
+//
+//        if (request.useBy().isAfter(food.getBestBeforeEnd())) {
+//            throw new MissingDataException("useBy date cannot be after bestBeforeEnd");
+//        }
+//        food.setUseBy(request.useBy());
+//
+//        if (request.initialConsumption() > 0) {
+//            food.setRemaining_ml_g(food.getRemaining_ml_g() - request.initialConsumption());
+//        }
+//        return FoodOriginalMapper.mapToFoodOriginalResponse(foodOriginalRepository.save(food));
+//    }
 
     // Package-private: lets StoredFoodServiceImpl resolve a FoodOriginal entity.
     FoodOriginal findEntity(long id) {

@@ -48,8 +48,8 @@ public class ConfigViaService {
 
             FoodOriginalResponse bloemkool02 = foodService.saveFood(
                     new FoodOriginalRequest("bloemkool", "bloemkool02", Util.days2date(4), 750));
-            foodService.openPackage(bloemkool02.id(), new OpenPackageRequest(Util.days2date(2), 0));
-            foodService.consume(bloemkool02.id(), new ConsumeRequest(750)); // empties → remaining = -1
+            //foodService.openPackage(bloemkool02.id(), new OpenPackageRequest(Util.days2date(2), 0));
+            bloemkool02 = foodService.consume(bloemkool02.id(), new FoodOriginalConsumeRequest( Util.days2date(2), 300)); // empties → remaining = -1
 
             FoodOriginalResponse miso01        = foodService.saveFood(new FoodOriginalRequest("miso licht",   null, Util.days2date(90),  300));
             FoodOriginalResponse melkSoja01    = foodService.saveFood(new FoodOriginalRequest("melk soja",    null, Util.days2date(90),  1000));

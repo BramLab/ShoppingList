@@ -1,10 +1,9 @@
 package be.intecbrussel.shoppinglist.controller;
 
-import be.intecbrussel.shoppinglist.dto.ConsumeRequest;
+import be.intecbrussel.shoppinglist.dto.FoodOriginalConsumeRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalResponse;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalUpdateRequest;
-import be.intecbrussel.shoppinglist.dto.OpenPackageRequest;
 import be.intecbrussel.shoppinglist.service.FoodService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -75,24 +74,24 @@ public class FoodController {
      *
      * Body: { "useBy": "2026-03-10", "initialConsumption": 50 }
      */
-    @PostMapping("/{id}/open")
-    public ResponseEntity<FoodOriginalResponse> openPackage(
-            @PathVariable long id,
-            @Valid @RequestBody OpenPackageRequest request) {
-        return ResponseEntity.ok(foodService.openPackage(id, request));
-    }
+//    @PostMapping("/{id}/open")
+//    public ResponseEntity<FoodOriginalResponse> openPackage(
+//            @PathVariable long id,
+//            @Valid @RequestBody OpenPackageRequest request) {
+//        return ResponseEntity.ok(foodService.openPackage(id, request));
+//    }
 
     /**
      * POST /api/foods/{id}/consume
-     * Record that some amount was used from an opened package.
+     * Record that some ml_g_left was used from an opened package.
      * Soft-deletes the item automatically when remaining reaches 0.
      *
-     * Body: { "amount": 100 }
+     * Body: { "ml_g_left": 100 }
      */
     @PostMapping("/{id}/consume")
     public ResponseEntity<FoodOriginalResponse> consume(
             @PathVariable long id,
-            @Valid @RequestBody ConsumeRequest request) {
+            @Valid @RequestBody FoodOriginalConsumeRequest request) {
         return ResponseEntity.ok(foodService.consume(id, request));
     }
 }

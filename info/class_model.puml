@@ -1,0 +1,73 @@
+@startuml
+abstract class be.intecbrussel.shoppinglist.model.AuditModel {
+- Date createdAt
+- Date updatedAt
+}
+
+class be.intecbrussel.shoppinglist.model.StorageType {
+- long id
+- String name
+- String remarks
+}
+
+class be.intecbrussel.shoppinglist.model.Home {
+- long id
+- String name
+}
+
+enum be.intecbrussel.shoppinglist.model.Role {
++  ADMIN
++  NORMAL
+}
+
+class be.intecbrussel.shoppinglist.model.Food {
+- long id
+- String name
+- String remarks
+}
+
+class be.intecbrussel.shoppinglist.model.User {
+- long id
+- String username
+- String email
+- Role role
+- String passwordHashed
+- Home home
+}
+
+class be.intecbrussel.shoppinglist.model.FoodOriginal {
+- LocalDate bestBeforeEnd
+- double original_ml_g
+- LocalDate useBy
+- double remaining_ml_g
++ <<Create>> FoodOriginal(long,String,String,LocalDate,double,LocalDate,double)
++ LocalDate getUseByElseBestBeforeEnd()
++ void setOriginal_ml_g(double)
++ void setRemaining_ml_g(double)
+}
+
+
+class be.intecbrussel.shoppinglist.model.StoredFood {
+- long id
+~ Home home
+~ Food food
+~ StorageType storageType
+~ int quantity
+}
+
+
+
+java.io.Serializable <|.. be.intecbrussel.shoppinglist.model.AuditModel
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.StorageType
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Home
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Food
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.User
+be.intecbrussel.shoppinglist.model.Food <|-- be.intecbrussel.shoppinglist.model.FoodOriginal
+be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.StoredFood
+
+User --> Home
+User --> Role
+StoredFood --> Home
+StoredFood --> Food
+StoredFood --> StorageType
+@enduml

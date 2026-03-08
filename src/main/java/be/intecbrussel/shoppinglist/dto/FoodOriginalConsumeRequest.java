@@ -1,18 +1,17 @@
 package be.intecbrussel.shoppinglist.dto;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
+
 import java.time.LocalDate;
 
 /**
- * Used with FoodService#openPackage — marks a sealed product as opened,
- * setting a shorter useBy date and optionally recording an initial serving taken.
+ * Used with FoodService#consume — record how much of a product was used.
  */
-public record FoodOriginalConsumeRequest (
-        @NotNull(message = "required when starting, can be updated after")
+public record FoodOriginalConsumeRequest(
+        @NotNull(message = "required when starting, can be updated after, or copy same if unchanged")
         LocalDate useBy,
 
-        @PositiveOrZero(message = "consumption cannot be negative")
-        double ml_g_consumed
-) {
-}
+        @Positive(message = "ml_g_left must be greater than 0")
+        double ml_g_left
+) {}

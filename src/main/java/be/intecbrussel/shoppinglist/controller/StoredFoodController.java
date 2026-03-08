@@ -1,9 +1,6 @@
 package be.intecbrussel.shoppinglist.controller;
 
-import be.intecbrussel.shoppinglist.dto.AdjustQuantityRequest;
-import be.intecbrussel.shoppinglist.dto.StoredFoodRequest;
-import be.intecbrussel.shoppinglist.dto.StoredFoodResponse;
-import be.intecbrussel.shoppinglist.dto.StoredFoodUpdateRequest;
+import be.intecbrussel.shoppinglist.dto.*;
 import be.intecbrussel.shoppinglist.service.StoredFoodService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -91,4 +88,40 @@ public class StoredFoodController {
             @Valid @RequestBody AdjustQuantityRequest request) {
         return ResponseEntity.ok(storedFoodService.adjustQuantity(id, request));
     }
+
+
+    /**
+     * POST /stored-foods/{id}/consume
+     *
+     * Take one unit out of a pack.
+     *
+     * Request body example:
+     * <pre>
+     * {
+     *   "remainingMlG": 1000.0,
+     *   "useBy": "2026-03-20",
+     *   "storageTypeId": null
+     * }
+     * </pre>
+     *
+     * Response body example (success):
+     * <pre>
+     * {
+     *   "sourceStoredFoodId": 5,
+     *   "sourceRemainingQuantity": 11,
+     *   "openedStoredFoodId": 42,
+     *   "openedRemainingMlG": 1000.0,
+     *   "openedUnitWasEmpty": false
+     * }
+     * </pre>
+     */
+    @PostMapping("/{id}/consume")
+    public ResponseEntity<ConsumeResult> consume(
+            @PathVariable long id,
+            @Valid @RequestBody ConsumeRequest request) {
+
+        ConsumeResult result = storedFoodService.consume(id, request);
+        return ResponseEntity.ok(result);
+    }
+
 }

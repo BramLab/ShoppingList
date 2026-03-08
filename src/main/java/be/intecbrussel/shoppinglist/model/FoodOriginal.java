@@ -19,7 +19,7 @@ public class FoodOriginal extends Food {
     private LocalDate bestBeforeEnd;// = UseBy if perishable soon.
     private double original_ml_g;
     private LocalDate useBy; // UseBy = perishable soon (sooner than unopened).
-    private double remaining_ml_g; // If opened also estimate amount left.
+    private double remaining_ml_g; // If opened also estimate ml_g_left left.
 
     @Builder(builderMethodName = "foodOriginalBuilder")
     public FoodOriginal(long id, String name, String remarks
