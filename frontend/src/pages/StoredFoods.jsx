@@ -201,15 +201,20 @@ function ConsumeModal({ entry, storageTypes, onSave, onClose }) {
 
 // ─── Add to Storage Modal ─────────────────────────────────────────────────
 
+const NEW_LOCATION_SENTINEL = '__new__';
+
 function AddToStorageModal({ homeId, storageTypes, onSave, onClose }) {
   const [form, setForm] = useState({
     name: '', remarks: '', bestBeforeEnd: '', originalMlG: '',
     remainingMlG: '', useBy: '',
-    storageTypeId: '', quantity: '1',
+    storageTypeId: '', newLocationName: '',
+    quantity: '1',
     isOpened: false,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState('');
+
+  const isNewLocation = form.storageTypeId === NEW_LOCATION_SENTINEL;
 
   function set(f) { return e => setForm(v => ({ ...v, [f]: e.target.value })); }
 
@@ -217,6 +222,17 @@ function AddToStorageModal({ homeId, storageTypes, onSave, onClose }) {
     e.preventDefault();
     setSaving(true); setError('');
     try {
+      // If a new storage type was requested, create it first
+      let resolvedStorageTypeId = Number(form.storageTypeId);
+      if (isNewLocation) {
+        if (!form.newLocationName.trim()) throw new Error('Location name is required');
+        const created = await request('/api/storage-types', {
+          method: 'POST',
+          body: JSON.stringify({ name: form.newLocationName.trim(), homeId }),
+        });
+        resolvedStorageTypeId = created.id;
+      }
+
       const body = {
         name:          form.name,
         remarks:       form.remarks || null,
@@ -225,7 +241,7 @@ function AddToStorageModal({ homeId, storageTypes, onSave, onClose }) {
         remainingMlG:  form.isOpened && form.remainingMlG ? Number(form.remainingMlG) : null,
         useBy:         form.isOpened && form.useBy ? form.useBy : null,
         homeId:        homeId,
-        storageTypeId: Number(form.storageTypeId),
+        storageTypeId: resolvedStorageTypeId,
         quantity:      Number(form.quantity),
       };
       await onSave(body);
@@ -299,12 +315,32 @@ function AddToStorageModal({ homeId, storageTypes, onSave, onClose }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label">Storage location *</label>
-            <select className="input" value={form.storageTypeId} onChange={set('storageTypeId')} required>
+            <select
+              className="input"
+              value={form.storageTypeId}
+              onChange={set('storageTypeId')}
+              required
+            >
               <option value="">— Select —</option>
               {storageTypes.map(st => (
                 <option key={st.id} value={st.id}>{st.name}</option>
               ))}
+              <option value={NEW_LOCATION_SENTINEL}>+ New location…</option>
             </select>
+
+            {/* Inline new-location input */}
+            {isNewLocation && (
+              <div className="mt-2 flex items-center gap-2 pl-3 border-l-2 border-forest/40">
+                <input
+                  className="input text-sm"
+                  placeholder="Location name, e.g. Freezer"
+                  value={form.newLocationName}
+                  onChange={set('newLocationName')}
+                  required={isNewLocation}
+                  autoFocus
+                />
+              </div>
+            )}
           </div>
           <div>
             <label className="label">Quantity *</label>
@@ -314,7 +350,9 @@ function AddToStorageModal({ homeId, storageTypes, onSave, onClose }) {
 
         <div className="flex gap-3 pt-1">
           <button type="submit" className="btn-primary flex-1" disabled={saving}>
-            {saving ? 'Adding…' : 'Add to storage'}
+            {saving
+              ? (isNewLocation ? 'Creating location…' : 'Adding…')
+              : 'Add to storage'}
           </button>
           <button type="button" className="btn-secondary flex-1" onClick={onClose}>Cancel</button>
         </div>
