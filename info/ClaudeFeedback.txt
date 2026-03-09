@@ -368,7 +368,7 @@ The backend needs to be running on port 8080 simultaneously. Visit http://localh
 
 ---
 Services, Controller, Frontend claude queries:
-
+PROMPT:
 Make the service layer, so that i can consume a Food from the StoredFood (e.g. open a package and take some content or cut and use a part of a vegetable):
 - If the StoredFood comes from a package of several (e.g. milkbottles often come in quantity of 12) and i take one, then that quantity is diminished by one.
 - That one Food is then added as a separate StoredFood.
@@ -376,11 +376,20 @@ Make the service layer, so that i can consume a Food from the StoredFood (e.g. o
 - I can consume from that same food later and have to indicate how much is left and optionally adapt the UseBy.
 - If the food is empty (remaining_ml_g = 0) then it must be softdeleted.
 
+PROMPT (sometime before):
 At registration, a User must be linked to a Home. Several Users can share a Home. The Home is the central place where their StoredFood is stored.
 
-
+PROMPT:
 Make a frontoffice page where i can:
 - See a list (with columns) of FoodOriginal that is stored as StoredFood at the Home of the currently logged in User.
 - When i click on a StoredFood, i can consume it via StoredFoodService.consume() where i can fill in or change UseBy, remainingMlG, storageTypeId. As a shortcut i can also indicate that i consume it completely, i.e. remainingMlG is set at 0 so that it can be softdeleted by the service.
 - I can also add new FoodOriginal via FoodOriginalController.addToStorage.
-- When i add new FoodOriginal, i can also add new StorageType.
+
+
+TODO:
+- When i add new FoodOriginal, i can also add new StorageType. (Done @ home, uncommitted?)
+- The list of FoodOriginal should also show the original bestBeforeEnd in the columns.
+- When adding a new FoodOriginal to storage, the name suggests an autocompleted name from a list of all previous names.
+- The modal popup to add food should not contain "Already opened" part. (any use case for that?)
+- The modal popup to add food should have a a UseBy date that indicates standard today plus 7d.
+- The modal popup to add food should have a shortcut for the UseBy to click (buttons, radiobuttons; dropdownlist) 3d, 1w, 2w, 3w, 1m, 2m, 3m, 6m, 9m, 1y, 2y
