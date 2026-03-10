@@ -5,8 +5,6 @@ import Layout        from './components/Layout';
 import Login         from './pages/Login';
 import Register      from './pages/Register';
 import Dashboard     from './pages/Dashboard';
-import Foods         from './pages/Foods';
-import Inventory     from './pages/Inventory';
 import AdminUsers    from './pages/AdminUsers';
 import StoredFoods   from './pages/StoredFoods';
 import DeletedFoods  from './pages/DeletedFoods';
@@ -27,8 +25,6 @@ export default function App() {
               </ProtectedRoute>
             }>
               <Route index                  element={<Dashboard />} />
-              <Route path="foods"           element={<Foods />} />
-              <Route path="inventory"       element={<Inventory />} />
               <Route path="stored-foods"    element={<StoredFoods />} />
               <Route path="deleted-foods"   element={<DeletedFoods />} />
 
