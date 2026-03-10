@@ -1,5 +1,6 @@
 package be.intecbrussel.shoppinglist.service;
 
+import be.intecbrussel.shoppinglist.dto.DeletedFoodResponse;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalConsumeRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalResponse;
@@ -11,9 +12,16 @@ import java.util.List;
 public interface FoodService {
     FoodOriginalResponse saveFood(FoodOriginalRequest request);
     List<FoodOriginalResponse> findAllFoods();
+    List<DeletedFoodResponse> findAllDeletedFoods();
     FoodOriginalResponse findFoodById(long id);
     FoodOriginalResponse updateFood(long id, FoodOriginalUpdateRequest request);
     void deleteFood(long id);
+
+    /**
+     * Restore a previously soft-deleted food, making it active again.
+     * Throws ResourceNotFoundException when no food (active or deleted) exists with that id.
+     */
+    FoodOriginalResponse restoreFood(long id);
 
     /**
      * Mark a sealed package as opened: set a shorter useBy date and optionally

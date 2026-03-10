@@ -474,3 +474,18 @@ Page-level components
     StoredFoods (default export) — the main page component
 
 ---
+PROMPT:
+Add a page that only shows Foods that have been Softdeleted.
+It should allow to undelete a Food.
+Add the Page to the Menu.
+...
+When food deleted, the DeletedFoods page gives "Request failed: 500" and "No deleted foods
+Nothing has been soft-deleted yet."
+...
+Make endpoint for fetching soft-deleted foods.
+Make endpoint for restoring a deleted food.
+...
+Add column "Last modified" with LastModifiedDate to deleted-foods page.
+...
+Make all date formats follow yyyy-MM-dd format.
+...

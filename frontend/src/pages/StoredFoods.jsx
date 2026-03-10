@@ -509,11 +509,18 @@ function AddToStorageModal({ homeId, storageTypes, onSave, onClose, onStorageTyp
 // ─── Storage Type Manager ─────────────────────────────────────────────────
 // Inline editor that appears when user clicks the ⚙ icon next to the filters.
 
-function StorageTypeManager({ storageTypes, onUpdate, onDelete }) {
+function StorageTypeManager({ storageTypes, entries, onUpdate, onDelete }) {
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName]   = useState('');
   const [busy, setBusy]           = useState(false);
   const [err, setErr]             = useState('');
+
+  // Count how many stored-food entries use each storage type
+  const countById = entries.reduce((acc, e) => {
+    const id = e.storageType?.id;
+    if (id != null) acc[id] = (acc[id] ?? 0) + 1;
+    return acc;
+  }, {});
 
   function startEdit(st) {
     setEditingId(st.id);
@@ -545,7 +552,7 @@ function StorageTypeManager({ storageTypes, onUpdate, onDelete }) {
   }
 
   async function handleDelete(st) {
-    if (!confirm(`Delete storage type "${st.name}"?\nThis will fail if any items are still stored there.`)) return;
+    if (!confirm(`Delete storage location "${st.name}"? This cannot be undone.`)) return;
     setBusy(true); setErr('');
     try {
       await request(`/api/storage-types/${st.id}`, { method: 'DELETE' });
@@ -568,67 +575,87 @@ function StorageTypeManager({ storageTypes, onUpdate, onDelete }) {
           <thead className="bg-cream-dark border-b border-gray-200">
           <tr>
             <th className="text-left py-2 px-3 font-mono text-xs text-ink-muted uppercase tracking-wider">Location</th>
+            <th className="text-center py-2 px-3 font-mono text-xs text-ink-muted uppercase tracking-wider">Items stored</th>
             <th className="py-2 px-3 font-mono text-xs text-ink-muted uppercase tracking-wider text-right">Actions</th>
           </tr>
           </thead>
           <tbody>
-          {storageTypes.map(st => (
-              <tr key={st.id} className="border-b border-gray-100 last:border-0">
-                <td className="py-2 px-3">
-                  {editingId === st.id ? (
-                      <input
-                          className="input text-sm py-1"
-                          value={editName}
-                          onChange={e => setEditName(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') saveEdit(st.id);
-                            if (e.key === 'Escape') cancelEdit();
-                          }}
-                          autoFocus
-                      />
-                  ) : (
-                      <span className="font-body text-ink">{st.name}</span>
-                  )}
-                </td>
-                <td className="py-2 px-3">
-                  <div className="flex gap-2 justify-end">
+          {storageTypes.map(st => {
+            const count = countById[st.id] ?? 0;
+            return (
+                <tr key={st.id} className="border-b border-gray-100 last:border-0">
+                  {/* Name / inline edit */}
+                  <td className="py-2 px-3">
                     {editingId === st.id ? (
-                        <>
-                          <button
-                              onClick={() => saveEdit(st.id)}
-                              disabled={busy}
-                              className="btn-primary text-xs px-3 py-1"
-                          >
-                            {busy ? '…' : 'Save'}
-                          </button>
-                          <button
-                              onClick={cancelEdit}
-                              className="btn-secondary text-xs px-3 py-1"
-                          >
-                            Cancel
-                          </button>
-                        </>
+                        <input
+                            className="input text-sm py-1"
+                            value={editName}
+                            onChange={e => setEditName(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') saveEdit(st.id);
+                              if (e.key === 'Escape') cancelEdit();
+                            }}
+                            autoFocus
+                        />
                     ) : (
-                        <>
-                          <button
-                              onClick={() => startEdit(st)}
-                              className="btn-secondary text-xs px-3 py-1"
-                          >
-                            Rename
-                          </button>
-                          <button
-                              onClick={() => handleDelete(st)}
-                              disabled={busy}
-                              className="btn-danger text-xs px-3 py-1"
-                          >
-                            Delete
-                          </button>
-                        </>
+                        <span className="font-body text-ink">{st.name}</span>
                     )}
-                  </div>
-                </td>
-              </tr>
-          ))}
+                  </td>
+
+                  {/* Count badge */}
+                  <td className="py-2 px-3 text-center">
+                  <span className={`badge font-mono text-xs ${
+                      count === 0
+                          ? 'bg-gray-100 text-gray-400'
+                          : 'bg-forest/10 text-forest'
+                  }`}>
+                    {count}
+                  </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="py-2 px-3">
+                    <div className="flex gap-2 justify-end">
+                      {editingId === st.id ? (
+                          <>
+                            <button
+                                onClick={() => saveEdit(st.id)}
+                                disabled={busy}
+                                className="btn-primary text-xs px-3 py-1"
+                            >
+                              {busy ? '…' : 'Save'}
+                            </button>
+                            <button
+                                onClick={cancelEdit}
+                                className="btn-secondary text-xs px-3 py-1"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                      ) : (
+                          <>
+                            <button
+                                onClick={() => startEdit(st)}
+                                className="btn-secondary text-xs px-3 py-1"
+                            >
+                              Rename
+                            </button>
+                            {count === 0 && (
+                                <button
+                                    onClick={() => handleDelete(st)}
+                                    disabled={busy}
+                                    className="btn-danger text-xs px-3 py-1"
+                                >
+                                  Delete
+                                </button>
+                            )}
+                          </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+            );
+          })}
           </tbody>
         </table>
       </div>
@@ -649,12 +676,30 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
   const food    = entry.food;
   const urgency = rowUrgency(entry);
 
+  // Food is null when its FoodOriginal is still soft-deleted.
+  // Show a muted placeholder row so the user knows the entry exists
+  // and can restore the food from the Deleted Foods page.
+  if (!food) {
+    return (
+        <tr className="border-b border-gray-100 bg-gray-50 opacity-60">
+          <td className="py-3 px-4" colSpan={5}>
+          <span className="font-body text-sm text-gray-400 italic">
+            Food deleted — restore it on the <strong>Deleted Foods</strong> page to see details
+          </span>
+          </td>
+          <td className="py-3 px-4">
+            <span className="font-mono text-xs text-gray-400">qty: {entry.quantity}</span>
+          </td>
+        </tr>
+    );
+  }
+
   return (
       <tr className={`border-b border-gray-100 transition-colors ${URGENCY_ROW[urgency]}`}>
         {/* Name */}
         <td className="py-3 px-4">
-          <p className="font-body font-semibold text-ink leading-snug">{food?.name ?? '—'}</p>
-          {food?.remarks && (
+          <p className="font-body font-semibold text-ink leading-snug">{food.name}</p>
+          {food.remarks && (
               <p className="font-body text-xs text-ink-muted mt-0.5">{food.remarks}</p>
           )}
         </td>
@@ -673,10 +718,10 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
 
         {/* Remaining */}
         <td className="py-3 px-4 font-mono text-sm text-center">
-          {food?.empty
+          {food.empty
               ? <span className="text-gray-400">—</span>
-              : food?.remaining_ml_g > 0
-                  ? <span className="text-ink">{food.remaining_ml_g}<span className="text-ink-muted text-xs"> / {food?.original_ml_g}</span></span>
+              : food.remaining_ml_g > 0
+                  ? <span className="text-ink">{food.remaining_ml_g}<span className="text-ink-muted text-xs"> / {food.original_ml_g}</span></span>
                   : <span className="text-gray-400">—</span>
           }
         </td>
@@ -684,10 +729,10 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
         {/* Best before / use-by */}
         <td className="py-3 px-4">
           <ExpiryBadge food={food} />
-          {food?.useBy && (
+          {food.useBy && (
               <p className="font-mono text-xs text-ink-muted mt-0.5">{food.useBy}</p>
           )}
-          {!food?.useBy && food?.bestBeforeEnd && (
+          {!food.useBy && food.bestBeforeEnd && (
               <p className="font-mono text-xs text-ink-muted mt-0.5">{food.bestBeforeEnd}</p>
           )}
         </td>
@@ -701,7 +746,7 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
             >
               Edit
             </button>
-            {!food?.empty && (
+            {!food.empty && (
                 <button
                     onClick={() => onConsume(entry)}
                     className="btn-terra text-xs px-3 py-1.5"
@@ -709,7 +754,7 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
                   Consume
                 </button>
             )}
-            {food?.empty && (
+            {food.empty && (
                 <span className="font-mono text-xs text-gray-400 italic self-center">consumed</span>
             )}
           </div>
@@ -946,6 +991,7 @@ export default function StoredFoods() {
               </p>
               <StorageTypeManager
                   storageTypes={storageTypes}
+                  entries={entries}
                   onUpdate={handleStorageTypeUpdated}
                   onDelete={handleStorageTypeDeleted}
               />

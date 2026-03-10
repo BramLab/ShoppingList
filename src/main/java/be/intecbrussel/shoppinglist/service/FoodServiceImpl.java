@@ -1,5 +1,6 @@
 package be.intecbrussel.shoppinglist.service;
 
+import be.intecbrussel.shoppinglist.dto.DeletedFoodResponse;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalConsumeRequest;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalMapper;
 import be.intecbrussel.shoppinglist.dto.FoodOriginalRequest;
@@ -9,12 +10,14 @@ import be.intecbrussel.shoppinglist.dto.OpenPackageRequest;
 import be.intecbrussel.shoppinglist.exception.MissingDataException;
 import be.intecbrussel.shoppinglist.exception.ResourceNotFoundException;
 import be.intecbrussel.shoppinglist.model.FoodOriginal;
+import be.intecbrussel.shoppinglist.repository.FoodDeletedView;
 import be.intecbrussel.shoppinglist.repository.FoodOriginalRepository;
 import be.intecbrussel.shoppinglist.repository.FoodRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -38,6 +41,22 @@ public class FoodServiceImpl implements FoodService {
                 .stream()
                 .filter(f -> f instanceof FoodOriginal)
                 .map(f -> FoodOriginalMapper.mapToFoodOriginalResponse((FoodOriginal) f))
+                .toList();
+    }
+
+    /**
+     * Returns every soft-deleted FoodOriginal, mapped to the standard response DTO.
+     *
+     * Uses a native query via the repository because Hibernate's @SoftDelete filter
+     * silently excludes deleted rows from all standard JPQL / entity queries.
+     * The projection FoodDeletedView is manually converted here rather than extending
+     * FoodOriginalMapper, so no existing code is touched.
+     */
+    @Override
+    public List<DeletedFoodResponse> findAllDeletedFoods() {
+        return foodOriginalRepository.findAllDeleted()
+                .stream()
+                .map(FoodServiceImpl::mapDeletedViewToResponse)
                 .toList();
     }
 
@@ -78,6 +97,28 @@ public class FoodServiceImpl implements FoodService {
     }
 
     /**
+     * Restores a soft-deleted food by clearing its deleted_at timestamp.
+     *
+     * Steps:
+     * 1. Verify the id exists at all (including deleted rows) — 404 if not.
+     * 2. Clear deleted_at via a native UPDATE (bypasses the @SoftDelete filter).
+     * 3. Re-load the now-active entity and return its DTO.
+     */
+    @Override
+    public FoodOriginalResponse restoreFood(long id) {
+        if (foodOriginalRepository.countIncludingDeleted(id) == 0) {
+            throw new ResourceNotFoundException("Food not found with id: " + id);
+        }
+        foodOriginalRepository.restoreById(id);
+
+        // After the UPDATE the entity is active and findById works normally again.
+        FoodOriginal restored = foodOriginalRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Food could not be restored for id: " + id));
+        return FoodOriginalMapper.mapToFoodOriginalResponse(restored);
+    }
+
+    /**
      * Mark a sealed package as opened.
      *
      * <ul>
@@ -94,13 +135,12 @@ public class FoodServiceImpl implements FoodService {
                 && request.useBy().isAfter(food.getBestBeforeEnd())) {
             throw new MissingDataException(
                     "useBy date (" + request.useBy()
-                    + ") cannot be after bestBeforeEnd (" + food.getBestBeforeEnd() + ")");
+                            + ") cannot be after bestBeforeEnd (" + food.getBestBeforeEnd() + ")");
         }
 
         food.setUseBy(request.useBy());
 
         if (request.initialConsumption() > 0) {
-            // setRemaining_ml_g() handles the ≤ 0 → -1 sentinel automatically
             food.setRemaining_ml_g(food.getRemaining_ml_g() - request.initialConsumption());
         }
 
@@ -120,9 +160,33 @@ public class FoodServiceImpl implements FoodService {
         return FoodOriginalMapper.mapToFoodOriginalResponse(foodOriginalRepository.save(food));
     }
 
+    // ── Private helpers ───────────────────────────────────────────────────────────
+
     // Package-private: lets StoredFoodServiceImpl resolve a FoodOriginal entity.
     FoodOriginal findEntity(long id) {
         return foodOriginalRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Food not found with id: " + id));
+    }
+
+    /**
+     * Converts a native-query projection to the standard response DTO.
+     * Mirrors FoodOriginalMapper#mapToFoodOriginalResponse but works from
+     * the FoodDeletedView projection instead of a managed entity.
+     */
+    private static DeletedFoodResponse mapDeletedViewToResponse(FoodDeletedView v) {
+        LocalDate effectiveUseBy = v.getUseBy() != null ? v.getUseBy() : v.getBestBeforeEnd();
+        boolean empty = v.getRemaining_ml_g() == -1d;
+        return new DeletedFoodResponse(
+                v.getId(),
+                v.getName(),
+                v.getRemarks(),
+                v.getBestBeforeEnd(),
+                v.getOriginal_ml_g(),
+                v.getUseBy(),
+                v.getRemaining_ml_g(),
+                effectiveUseBy,
+                empty,
+                v.getUpdatedAt()
+        );
     }
 }

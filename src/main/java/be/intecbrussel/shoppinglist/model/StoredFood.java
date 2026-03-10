@@ -6,26 +6,37 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Data //Combines @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
-@ToString(callSuper=true)
+@Data
+@ToString(callSuper = true)
 @Entity
 public class StoredFood extends AuditModel {
+
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    // As a general rule, cascade=CascadeType.ALL (or any cascade) on a @ManyToOne is almost never correct.
-    // Cascading makes sense on @OneToMany — flowing from parent down to children — not from a child up to its parent.
-    // You wouldn't want deleting a StoredFood to also delete the Home or the Food item itself.
     @ManyToOne(optional = false)
     Home home;
 
-    @ManyToOne(optional = false)
+    /**
+     * LEFT JOIN (optional = true, the default) instead of INNER JOIN.
+     *
+     * Hibernate's @SoftDelete filter on Food adds "food.deleted_at IS NULL" to the
+     * JOIN condition. With INNER JOIN (optional = false) a StoredFood row whose food
+     * is soft-deleted is silently excluded from every query result — including after
+     * the food is restored, because by that point the row is missing from the
+     * result set and never re-evaluated.
+     *
+     * With LEFT JOIN, the row is always returned. When the food is soft-deleted,
+     * getFood() returns null and the mapper renders the entry without food details.
+     * Once the food is restored (deleted_at = NULL), getFood() returns the entity
+     * normally and the full entry appears in the Stored Foods table again.
+     */
+    @ManyToOne(optional = true)
     Food food;
 
     @ManyToOne(optional = false)
     StorageType storageType;
 
     int quantity;
-
 }

@@ -41,7 +41,13 @@ public class StoredFoodMapper {
     public static StoredFoodResponse mapToStoredFoodResponse(StoredFood storedFood) {
         Food food = storedFood.getFood();
 
-        // StoredFood.food is typed as Food (the base entity); cast if it is a FoodOriginal.
+        /*
+         * food can be null when its FoodOriginal has been soft-deleted:
+         * Hibernate's @SoftDelete filter on Food means the LEFT JOIN returns
+         * null for the food columns instead of excluding the row.
+         * The frontend shows these as "food deleted" placeholders until the food
+         * is restored, at which point this mapping produces a full response.
+         */
         FoodOriginalResponse foodResponse = (food instanceof FoodOriginal fo)
                 ? FoodOriginalMapper.mapToFoodOriginalResponse(fo)
                 : null;

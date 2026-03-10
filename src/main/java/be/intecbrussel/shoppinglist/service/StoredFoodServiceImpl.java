@@ -26,8 +26,7 @@ import java.util.List;
 public class StoredFoodServiceImpl implements StoredFoodService {
 
     private final StoredFoodRepository   storedFoodRepository;
-    private final StoredFoodMapper       storedFoodMapper;       // @Component — resolves IDs → entities on create
-    //private final StorageTypeServiceImpl storageTypeService;     // concrete Impl to reach findEntity()
+    private final StoredFoodMapper       storedFoodMapper;
     private final FoodOriginalRepository foodOriginalRepository;
     private final StorageTypeRepository  storageTypeRepository;
 
@@ -40,14 +39,17 @@ public class StoredFoodServiceImpl implements StoredFoodService {
 
     @Override
     public List<StoredFoodResponse> findAllStoredFoods() {
-        return storedFoodRepository.findAll()
+        // findAllWithFood uses LEFT JOIN FETCH to bypass Hibernate's per-row
+        // soft-delete filter that would otherwise exclude restored-food entries.
+        return storedFoodRepository.findAllWithFood()
                 .stream()
                 .map(StoredFoodMapper::mapToStoredFoodResponse)
                 .toList();
     }
 
     /**
-     * Uses the repository-level query instead of an in-memory stream filter.
+     * Uses the repository-level LEFT JOIN FETCH query instead of the inherited
+     * findAll, for the same reason as findAllStoredFoods.
      */
     @Override
     public List<StoredFoodResponse> findAllByHomeId(long homeId) {
@@ -66,9 +68,7 @@ public class StoredFoodServiceImpl implements StoredFoodService {
     public StoredFoodResponse updateStoredFood(long id, StoredFoodUpdateRequest request) {
         StoredFood existing = findEntity(id);
 
-        // Home and Food are immutable after creation.
         if (request.storageTypeId() != null) {
-            //StorageType storageType = storageTypeService.findEntity(request.storageTypeId());
             StorageType storageType = storageTypeRepository.findById(request.storageTypeId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "StorageType not found with id: " + request.storageTypeId()));
@@ -97,38 +97,20 @@ public class StoredFoodServiceImpl implements StoredFoodService {
         if (newQty < 0) {
             throw new MissingDataException(
                     "Quantity cannot drop below 0 (current: " + existing.getQuantity()
-                    + ", delta: " + request.delta() + ")");
+                            + ", delta: " + request.delta() + ")");
         }
         if (newQty == 0) {
             storedFoodRepository.deleteById(id);
-            return StoredFoodMapper.mapToStoredFoodResponse(existing); // last known state
+            return StoredFoodMapper.mapToStoredFoodResponse(existing);
         }
         existing.setQuantity(newQty);
         return StoredFoodMapper.mapToStoredFoodResponse(storedFoodRepository.save(existing));
     }
 
-    /**
-     * Take one unit out of a stored pack.
-     *
-     * <h3>Example: milk crate of 12</h3>
-     * <pre>
-     *   Before: StoredFood{ food=Milk, qty=12 }
-     *
-     *   consume(id, { remainingMlG=1000, useBy=2026-03-15 })
-     *
-     *   After:  StoredFood{ food=Milk, qty=11 }                    ← original pack, decremented
-     *           StoredFood{ food=FoodOriginal(Milk, 1000ml), qty=1 } ← newly opened bottle
-     * </pre>
-     *
-     * <h3>Empty-on-open edge case</h3>
-     * If {@code remainingMlG = 0} the opened {@code FoodOriginal} is immediately
-     * soft-deleted and no matching {@code StoredFood} row is created.
-     */
     @Override
     @Transactional
     public ConsumeResult consume(long storedFoodId, ConsumeRequest request) {
 
-        // ── 1. Load the source StoredFood ────────────────────────────────────────
         StoredFood source = storedFoodRepository.findById(storedFoodId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "StoredFood not found with id: " + storedFoodId));
@@ -136,7 +118,6 @@ public class StoredFoodServiceImpl implements StoredFoodService {
         Food baseFood = source.getFood();
         int  oldQty   = source.getQuantity();
 
-        // ── 2. Decrement source quantity ─────────────────────────────────────────
         int  newQty      = oldQty - 1;
         Long sourceIdAfter;
 
@@ -151,15 +132,13 @@ public class StoredFoodServiceImpl implements StoredFoodService {
             log.debug("StoredFood {} decremented to qty={}.", storedFoodId, newQty);
         }
 
-        // ── 3. Build a FoodOriginal for the opened unit ──────────────────────────
         FoodOriginal opened = buildOpenedFoodOriginal(baseFood, request);
 
-        // ── 4. Handle the empty-on-open case ─────────────────────────────────────
         double remaining = opened.getRemaining_ml_g();
 
         if (remaining <= 0) {
             FoodOriginal saved = foodOriginalRepository.save(opened);
-            foodOriginalRepository.delete(saved);   // @SoftDelete → sets deleted_at
+            foodOriginalRepository.delete(saved);
             log.debug("Opened unit of '{}' was immediately empty; soft-deleted FoodOriginal {}.",
                     baseFood.getName(), saved.getId());
 
@@ -172,13 +151,10 @@ public class StoredFoodServiceImpl implements StoredFoodService {
                     .build();
         }
 
-        // ── 5. Persist the opened FoodOriginal ────────────────────────────────────
         FoodOriginal savedOpened = foodOriginalRepository.save(opened);
 
-        // ── 6. Determine which StorageType the opened unit goes into ──────────────
         StorageType targetStorageType = resolveStorageType(request, source);
 
-        // ── 7. Create the new StoredFood for the opened unit ──────────────────────
         StoredFood openedStoredFood = new StoredFood(
                 0L,
                 source.getHome(),
@@ -215,8 +191,8 @@ public class StoredFoodServiceImpl implements StoredFoodService {
         opened.setName(baseFood.getName());
         opened.setRemarks(baseFood.getRemarks());
         opened.setBestBeforeEnd(bestBefore);
-        opened.setOriginal_ml_g(originalMlG);                // sets remaining = original
-        opened.setRemaining_ml_g(request.getRemainingMlG()); // caller override
+        opened.setOriginal_ml_g(originalMlG);
+        opened.setRemaining_ml_g(request.getRemainingMlG());
         opened.setUseBy(request.getUseBy());
 
         return opened;
