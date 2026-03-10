@@ -38,6 +38,14 @@ function DeletedFoodRow({ food, onRestore }) {
             <td className="py-3 px-4 font-mono text-sm text-ink-muted">
                 {food.original_ml_g ? `${food.original_ml_g} ml/g` : '—'}
             </td>
+            <td className="py-3 px-4 font-mono text-sm text-ink-muted">
+                {food.quantity > 0
+                    ? <span className="inline-flex items-center gap-1">
+                        <span className="bg-gray-100 text-ink-muted rounded px-1.5 py-0.5 text-xs font-mono">×{food.quantity}</span>
+                      </span>
+                    : <span className="text-gray-300">—</span>
+                }
+            </td>
             <td className="py-3 px-4 font-mono text-sm text-ink-muted">{lastModified}</td>
             <td className="py-3 px-4">
                 <button
@@ -126,7 +134,7 @@ export default function DeletedFoods() {
                     <table className="w-full text-sm">
                         <thead className="bg-cream-dark border-b border-gray-200">
                         <tr>
-                            {['Name', 'Best before', 'Amount', 'Last modified', 'Actions'].map(h => (
+                            {['Name', 'Best before', 'Amount', 'Qty', 'Last modified', 'Actions'].map(h => (
                                 <th key={h} className="text-left py-3 px-4 font-mono text-xs text-ink-muted uppercase tracking-wider">
                                     {h}
                                 </th>

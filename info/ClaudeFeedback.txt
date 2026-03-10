@@ -490,7 +490,82 @@ Add column "Last modified" with LastModifiedDate to deleted-foods page.
 Make all date formats follow yyyy-MM-dd format.
 ...
 
+If multiple items were deleted, then there should be an indication of
+how many also in the deleted-foods. Add a column with quantity.
+
+
+
 ---
 Which approach depends on what you want to change:
-GoalWhereChange a color everywheretailwind.config.jsRestyle a specific componentEdit className in the .jsx file
-Add a reusable styled class@layer components in index.cssComplex CSS (animations, gradients)Plain CSS in index.css
+GoalWhere
+Change a color everywhere           tailwind.config.js
+Restyle a specific component        Edit className in the .jsx file
+Add a reusable styled class         @layer components in index.css
+Complex CSS (animations, gradients) Plain CSS in index.css
+---
+
+
+Here's the full map, plus some issues worth knowing about.
+
+AuthController
+Method      Endpoint                    Used in
+login       POST /api/auth/login        Login.jsx,AuthContext
+register    POST /api/auth/register     Register.jsx, AuthContext
+
+UserController
+Method      Endpoint                    Used in
+getMe       GET /api/users/me           AuthContext (on mount + after login)
+getAllUsers GET /api/admin/users        AdminUsers.jsx
+changeRole  PATCH /api/admin/users/{id}/role    AdminUsers.jsx
+deleteUser  DELETE /api/admin/users/{id}    AdminUsers.jsx
+
+FoodController
+Method      Endpoint                    Used in
+getAllFoods GET /api/foods              Dashboard.jsx
+getDeletedFoods GET /api/foods/deleted  DeletedFoods.jsx
+updateFood  PATCH/api/foods/{id}        StoredFoods.jsx (Edit modal)
+restoreFood POST/api/foods/{id}/restore DeletedFoods.jsx
+getFoodById GET/api/foods/{id}          ⚠️ defined in api.js, never called
+createFood  POST /api/foods             ⚠️ defined in api.js, never called
+deleteFood  DELETE /api/foods/{id}      ⚠️ defined in api.js, never called
+openPackage POST /api/foods/{id}/open   ⚠️ defined in api.js, never called
+consume(FoodController)    POST/api/foods/{id}/consume ⚠️ defined in api.js, never called
+
+FoodOriginalController
+Method          Endpoint                    Used in
+addToStorage    POST/api/food-originalsStoredFoods.jsx (Add to storage modal)
+
+StoredFoodController
+Method              Endpoint                        Used in
+getAllStoredFoods   GET/api/stored-foods?homeId=    Dashboard.jsx, StoredFoods.jsx
+updateStoredFood    PATCH /api/stored-foods/{id}    StoredFoods.jsx (Edit modal)
+consume             POST/api/stored-foods/{id}/consume  StoredFoods.jsx (Consume modal)
+getById             GET/api/stored-foods/{id}       ⚠️ defined in api.js, never called
+createStoredFood    POST/api/stored-foods           ⚠️ defined in api.js, never called
+deleteStoredFood    DELETE/api/stored-foods/{id}    ⚠️ defined in api.js, never called
+adjustQuantity      PATCH/api/stored-foods/{id}/quantity    ⚠️defined in api.js, never called
+
+StorageTypeController
+Method              Endpoint                    Used in
+getAllStorageTypes  GET/api/storage-types       StoredFoods.jsx
+createStorageType   POST/api/storage-types      StoredFoods.jsx (inline request(), 3 modals)
+updateStorageType   PUT/api/storage-types/{id}  StoredFoods.jsx (StorageTypeManager, inline request())
+deleteStorageType   DELETE/api/storage-types/{id}   StoredFoods.jsx (StorageTypeManager, inline request())
+
+HomeController
+Method      Endpoint            Used in
+getAllHomes GET/api/homes       ⚠️ defined in api.js, never called
+getHomeById GET/api/homes/{id}  ⚠️ defined in api.js, never called
+
+Three other things worth flagging:
+1. StoredFoods.jsx bypasses api.js for several calls —
+    it has its own local request() copy and calls storage-type and consume endpoints
+    directly instead of using the shared api functions.
+    This means auth headers are duplicated logic and changes to the base URL or auth scheme
+    need to be updated in two places.
+2. Dashboard.jsx has two broken links — the quick-link cards point to /foods and /inventory,
+    neither of which exists as a route in App.jsx. They'll redirect to / via the fallback.
+3. FoodController.consume vs StoredFoodController.consume — there are two separate consume endpoints.
+    The frontend only uses the StoredFoodController one (/api/stored-foods/{id}/consume).
+    FoodController's consume (/api/foods/{id}/consume) is wired in api.js but never actually called from any page.
+

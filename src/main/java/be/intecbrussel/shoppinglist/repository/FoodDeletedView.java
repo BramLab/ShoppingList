@@ -16,4 +16,11 @@ public interface FoodDeletedView {
     LocalDate getUseBy();
     double    getRemaining_ml_g();
     Date      getUpdatedAt();
+
+    /**
+     * Total quantity across all StoredFood rows that reference this food.
+     * Reflects how many units were consumed/marked empty in one operation.
+     * Returns 0 when no StoredFood row exists (food was deleted without going through consume).
+     */
+    int getQuantity();
 }

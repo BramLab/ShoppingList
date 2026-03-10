@@ -186,7 +186,8 @@ public class FoodServiceImpl implements FoodService {
                 v.getRemaining_ml_g(),
                 effectiveUseBy,
                 empty,
-                v.getUpdatedAt()
+                v.getUpdatedAt(),
+                v.getQuantity()      // ← new
         );
     }
 }

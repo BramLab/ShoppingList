@@ -6,7 +6,8 @@ import java.util.Date;
 /**
  * Response DTO for soft-deleted foods.
  * Extends the usual food fields with {@code updatedAt} (last-modified timestamp)
- * so the UI can show when the item was deleted / last touched.
+ * so the UI can show when the item was deleted / last touched, and {@code quantity}
+ * so the UI can show how many units were consumed/marked empty in one operation.
  */
 public record DeletedFoodResponse(
         long      id,
@@ -18,5 +19,6 @@ public record DeletedFoodResponse(
         double    remaining_ml_g,
         LocalDate effectiveUseBy,
         boolean   empty,
-        Date      updatedAt
+        Date      updatedAt,
+        int       quantity
 ) {}
