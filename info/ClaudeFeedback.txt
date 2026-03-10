@@ -393,6 +393,8 @@ TODO:
 - The modal popup to add food should not contain "Already opened" part. (any use case for that?)
 - The modal popup to add food should have a a UseBy date that indicates standard today plus 7d.
 - The modal popup to add food should have a shortcut for the UseBy to click (buttons, radiobuttons; dropdownlist) 3d, 1w, 2w, 3w, 1m, 2m, 3m, 6m, 9m, 1y, 2y
+- Layout UX/UI
+- Styling food (instead of clothing/clubbing/...)
 
 - Cleanup redundant code,
 - ubiquitous naming.
