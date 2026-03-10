@@ -387,7 +387,12 @@ Make a frontoffice page where i can:
 
 
 TODO:
-- When i add new FoodOriginal, i can also add new StorageType. (Done @ home, uncommitted?)
+- When i add new FoodOriginal, i can also add new StorageType. ok
+- When i consume FoodOriginal, i can also add new StorageType.
+- A part where every user can manage their StorageTypes (change name, delete if unused).
+
+
+
 - The list of FoodOriginal should also show the original bestBeforeEnd in the columns.
 - When adding a new FoodOriginal to storage, the name suggests an autocompleted name from a list of all previous names.
 - The modal popup to add food should not contain "Already opened" part. (any use case for that?)
