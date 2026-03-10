@@ -1,101 +1,133 @@
+import { useState, useRef, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const NAV = [
-  { to: '/',          label: 'Dashboard',  icon: '⌂' },
-  { to: '/foods',     label: 'Catalogue',  icon: '◈' },
-  { to: '/inventory', label: 'Inventory',  icon: '▤' },
-  { to: '/stored-foods', label: 'Stored Foods',  icon: '▤' },
+  { to: '/',                label: 'Dashboard'    },
+  { to: '/foods',           label: 'Catalogue'    },
+  { to: '/inventory',       label: 'Inventory'    },
+  { to: '/stored-foods',    label: 'Stored Foods' },
+  { to: '/deleted-foods',   label: 'Deleted Foods'},
 ];
 
-// <NavLink to="/stored-foods">Stored Foods</NavLink>
-
 const ADMIN_NAV = [
-  { to: '/admin/users', label: 'Users', icon: '◎' },
+  { to: '/admin/users', label: 'Users' },
 ];
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function handleLogout() {
     logout();
     navigate('/login');
   }
 
+  const allNav = user?.role === 'ADMIN' ? [...NAV, ...ADMIN_NAV] : NAV;
+
   return (
-    <div className="min-h-screen flex bg-cream">
-      {/* ── Sidebar ──────────────────────────────────────────────── */}
-      <aside className="w-60 flex-shrink-0 bg-forest-dark flex flex-col">
-        {/* Logo */}
-        <div className="px-6 pt-8 pb-6 border-b border-forest">
-          <h1 className="font-display text-cream text-xl font-bold leading-tight">
-            Pantry
-          </h1>
-          <p className="font-mono text-xs text-green-400 mt-0.5 opacity-70">
-            {user?.username}
-          </p>
-        </div>
+      <div className="min-h-screen flex flex-col bg-cream">
 
-        {/* Nav links */}
-        <nav className="flex-1 px-3 py-5 space-y-1">
-          {NAV.map(({ to, label, icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors duration-100
-                 ${isActive
-                   ? 'bg-forest text-cream font-medium'
-                   : 'text-green-200 hover:bg-forest hover:text-cream'}`
-              }
+        {/* ── Top nav ───────────────────────────────────────────────── */}
+        <header className="bg-forest-dark border-b border-forest flex items-center justify-between px-6 py-3 flex-shrink-0">
+
+          {/* Left: logo */}
+          <div className="flex items-center gap-4">
+            <h1 className="font-display text-cream text-lg font-bold leading-tight">
+              Pantry
+            </h1>
+            <p className="font-mono text-xs text-green-400 opacity-70">
+              {user?.username}
+            </p>
+          </div>
+
+          {/* Centre: nav dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+                onClick={() => setOpen(v => !v)}
+                className="flex items-center gap-2 font-body text-sm text-green-200
+                       hover:text-cream transition-colors px-3 py-1.5 rounded-sm
+                       border border-forest hover:border-green-400"
             >
-              <span className="text-base w-5 text-center">{icon}</span>
-              {label}
-            </NavLink>
-          ))}
+              <span>Navigation</span>
+              <span className={`font-mono text-xs transition-transform duration-150 ${open ? 'rotate-180' : ''}`}>
+              ▾
+            </span>
+            </button>
 
-          {user?.role === 'ADMIN' && (
-            <>
-              <div className="pt-4 pb-1 px-3">
-                <span className="font-mono text-xs text-green-600 uppercase tracking-widest">Admin</span>
-              </div>
-              {ADMIN_NAV.map(({ to, label, icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors
+            {open && (
+                <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-forest-dark
+                            border border-forest rounded-sm shadow-xl z-50 overflow-hidden">
+                  {allNav.map(({ to, label }) => (
+                      <NavLink
+                          key={to}
+                          to={to}
+                          end={to === '/'}
+                          onClick={() => setOpen(false)}
+                          className={({ isActive }) =>
+                              `block px-4 py-2.5 font-body text-sm transition-colors
                      ${isActive
-                       ? 'bg-forest text-cream font-medium'
-                       : 'text-green-200 hover:bg-forest hover:text-cream'}`
-                  }
-                >
-                  <span className="text-base w-5 text-center">{icon}</span>
-                  {label}
-                </NavLink>
-              ))}
-            </>
-          )}
-        </nav>
+                                  ? 'bg-forest text-cream font-medium'
+                                  : 'text-green-200 hover:bg-forest hover:text-cream'}`
+                          }
+                      >
+                        {label}
+                      </NavLink>
+                  ))}
 
-        {/* Footer */}
-        <div className="px-4 pb-6">
+                  {user?.role === 'ADMIN' && (
+                      <div className="border-t border-forest mt-1 pt-1">
+                        <p className="px-4 py-1 font-mono text-xs text-green-600 uppercase tracking-widest">
+                          Admin
+                        </p>
+                        {ADMIN_NAV.map(({ to, label }) => (
+                            <NavLink
+                                key={to}
+                                to={to}
+                                onClick={() => setOpen(false)}
+                                className={({ isActive }) =>
+                                    `block px-4 py-2.5 font-body text-sm transition-colors
+                         ${isActive
+                                        ? 'bg-forest text-cream font-medium'
+                                        : 'text-green-200 hover:bg-forest hover:text-cream'}`
+                                }
+                            >
+                              {label}
+                            </NavLink>
+                        ))}
+                      </div>
+                  )}
+                </div>
+            )}
+          </div>
+
+          {/* Right: logout */}
           <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-green-300
-                       hover:text-red-300 font-body transition-colors rounded-sm"
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 font-body text-sm text-green-300
+                     hover:text-red-300 transition-colors"
           >
             <span>→</span> Logout
           </button>
-        </div>
-      </aside>
+        </header>
 
-      {/* ── Main ──────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-auto">
-        <Outlet />
-      </main>
-    </div>
+        {/* ── Main ──────────────────────────────────────────────────── */}
+        <main className="flex-1 overflow-auto">
+          <Outlet />
+        </main>
+      </div>
   );
 }

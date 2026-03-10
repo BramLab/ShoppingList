@@ -386,11 +386,12 @@ Make a frontoffice page where i can:
 - I can also add new FoodOriginal via FoodOriginalController.addToStorage.
 
 
-TODO:
+---
+TODO 2026-03-09:
 - When i add new FoodOriginal, i can also add new StorageType. ok
 - When i consume FoodOriginal, i can also add new StorageType.
 - A part where every user can manage their StorageTypes (change name, delete if unused).
-
+- The list of FoodOriginal should also have a column with an edit button to edit same info as when adding Food.
 
 
 - The list of FoodOriginal should also show the original bestBeforeEnd in the columns.
@@ -404,3 +405,72 @@ TODO:
 - Cleanup redundant code,
 - ubiquitous naming.
 - UML class, ...
+
+---
+2026-03-10:
+PROMPT:
+For the frontoffice:
+- When i consume FoodOriginal, i can also add new StorageType.
+- The part where a user can manage their StorageTypes: where user choses or adds a StorageType also allows to change the name of a StorageType, or to delete it if it is not used.
+- The list of FoodOriginal should also have a column with an edit button to edit same info as when adding Food.
+
+CLAUDE: 09:30
+Orchestrated implementation of storage management and food editing features
+
+Now I'll implement all three features. Let me update StoredFoods.jsx first (consume modal gets new storage type option + storage type management + edit button), then Foods.jsx (verify edit column is properly labelled).
+Determined to reconstruct files from context window directly
+
+The files are only in context — I'll create the updated versions directly.
+Updated StoredFoods.jsx with: new storage type in ConsumeModal, StorageType management (rename/delete), and edit button for FoodOriginal
+
+Now update Foods.jsx to add a clear "Edit" column header (it already has the edit button, but let's make the column explicit and ensure the form matches the add form):
+Created a file, read a file
+
+Here's what changed in each file:
+
+StoredFoods.jsx — three improvements:
+
+    Consume modal → new storage type: The storage location dropdown now includes a + New location… option (same sentinel pattern as Add to Storage). Selecting it reveals an inline text input; on submit the new StorageType is POSTed to /api/storage-types first and its id is resolved before the consume call. The new type is also pushed into the local storageTypes state so the filter pills update instantly.
+    Storage type manager: A ⚙ Manage toggle button sits next to the filter pills. Clicking it reveals a collapsible table listing all storage types with a Rename button (inline edit, saved on Enter or click) and a Delete button (with a confirm prompt — the backend will reject it if items are still stored there, and the error surfaces inline). Both operations update local state immediately without a full reload.
+    Edit button on each row: StoredFoodRow now has an Edit button that opens EditFoodModal, which patches /api/foods/{id} with the same four fields (name, remarks, best-before, total ml/g) as the Add form.
+
+Foods.jsx — the Edit button is now in its own dedicated Edit column (separate from the Open/Consume/Delete actions column), making it easier to spot at a glance.
+
+---
+
+PROMPT:
+EditFoodModal should also allow editing of Storage location and of Quantity.
+...ok
+
+PROMPT:
+When i "Manage storage locations" and the list shows, it also shows a count of storage locations.
+The button "Delete" is only there if the count is zero.
+...
+
+PROMPT:
+List the names of all the components in the stored-foods page. Also the modal parts.
+
+10:50
+Hunted down the main page component structure. Here's the full list:
+
+Utilities / helpers
+    daysUntil — date helper
+    rowUrgency — urgency classifier per entry
+
+UI primitives
+    ExpiryBadge — coloured expiry label
+    Modal — base modal shell (title, overlay, close button)
+    StorageLocationSelect — reusable storage type <select> with "New location…" inline input
+
+Modals
+    ConsumeModal — record a consumption event
+    EditFoodModal — edit food details + storage location + quantity
+    AddToStorageModal — add a new food item to storage
+
+Page-level components
+    StorageTypeManager — inline table for renaming/deleting storage locations
+    StoredFoodRow — a single row in the inventory table
+    SummaryStrip — summary stats bar at the top of the page
+    StoredFoods (default export) — the main page component
+
+---

@@ -36,12 +36,14 @@ export const authApi = {
 // ── Foods ───────────────────────────────────────────────────────
 export const foodApi = {
   getAll:      ()           => request('/api/foods'),
+  getDeleted:  ()           => request('/api/foods/deleted'),
   getById:     (id)         => request(`/api/foods/${id}`),
-  create:      (body)       => request('/api/foods',          { method: 'POST',   body: JSON.stringify(body) }),
-  update:      (id, body)   => request(`/api/foods/${id}`,    { method: 'PATCH',  body: JSON.stringify(body) }),
-  delete:      (id)         => request(`/api/foods/${id}`,    { method: 'DELETE' }),
-  openPackage: (id, body)   => request(`/api/foods/${id}/open`,    { method: 'POST', body: JSON.stringify(body) }),
-  consume:     (id, body)   => request(`/api/foods/${id}/consume`, { method: 'POST', body: JSON.stringify(body) }),
+  create:      (body)       => request('/api/foods',                { method: 'POST',   body: JSON.stringify(body) }),
+  update:      (id, body)   => request(`/api/foods/${id}`,          { method: 'PATCH',  body: JSON.stringify(body) }),
+  delete:      (id)         => request(`/api/foods/${id}`,          { method: 'DELETE' }),
+  restore:     (id)         => request(`/api/foods/${id}/restore`,  { method: 'POST' }),
+  openPackage: (id, body)   => request(`/api/foods/${id}/open`,     { method: 'POST',   body: JSON.stringify(body) }),
+  consume:     (id, body)   => request(`/api/foods/${id}/consume`,  { method: 'POST',   body: JSON.stringify(body) }),
 };
 
 // ── Storage Types ────────────────────────────────────────────────
@@ -56,9 +58,9 @@ export const storageTypeApi = {
 export const storedFoodApi = {
   getAll:          (homeId)       => request(`/api/stored-foods${homeId ? `?homeId=${homeId}` : ''}`),
   getById:         (id)           => request(`/api/stored-foods/${id}`),
-  create:          (body)         => request('/api/stored-foods',              { method: 'POST',  body: JSON.stringify(body) }),
-  update:          (id, body)     => request(`/api/stored-foods/${id}`,        { method: 'PATCH', body: JSON.stringify(body) }),
-  delete:          (id)           => request(`/api/stored-foods/${id}`,        { method: 'DELETE' }),
+  create:          (body)         => request('/api/stored-foods',               { method: 'POST',  body: JSON.stringify(body) }),
+  update:          (id, body)     => request(`/api/stored-foods/${id}`,         { method: 'PATCH', body: JSON.stringify(body) }),
+  delete:          (id)           => request(`/api/stored-foods/${id}`,         { method: 'DELETE' }),
   adjustQuantity:  (id, delta)    => request(`/api/stored-foods/${id}/quantity`,{ method: 'PATCH', body: JSON.stringify({ delta }) }),
 };
 

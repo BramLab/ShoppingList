@@ -57,7 +57,7 @@ public class ConfigViaService {
             FoodOriginalResponse melkKoe01     = foodService.saveFood(new FoodOriginalRequest("melk koe",     null, Util.days2date(90),  1000));
 
             // ── Stored foods (all linked to user01's home) ────────────────────────────
-            storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, bloemkool01.id(),   kelder.id(),       0));
+            storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, bloemkool01.id(),   kelder.id(),       1));
             storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, bloemkool02.id(),   kelder.id(),       1));
             storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, miso01.id(),        koelkast.id(),     1));
             storedFoodService.saveStoredFood(new StoredFoodRequest(primaryHomeId, melkAmandel01.id(), voorraadkast.id(), 12));
