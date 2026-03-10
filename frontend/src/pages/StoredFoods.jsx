@@ -920,67 +920,67 @@ export default function StoredFoods() {
               Your home's current inventory — click <em>Consume</em> to use a unit.
             </p>
           </div>
-          <button className="btn-primary" onClick={() => setModal('add')}>
-            + Add to storage
-          </button>
         </div>
 
         {/* ── Summary strip ────────────────────────────────────────────── */}
-        {!loading && <SummaryStrip entries={entries} />}
+        {/*{!loading && <SummaryStrip entries={entries} />}*/}
 
         {/* ── Toolbar ──────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center gap-3 mb-2">
           {/* Search */}
           <input
-              className="input max-w-xs"
+              className="input max-w-xs h-10"
               placeholder="Search by name or remarks…"
               value={search}
               onChange={e => setSearch(e.target.value)}
           />
 
-          {/* Location filter pills */}
-          <div className="flex gap-1.5 flex-wrap items-center">
-            <button
-                onClick={() => setFilterLocation('')}
-                className={`badge text-xs px-3 py-1.5 cursor-pointer transition-colors
-              ${!filterLocation ? 'bg-forest text-cream' : 'bg-gray-100 text-ink-muted hover:bg-gray-200'}`}
-            >All</button>
-            {storageTypes.map(st => (
-                <button
-                    key={st.id}
-                    onClick={() => setFilterLocation(f => f === st.name ? '' : st.name)}
-                    className={`badge text-xs px-3 py-1.5 cursor-pointer transition-colors
-                ${filterLocation === st.name ? 'bg-forest text-cream' : 'bg-gray-100 text-ink-muted hover:bg-gray-200'}`}
-                >{st.name}</button>
-            ))}
-
-            {/* Manage locations toggle */}
-            <button
-                onClick={() => setShowLocationMgr(v => !v)}
-                title="Manage storage locations"
-                className={`badge text-xs px-2.5 py-1.5 cursor-pointer transition-colors border
-              ${showLocationMgr
-                    ? 'bg-forest text-cream border-forest'
-                    : 'border-gray-300 text-ink-muted hover:border-forest hover:text-forest'}`}
+          {/* Location filter dropdown */}
+          <div className="flex items-center gap-2 h-10">
+            <label className="font-mono text-xs text-ink-muted whitespace-nowrap">Filter:</label>
+            <select
+                value={filterLocation}
+                onChange={e => setFilterLocation(e.target.value)}
+                className="input text-sm"
             >
-              ⚙ Manage
-            </button>
+              <option value="">All locations</option>
+              {storageTypes.map(st => (
+                  <option key={st.id} value={st.name}>{st.name}</option>
+              ))}
+            </select>
           </div>
 
-          {/* Sort */}
-          <div className="ml-auto flex items-center gap-2">
-            <span className="font-mono text-xs text-ink-muted">Sort:</span>
-            {[['expiry', 'Expiry'], ['name', 'Name'], ['location', 'Location'], ['qty', 'Qty']].map(([k, l]) => (
-                <button
-                    key={k}
-                    onClick={() => setSortKey(k)}
-                    className={`font-mono text-xs px-2.5 py-1 rounded-sm border transition-colors
-                ${sortKey === k
-                        ? 'bg-forest text-cream border-forest'
-                        : 'border-gray-200 text-ink-muted hover:border-forest hover:text-forest'}`}
-                >{l}</button>
-            ))}
+          {/* Manage locations toggle */}
+          <button
+              onClick={() => setShowLocationMgr(v => !v)}
+              title="Manage storage locations"
+              className={`h-10 text-xs px-2.5 py-1.5 cursor-pointer transition-colors border rounded-sm
+            ${showLocationMgr
+                  ? 'bg-forest text-cream border-forest'
+                  : 'border-gray-300 text-ink-muted hover:border-forest hover:text-forest'}`}
+          >
+            ⚙ Manage
+          </button>
+
+          {/* Sort dropdown */}
+          <div className="flex items-center gap-2 h-10">
+            <label className="font-mono text-xs text-ink-muted whitespace-nowrap">Sort:</label>
+            <select
+                value={sortKey}
+                onChange={e => setSortKey(e.target.value)}
+                className="input text-sm"
+            >
+              <option value="expiry">Expiry</option>
+              <option value="name">Name</option>
+              <option value="location">Location</option>
+              <option value="qty">Quantity</option>
+            </select>
           </div>
+
+          {/* Add to storage button - right aligned */}
+          <button className="btn-primary ml-auto h-10" onClick={() => setModal('add')}>
+            + Add to storage
+          </button>
         </div>
 
         {/* ── Storage location manager (collapsible) ────────────────────── */}
