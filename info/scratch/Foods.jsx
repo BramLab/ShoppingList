@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { foodApi } from '../api/api';
+import { foodApi } from '../../frontend/src/api/api';
 
 // ── Small helpers ─────────────────────────────────────────────────────────────
 
