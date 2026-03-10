@@ -39,18 +39,12 @@ public class StoredFoodServiceImpl implements StoredFoodService {
 
     @Override
     public List<StoredFoodResponse> findAllStoredFoods() {
-        // findAllWithFood uses LEFT JOIN FETCH to bypass Hibernate's per-row
-        // soft-delete filter that would otherwise exclude restored-food entries.
         return storedFoodRepository.findAllWithFood()
                 .stream()
                 .map(StoredFoodMapper::mapToStoredFoodResponse)
                 .toList();
     }
 
-    /**
-     * Uses the repository-level LEFT JOIN FETCH query instead of the inherited
-     * findAll, for the same reason as findAllStoredFoods.
-     */
     @Override
     public List<StoredFoodResponse> findAllByHomeId(long homeId) {
         return storedFoodRepository.findAllByHomeId(homeId)
@@ -107,6 +101,22 @@ public class StoredFoodServiceImpl implements StoredFoodService {
         return StoredFoodMapper.mapToStoredFoodResponse(storedFoodRepository.save(existing));
     }
 
+    /**
+     * Take {@code request.quantity} sealed units out of a stored pack.
+     *
+     * <p>Steps performed:
+     * <ol>
+     *   <li>Validate that the requested quantity does not exceed what is in stock.</li>
+     *   <li>Decrement {@code StoredFood.quantity} by {@code request.quantity}.
+     *       When quantity reaches 0 the source {@code StoredFood} row is deleted.</li>
+     *   <li>Create a brand-new {@code FoodOriginal} copying name/remarks from the base food,
+     *       with the provided {@code remainingMlG}, {@code useBy}, and {@code bestBeforeEnd}.</li>
+     *   <li>Wrap that {@code FoodOriginal} in a new {@code StoredFood} with
+     *       {@code quantity = request.quantity}, so the N opened units are tracked together.</li>
+     *   <li>If {@code remainingMlG ≤ 0} the opened unit is immediately soft-deleted
+     *       and no {@code StoredFood} row is created for it.</li>
+     * </ol>
+     */
     @Override
     @Transactional
     public ConsumeResult consume(long storedFoodId, ConsumeRequest request) {
@@ -115,62 +125,97 @@ public class StoredFoodServiceImpl implements StoredFoodService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "StoredFood not found with id: " + storedFoodId));
 
-        Food baseFood = source.getFood();
-        int  oldQty   = source.getQuantity();
+        int consumeQty = request.getQuantity();
+        int oldQty     = source.getQuantity();
 
-        int  newQty      = oldQty - 1;
+        // Guard: cannot consume more units than are in stock
+        if (consumeQty > oldQty) {
+            throw new MissingDataException(
+                    "Cannot consume " + consumeQty + " unit(s): only " + oldQty + " in stock.");
+        }
+
+        // Eagerly capture references before any delete — lazy fields become inaccessible
+        // once the entity is removed from the persistence context.
+        Food        baseFood    = source.getFood();
+        var         sourceHome  = source.getHome();
+        StorageType sourceStorageType = source.getStorageType();
+
+        int  newQty   = oldQty - consumeQty;
         Long sourceIdAfter;
 
-        if (newQty <= 0) {
-            log.debug("StoredFood {} was the last unit; deleting it.", storedFoodId);
+        if (newQty == 0) {
+            log.debug("StoredFood {} is now empty after consuming {}; deleting it.", storedFoodId, consumeQty);
             storedFoodRepository.delete(source);
             sourceIdAfter = null;
         } else {
             source.setQuantity(newQty);
             storedFoodRepository.save(source);
             sourceIdAfter = source.getId();
-            log.debug("StoredFood {} decremented to qty={}.", storedFoodId, newQty);
+            log.debug("StoredFood {} decremented by {} to qty={}.", storedFoodId, consumeQty, newQty);
         }
 
-        FoodOriginal opened = buildOpenedFoodOriginal(baseFood, request);
-
-        double remaining = opened.getRemaining_ml_g();
+        FoodOriginal opened    = buildOpenedFoodOriginal(baseFood, request);
+        double       remaining = opened.getRemaining_ml_g();
 
         if (remaining <= 0) {
+            // Soft-delete the FoodOriginal so it appears on the Deleted Foods page.
             FoodOriginal saved = foodOriginalRepository.save(opened);
             foodOriginalRepository.delete(saved);
-            log.debug("Opened unit of '{}' was immediately empty; soft-deleted FoodOriginal {}.",
-                    baseFood.getName(), saved.getId());
+
+            // Still create a StoredFood row (quantity = consumeQty) so the main list
+            // shows N empty units rather than silently discarding them.
+            StorageType emptyStorageType = request.getStorageTypeId() != null
+                    ? storageTypeRepository.findById(request.getStorageTypeId())
+                    .orElseThrow(() -> new EntityNotFoundException("StorageType not found: " + request.getStorageTypeId()))
+                    : sourceStorageType;
+            StoredFood emptyStoredFood = new StoredFood(
+                    0L,
+                    sourceHome,
+                    saved,
+                    emptyStorageType,
+                    consumeQty
+            );
+            StoredFood savedEmptyStoredFood = storedFoodRepository.save(emptyStoredFood);
+            log.debug("Consumed {} unit(s) of '{}' marked empty; StoredFood id={} qty={}.",
+                    consumeQty, baseFood.getName(), savedEmptyStoredFood.getId(), consumeQty);
 
             return ConsumeResult.builder()
                     .sourceStoredFoodId(sourceIdAfter)
                     .sourceRemainingQuantity(newQty)
-                    .openedStoredFoodId(null)
+                    .openedStoredFoodId(savedEmptyStoredFood.getId())
+                    .consumedQuantity(consumeQty)
                     .openedRemainingMlG(0)
                     .openedUnitWasEmpty(true)
                     .build();
         }
 
-        FoodOriginal savedOpened = foodOriginalRepository.save(opened);
+        FoodOriginal savedOpened     = foodOriginalRepository.save(opened);
+        StorageType  targetStorageType = request.getStorageTypeId() != null
+                ? storageTypeRepository.findById(request.getStorageTypeId())
+                .orElseThrow(() -> new EntityNotFoundException("StorageType not found: " + request.getStorageTypeId()))
+                : sourceStorageType;
 
-        StorageType targetStorageType = resolveStorageType(request, source);
-
+        // The opened tracking entry always has quantity = 1.
+        // Consuming N sealed units removes N from the source; the single opened
+        // entry represents the now-open container being used — it does not
+        // add N back to the visible stock total.
         StoredFood openedStoredFood = new StoredFood(
                 0L,
-                source.getHome(),
+                sourceHome,
                 savedOpened,
                 targetStorageType,
                 1
         );
         StoredFood savedOpenedStoredFood = storedFoodRepository.save(openedStoredFood);
 
-        log.info("Consumed 1 unit from StoredFood {}. New opened StoredFood id={}. Remaining in pack: {}.",
-                storedFoodId, savedOpenedStoredFood.getId(), newQty);
+        log.info("Consumed {} unit(s) from StoredFood {}. New opened StoredFood id={} (qty=1). Remaining in pack: {}.",
+                consumeQty, storedFoodId, savedOpenedStoredFood.getId(), newQty);
 
         return ConsumeResult.builder()
                 .sourceStoredFoodId(sourceIdAfter)
                 .sourceRemainingQuantity(newQty)
                 .openedStoredFoodId(savedOpenedStoredFood.getId())
+                .consumedQuantity(consumeQty)
                 .openedRemainingMlG(remaining)
                 .openedUnitWasEmpty(false)
                 .build();

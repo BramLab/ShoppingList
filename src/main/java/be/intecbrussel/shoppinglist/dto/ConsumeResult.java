@@ -17,14 +17,17 @@ public class ConsumeResult {
     private int sourceRemainingQuantity;
 
     /**
-     * The newly created StoredFood that represents the opened unit.
-     * Null when the opened unit was immediately empty and therefore soft-deleted.
+     * The newly created StoredFood that represents the opened units.
+     * Null when the opened units were immediately empty and therefore soft-deleted.
      */
     private Long openedStoredFoodId;
 
-    /** Remaining ml/g in the opened unit (mirrors FoodOriginal.remaining_ml_g). */
+    /** How many units were consumed (mirrors ConsumeRequest.quantity). */
+    private int consumedQuantity;
+
+    /** Remaining ml/g in each opened unit (mirrors FoodOriginal.remaining_ml_g). */
     private double openedRemainingMlG;
 
-    /** True when the opened unit was empty (remaining_ml_g ≤ 0) and has been soft-deleted. */
+    /** True when the opened units were empty (remaining_ml_g ≤ 0) and have been soft-deleted. */
     private boolean openedUnitWasEmpty;
 }

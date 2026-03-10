@@ -489,3 +489,8 @@ Add column "Last modified" with LastModifiedDate to deleted-foods page.
 ...
 Make all date formats follow yyyy-MM-dd format.
 ...
+
+---
+Which approach depends on what you want to change:
+GoalWhereChange a color everywheretailwind.config.jsRestyle a specific componentEdit className in the .jsx file
+Add a reusable styled class@layer components in index.cssComplex CSS (animations, gradients)Plain CSS in index.css

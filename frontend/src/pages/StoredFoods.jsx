@@ -71,7 +71,6 @@ function Modal({ title, subtitle, onClose, children }) {
 }
 
 // ─── Storage location select (shared) ─────────────────────────────────────
-// Renders the <select> + conditional new-name input for both Consume and Add modals.
 
 function StorageLocationSelect({ storageTypes, value, newName, onChange, onNewNameChange, required }) {
   const isNew = value === NEW_LOCATION_SENTINEL;
@@ -105,20 +104,31 @@ function StorageLocationSelect({ storageTypes, value, newName, onChange, onNewNa
 // ─── Consume Modal ────────────────────────────────────────────────────────
 
 function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageTypeCreated }) {
-  const food = entry.food;
+  const food     = entry.food;
+  const maxQty   = entry.quantity;           // can't consume more than in stock
+
   const [form, setForm] = useState({
-    remainingMlG: food?.remaining_ml_g > 0 ? String(food.remaining_ml_g) : '',
-    useBy: food?.useBy ?? food?.effectiveUseBy ?? '',
-    storageTypeId: String(entry.storageType?.id ?? ''),
-    consumeAll: false,
+    quantity:        '1',
+    remainingMlG:    food?.remaining_ml_g > 0 ? String(food.remaining_ml_g) : '',
+    useBy:           food?.useBy ?? food?.effectiveUseBy ?? '',
+    storageTypeId:   String(entry.storageType?.id ?? ''),
+    consumeAll:      false,
     newLocationName: '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState('');
 
   const isNewLocation = form.storageTypeId === NEW_LOCATION_SENTINEL;
+  const qty           = Math.max(1, Math.min(maxQty, Number(form.quantity) || 1));
 
   function set(f) { return e => setForm(v => ({ ...v, [f]: e.target.value })); }
+
+  function stepQty(delta) {
+    setForm(v => ({
+      ...v,
+      quantity: String(Math.max(1, Math.min(maxQty, (Number(v.quantity) || 1) + delta))),
+    }));
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -139,8 +149,9 @@ function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageT
       }
 
       const body = {
-        remainingMlG: form.consumeAll ? 0 : Number(form.remainingMlG),
-        useBy:        form.useBy || null,
+        quantity:      qty,
+        remainingMlG:  form.consumeAll ? 0 : Number(form.remainingMlG),
+        useBy:         form.useBy || null,
         storageTypeId: resolvedStorageTypeId,
       };
       await onSave(entry.id, body);
@@ -153,7 +164,7 @@ function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageT
 
   return (
       <Modal
-          title="Consume unit"
+          title="Consume units"
           subtitle={`${food?.name}${food?.remarks ? ` · ${food.remarks}` : ''}`}
           onClose={onClose}
       >
@@ -161,6 +172,54 @@ function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageT
           {error && (
               <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-sm">{error}</p>
           )}
+
+          {/* ── Quantity stepper ── */}
+          <div>
+            <label className="label">How many units to consume *</label>
+            <div className="flex items-center gap-3">
+              <button
+                  type="button"
+                  onClick={() => stepQty(-1)}
+                  disabled={qty <= 1}
+                  className="w-9 h-9 flex items-center justify-center border border-gray-300
+                             rounded-sm font-mono text-lg text-ink hover:border-forest
+                             hover:text-forest transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >−</button>
+
+              <input
+                  className="input text-center font-display text-xl font-bold w-20"
+                  type="number"
+                  min="1"
+                  max={maxQty}
+                  value={form.quantity}
+                  onChange={e => setForm(v => ({ ...v, quantity: e.target.value }))}
+                  required
+              />
+
+              <button
+                  type="button"
+                  onClick={() => stepQty(1)}
+                  disabled={qty >= maxQty}
+                  className="w-9 h-9 flex items-center justify-center border border-gray-300
+                             rounded-sm font-mono text-lg text-ink hover:border-forest
+                             hover:text-forest transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >+</button>
+
+              <span className="font-mono text-xs text-ink-muted whitespace-nowrap">
+                of {maxQty} in stock
+              </span>
+            </div>
+
+            {/* Visual stock indicator */}
+            {maxQty > 1 && (
+                <div className="mt-2 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div
+                      className="h-full rounded-full bg-terra transition-all duration-200"
+                      style={{ width: `${(qty / maxQty) * 100}%` }}
+                  />
+                </div>
+            )}
+          </div>
 
           {/* Consume all toggle */}
           <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-sm cursor-pointer hover:bg-cream transition-colors">
@@ -171,15 +230,15 @@ function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageT
                 onChange={e => setForm(v => ({ ...v, consumeAll: e.target.checked }))}
             />
             <div>
-              <p className="font-body font-medium text-sm text-ink">Consume everything</p>
-              <p className="font-body text-xs text-ink-muted">Sets remaining to 0 — item will be soft-deleted</p>
+              <p className="font-body font-medium text-sm text-ink">Mark opened unit as empty</p>
+              <p className="font-body text-xs text-ink-muted">Sets remaining to 0 — opened unit will be soft-deleted</p>
             </div>
           </label>
 
           {/* Remaining ml/g */}
           {!form.consumeAll && (
               <div>
-                <label className="label">Remaining ml / g after this use</label>
+                <label className="label">Remaining ml / g in the opened unit</label>
                 <div className="flex items-center gap-2">
                   <input
                       className="input"
@@ -198,11 +257,11 @@ function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageT
 
           {/* Use-by */}
           <div>
-            <label className="label">Use by</label>
+            <label className="label">Use by (opened unit)</label>
             <input className="input" type="date" value={form.useBy} onChange={set('useBy')} />
           </div>
 
-          {/* Storage type — now supports "+ New location…" */}
+          {/* Storage type */}
           <StorageLocationSelect
               storageTypes={storageTypes}
               value={form.storageTypeId}
@@ -219,6 +278,12 @@ function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageT
             {food?.effectiveUseBy && (
                 <p className="text-ink-muted">Effective use-by: <span className="text-ink">{food.effectiveUseBy}</span></p>
             )}
+            <p className="text-ink-muted">
+              Stock after consuming:{' '}
+              <span className={`${maxQty - qty === 0 ? 'text-terra' : 'text-ink'} font-medium`}>
+                {maxQty - qty} unit{maxQty - qty !== 1 ? 's' : ''} remaining
+              </span>
+            </p>
           </div>
 
           <div className="flex gap-3 pt-1">
@@ -230,7 +295,11 @@ function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageT
                     : 'btn-primary'}`}
                 disabled={saving}
             >
-              {saving ? 'Saving…' : form.consumeAll ? 'Consume all & delete' : 'Record consumption'}
+              {saving
+                  ? 'Saving…'
+                  : form.consumeAll
+                      ? `Consume ${qty} & mark empty`
+                      : `Consume ${qty} unit${qty !== 1 ? 's' : ''}`}
             </button>
             <button type="button" className="btn-secondary flex-1" onClick={onClose}>Cancel</button>
           </div>
@@ -240,18 +309,14 @@ function ConsumeModal({ entry, storageTypes, homeId, onSave, onClose, onStorageT
 }
 
 // ─── Edit Food Original Modal ──────────────────────────────────────────────
-// Edits both the FoodOriginal (name, remarks, bestBeforeEnd, ml/g)
-// and the StoredFood entry (storage location, quantity) in one save.
 
 function EditFoodModal({ entry, storageTypes, homeId, onSave, onClose, onStorageTypeCreated }) {
   const food = entry.food;
   const [form, setForm] = useState({
-    // FoodOriginal fields
     name:            food.name ?? '',
     remarks:         food.remarks ?? '',
     bestBeforeEnd:   food.bestBeforeEnd ?? '',
     original_ml_g:   food.original_ml_g ?? '',
-    // StoredFood fields
     storageTypeId:   String(entry.storageType?.id ?? ''),
     quantity:        String(entry.quantity ?? 1),
     newLocationName: '',
@@ -267,7 +332,6 @@ function EditFoodModal({ entry, storageTypes, homeId, onSave, onClose, onStorage
     e.preventDefault();
     setSaving(true); setError('');
     try {
-      // Resolve storage type (create new one if requested)
       let resolvedStorageTypeId = isNewLocation ? null : Number(form.storageTypeId);
       if (isNewLocation) {
         if (!form.newLocationName.trim()) throw new Error('Location name is required');
@@ -311,7 +375,6 @@ function EditFoodModal({ entry, storageTypes, homeId, onSave, onClose, onStorage
               <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-sm">{error}</p>
           )}
 
-          {/* ── FoodOriginal fields ── */}
           <p className="font-mono text-xs uppercase tracking-widest text-ink-muted border-b border-gray-100 pb-1">
             Food details
           </p>
@@ -335,7 +398,6 @@ function EditFoodModal({ entry, storageTypes, homeId, onSave, onClose, onStorage
             </div>
           </div>
 
-          {/* ── StoredFood fields ── */}
           <p className="font-mono text-xs uppercase tracking-widest text-ink-muted border-b border-gray-100 pb-1 pt-1">
             Storage
           </p>
@@ -507,7 +569,6 @@ function AddToStorageModal({ homeId, storageTypes, onSave, onClose, onStorageTyp
 }
 
 // ─── Storage Type Manager ─────────────────────────────────────────────────
-// Inline editor that appears when user clicks the ⚙ icon next to the filters.
 
 function StorageTypeManager({ storageTypes, entries, onUpdate, onDelete }) {
   const [editingId, setEditingId] = useState(null);
@@ -515,7 +576,6 @@ function StorageTypeManager({ storageTypes, entries, onUpdate, onDelete }) {
   const [busy, setBusy]           = useState(false);
   const [err, setErr]             = useState('');
 
-  // Count how many stored-food entries use each storage type
   const countById = entries.reduce((acc, e) => {
     const id = e.storageType?.id;
     if (id != null) acc[id] = (acc[id] ?? 0) + 1;
@@ -584,7 +644,6 @@ function StorageTypeManager({ storageTypes, entries, onUpdate, onDelete }) {
             const count = countById[st.id] ?? 0;
             return (
                 <tr key={st.id} className="border-b border-gray-100 last:border-0">
-                  {/* Name / inline edit */}
                   <td className="py-2 px-3">
                     {editingId === st.id ? (
                         <input
@@ -601,8 +660,6 @@ function StorageTypeManager({ storageTypes, entries, onUpdate, onDelete }) {
                         <span className="font-body text-ink">{st.name}</span>
                     )}
                   </td>
-
-                  {/* Count badge */}
                   <td className="py-2 px-3 text-center">
                   <span className={`badge font-mono text-xs ${
                       count === 0
@@ -612,40 +669,20 @@ function StorageTypeManager({ storageTypes, entries, onUpdate, onDelete }) {
                     {count}
                   </span>
                   </td>
-
-                  {/* Actions */}
                   <td className="py-2 px-3">
                     <div className="flex gap-2 justify-end">
                       {editingId === st.id ? (
                           <>
-                            <button
-                                onClick={() => saveEdit(st.id)}
-                                disabled={busy}
-                                className="btn-primary text-xs px-3 py-1"
-                            >
+                            <button onClick={() => saveEdit(st.id)} disabled={busy} className="btn-primary text-xs px-3 py-1">
                               {busy ? '…' : 'Save'}
                             </button>
-                            <button
-                                onClick={cancelEdit}
-                                className="btn-secondary text-xs px-3 py-1"
-                            >
-                              Cancel
-                            </button>
+                            <button onClick={cancelEdit} className="btn-secondary text-xs px-3 py-1">Cancel</button>
                           </>
                       ) : (
                           <>
-                            <button
-                                onClick={() => startEdit(st)}
-                                className="btn-secondary text-xs px-3 py-1"
-                            >
-                              Rename
-                            </button>
+                            <button onClick={() => startEdit(st)} className="btn-secondary text-xs px-3 py-1">Rename</button>
                             {count === 0 && (
-                                <button
-                                    onClick={() => handleDelete(st)}
-                                    disabled={busy}
-                                    className="btn-danger text-xs px-3 py-1"
-                                >
+                                <button onClick={() => handleDelete(st)} disabled={busy} className="btn-danger text-xs px-3 py-1">
                                   Delete
                                 </button>
                             )}
@@ -676,9 +713,6 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
   const food    = entry.food;
   const urgency = rowUrgency(entry);
 
-  // Food is null when its FoodOriginal is still soft-deleted.
-  // Show a muted placeholder row so the user knows the entry exists
-  // and can restore the food from the Deleted Foods page.
   if (!food) {
     return (
         <tr className="border-b border-gray-100 bg-gray-50 opacity-60">
@@ -696,27 +730,20 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
 
   return (
       <tr className={`border-b border-gray-100 transition-colors ${URGENCY_ROW[urgency]}`}>
-        {/* Name */}
         <td className="py-3 px-4">
           <p className="font-body font-semibold text-ink leading-snug">{food.name}</p>
           {food.remarks && (
               <p className="font-body text-xs text-ink-muted mt-0.5">{food.remarks}</p>
           )}
         </td>
-
-        {/* Storage location */}
         <td className="py-3 px-4">
         <span className="badge bg-forest/10 text-forest font-mono text-xs">
           {entry.storageType?.name ?? '—'}
         </span>
         </td>
-
-        {/* Qty */}
         <td className="py-3 px-4 font-display text-2xl font-bold text-ink text-center">
           {entry.quantity}
         </td>
-
-        {/* Remaining */}
         <td className="py-3 px-4 font-mono text-sm text-center">
           {food.empty
               ? <span className="text-gray-400">—</span>
@@ -725,8 +752,6 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
                   : <span className="text-gray-400">—</span>
           }
         </td>
-
-        {/* Best before / use-by */}
         <td className="py-3 px-4">
           <ExpiryBadge food={food} />
           {food.useBy && (
@@ -736,21 +761,13 @@ function StoredFoodRow({ entry, onConsume, onEditFood }) {
               <p className="font-mono text-xs text-ink-muted mt-0.5">{food.bestBeforeEnd}</p>
           )}
         </td>
-
-        {/* Actions */}
         <td className="py-3 px-4">
           <div className="flex gap-2 flex-wrap">
-            <button
-                onClick={() => onEditFood(entry)}
-                className="btn-secondary text-xs px-3 py-1.5"
-            >
+            <button onClick={() => onEditFood(entry)} className="btn-secondary text-xs px-3 py-1.5">
               Edit
             </button>
             {!food.empty && (
-                <button
-                    onClick={() => onConsume(entry)}
-                    className="btn-terra text-xs px-3 py-1.5"
-                >
+                <button onClick={() => onConsume(entry)} className="btn-terra text-xs px-3 py-1.5">
                   Consume
                 </button>
             )}
@@ -801,7 +818,6 @@ export default function StoredFoods() {
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState('');
 
-  // modal: null | 'consume' | 'add' | 'editFood'
   const [modal, setModal]         = useState(null);
   const [selected, setSelected]   = useState(null);
 
@@ -828,7 +844,6 @@ export default function StoredFoods() {
 
   useEffect(() => { load(); }, [load]);
 
-  // ── Consume ─────────────────────────────────────────────────────────────
   async function handleConsume(id, body) {
     await request(`/api/stored-foods/${id}/consume`, {
       method: 'POST',
@@ -838,7 +853,6 @@ export default function StoredFoods() {
     setModal(null);
   }
 
-  // ── Add to storage ──────────────────────────────────────────────────────
   async function handleAddToStorage(body) {
     await request('/api/food-originals', {
       method: 'POST',
@@ -848,7 +862,6 @@ export default function StoredFoods() {
     setModal(null);
   }
 
-  // ── Edit food original + stored food entry ─────────────────────────────
   async function handleEditFood({ entryId, foodId, foodPayload, entryPayload }) {
     await Promise.all([
       request(`/api/foods/${foodId}`, {
@@ -864,7 +877,6 @@ export default function StoredFoods() {
     setModal(null);
   }
 
-  // ── StorageType callbacks ───────────────────────────────────────────────
   function handleStorageTypeCreated(st) {
     setStorageTypes(prev => [...prev, st]);
   }
@@ -881,7 +893,6 @@ export default function StoredFoods() {
     }
   }
 
-  // ── Filter + sort ────────────────────────────────────────────────────────
   const SORT_FNS = {
     expiry:   (a, b) => {
       const da = daysUntil(a.food?.effectiveUseBy) ?? 9999;
@@ -912,7 +923,6 @@ export default function StoredFoods() {
 
   return (
       <div className="p-8 max-w-6xl">
-        {/* ── Page header ──────────────────────────────────────────────── */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="font-display text-3xl font-bold text-ink">Stored Foods</h2>
@@ -922,20 +932,14 @@ export default function StoredFoods() {
           </div>
         </div>
 
-        {/* ── Summary strip ────────────────────────────────────────────── */}
-        {/*{!loading && <SummaryStrip entries={entries} />}*/}
-
-        {/* ── Toolbar ──────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center gap-3 mb-2">
-          {/* Search */}
           <input
-              className="input max-w-xs h-10"
+              className="input max-w-48 h-10"
               placeholder="Search by name or remarks…"
               value={search}
               onChange={e => setSearch(e.target.value)}
           />
 
-          {/* Location filter dropdown */}
           <div className="flex items-center gap-2 h-10">
             <label className="font-mono text-xs text-ink-muted whitespace-nowrap">Filter:</label>
             <select
@@ -950,7 +954,6 @@ export default function StoredFoods() {
             </select>
           </div>
 
-          {/* Manage locations toggle */}
           <button
               onClick={() => setShowLocationMgr(v => !v)}
               title="Manage storage locations"
@@ -962,7 +965,6 @@ export default function StoredFoods() {
             ⚙ Manage
           </button>
 
-          {/* Sort dropdown */}
           <div className="flex items-center gap-2 h-10">
             <label className="font-mono text-xs text-ink-muted whitespace-nowrap">Sort:</label>
             <select
@@ -977,13 +979,11 @@ export default function StoredFoods() {
             </select>
           </div>
 
-          {/* Add to storage button - right aligned */}
           <button className="btn-primary ml-auto h-10" onClick={() => setModal('add')}>
             + Add to storage
           </button>
         </div>
 
-        {/* ── Storage location manager (collapsible) ────────────────────── */}
         {showLocationMgr && (
             <div className="mb-5 bg-cream-dark border border-gray-200 rounded-sm p-4">
               <p className="font-mono text-xs uppercase tracking-widest text-ink-muted mb-2">
@@ -1000,7 +1000,6 @@ export default function StoredFoods() {
 
         {error && <p className="text-sm text-red-600 mb-4 mt-3">{error}</p>}
 
-        {/* ── Table ────────────────────────────────────────────────────── */}
         {loading ? (
             <div className="card py-20 text-center">
               <p className="font-mono text-sm text-ink-muted animate-pulse">Loading inventory…</p>
@@ -1057,7 +1056,6 @@ export default function StoredFoods() {
             </div>
         )}
 
-        {/* ── Modals ───────────────────────────────────────────────────── */}
         {modal === 'consume' && selected && (
             <ConsumeModal
                 entry={selected}
