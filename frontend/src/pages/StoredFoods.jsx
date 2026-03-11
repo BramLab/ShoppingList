@@ -88,7 +88,7 @@ function StorageLocationSelect({ storageTypes, value, newName, onChange, onNewNa
         {isNew && (
             <div className="mt-2 pl-3 border-l-2 border-forest/40">
               <input
-                  className="input text-sm"
+                  className="input text-sm h-8"
                   placeholder="Location name, e.g. Freezer"
                   value={newName}
                   onChange={onNewNameChange}
@@ -647,7 +647,7 @@ function StorageTypeManager({ storageTypes, entries, onUpdate, onDelete }) {
                   <td className="py-2 px-3">
                     {editingId === st.id ? (
                         <input
-                            className="input text-sm py-1"
+                            className="input text-sm py-1 h-8"
                             value={editName}
                             onChange={e => setEditName(e.target.value)}
                             onKeyDown={e => {
@@ -934,18 +934,18 @@ export default function StoredFoods() {
 
         <div className="flex flex-wrap items-center gap-3 mb-2">
           <input
-              className="input max-w-48 h-10"
+              className="input max-w-48 h-8 px-2.5"
               placeholder="Search by name or remarks…"
               value={search}
               onChange={e => setSearch(e.target.value)}
           />
 
-          <div className="flex items-center gap-2 h-10">
+          <div className="flex items-center gap-2 h-8">
             <label className="font-mono text-xs text-ink-muted whitespace-nowrap">Filter:</label>
             <select
                 value={filterLocation}
                 onChange={e => setFilterLocation(e.target.value)}
-                className="input text-sm"
+                className="input text-sm h-8"
             >
               <option value="">All locations</option>
               {storageTypes.map(st => (
@@ -957,7 +957,7 @@ export default function StoredFoods() {
           <button
               onClick={() => setShowLocationMgr(v => !v)}
               title="Manage storage locations"
-              className={`h-10 text-xs px-2.5 py-1.5 cursor-pointer transition-colors border rounded-sm
+              className={`h-8 text-xs px-2.5 py-1.5 cursor-pointer transition-colors border rounded-sm
             ${showLocationMgr
                   ? 'bg-forest text-cream border-forest'
                   : 'border-gray-300 text-ink-muted hover:border-forest hover:text-forest'}`}
@@ -965,12 +965,12 @@ export default function StoredFoods() {
             ⚙ Manage
           </button>
 
-          <div className="flex items-center gap-2 h-10">
+          <div className="flex items-center gap-2 h-8">
             <label className="font-mono text-xs text-ink-muted whitespace-nowrap">Sort:</label>
             <select
                 value={sortKey}
                 onChange={e => setSortKey(e.target.value)}
-                className="input text-sm"
+                className="input text-sm h-8"
             >
               <option value="expiry">Expiry</option>
               <option value="name">Name</option>
@@ -979,7 +979,7 @@ export default function StoredFoods() {
             </select>
           </div>
 
-          <button className="btn-primary ml-auto h-10" onClick={() => setModal('add')}>
+          <button className="btn-primary ml-auto h-8" onClick={() => setModal('add')}>
             + Add to storage
           </button>
         </div>
