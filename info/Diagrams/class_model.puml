@@ -40,7 +40,6 @@ class be.intecbrussel.shoppinglist.model.FoodOriginal {
 - double original_ml_g
 - LocalDate useBy
 - double remaining_ml_g
-+ <<Create>> FoodOriginal(long,String,String,LocalDate,double,LocalDate,double)
 + LocalDate getUseByElseBestBeforeEnd()
 + void setOriginal_ml_g(double)
 + void setRemaining_ml_g(double)
@@ -57,7 +56,7 @@ class be.intecbrussel.shoppinglist.model.StoredFood {
 
 
 
-java.io.Serializable <|.. be.intecbrussel.shoppinglist.model.AuditModel
+'java.io.Serializable <|.. be.intecbrussel.shoppinglist.model.AuditModel
 be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.StorageType
 be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Home
 be.intecbrussel.shoppinglist.model.AuditModel <|-- be.intecbrussel.shoppinglist.model.Food
@@ -70,4 +69,5 @@ User --> Role
 StoredFood --> Home
 StoredFood --> Food
 StoredFood --> StorageType
+
 @enduml

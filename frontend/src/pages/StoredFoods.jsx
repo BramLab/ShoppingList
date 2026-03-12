@@ -934,7 +934,7 @@ export default function StoredFoods() {
 
         <div className="flex flex-wrap items-center gap-3 mb-2">
           <input
-              className="input max-w-48 h-8 px-2.5"
+              className="input max-w-48 h-8"
               placeholder="Search by name or remarks…"
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -945,7 +945,7 @@ export default function StoredFoods() {
             <select
                 value={filterLocation}
                 onChange={e => setFilterLocation(e.target.value)}
-                className="input text-sm h-8"
+                className="input text-base py-1 h-8"
             >
               <option value="">All locations</option>
               {storageTypes.map(st => (
@@ -966,11 +966,11 @@ export default function StoredFoods() {
           </button>
 
           <div className="flex items-center gap-2 h-8">
-            <label className="font-mono text-xs text-ink-muted whitespace-nowrap">Sort:</label>
+            <label className="font-verdana text-base py-1 text-ink-muted whitespace-nowrap">Sort:</label>
             <select
                 value={sortKey}
                 onChange={e => setSortKey(e.target.value)}
-                className="input text-sm h-8"
+                className="input text-base py-1 h-8"
             >
               <option value="expiry">Expiry</option>
               <option value="name">Name</option>
@@ -986,7 +986,7 @@ export default function StoredFoods() {
 
         {showLocationMgr && (
             <div className="mb-5 bg-cream-dark border border-gray-200 rounded-sm p-4">
-              <p className="font-mono text-xs uppercase tracking-widest text-ink-muted mb-2">
+              <p className="font-mono text-base uppercase tracking-widest text-ink-muted mb-2">
                 Manage storage locations
               </p>
               <StorageTypeManager
