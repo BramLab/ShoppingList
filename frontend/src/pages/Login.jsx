@@ -55,11 +55,6 @@ export default function Login() {
                 </div>
 
                 <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-3">
-                        {['🥕', '🥦', '🌿', '🍅', '🫛'].map((e, i) => (
-                            <span key={i} className="text-lg opacity-60">{e}</span>
-                        ))}
-                    </div>
                     <p className="font-mono text-xs text-leaf">v0.0.1</p>
                 </div>
             </div>

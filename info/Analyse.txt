@@ -31,17 +31,30 @@ hieronder tijdelijke kopie:
 
 Waarom?
 Zelf koken is meestal goedkoper, gezonder, flexibeler.
-Een gevulde voorraadkast geeft flexibiliteit in wat je wil maken, op het moment dat je iets wilt maken.
-En maakt weerbaarder bij calamiteiten.
+
+Probleem?
 Maar zelf koken neemt tijd: plannen, winkelen, opslaan, uithalen, bereiden, restjes niet vergeten, opbergen, afwassen.
+
+Doel?
+Een gevulde voorraadkast geeft flexibiliteit in wat je wil maken, op het moment dat je iets wilt maken.
+En deze maakt weerbaarder bij calamiteiten (zoals .
 
 Een goede organisatie verlicht sterk de moeilijkheden. Een app kan helpen.
 Er zijn apps die een deel van deze functionaliteiten aanbieden, maar niet alle.
 https://www.google.com/search?q=shopping+list+apps
 
+Oplossing 1 (origineel gepland):
 Een app waarin je kan bijhouden wat je nog hebt (voorraad),
 en wat je wil maken (menu's) de volgende periode (vb week),
 zodat je weet wat je nog moet bijkopen (boodschappenlijst).
+
+Oplossing (reality check)?
+Een app waarin je kan bijhouden wat je nog hebt (voorraad),
+zodat je weet wat je eerder moet opgebruiken.
+
+Naar later:
+Boodschappenlijst, recepten, vervangingen (vb citroenschil ipv citroengras).
+
 ---
 
 * Hoofddoel:
