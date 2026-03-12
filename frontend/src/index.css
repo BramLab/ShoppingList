@@ -1,57 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-cream text-ink font-body antialiased;
-  }
+    body {
+        @apply bg-parchment text-ink font-body antialiased;
+    }
 }
 
 @layer components {
-  /* ── Buttons ─────────────────────────────────────────────────── */
-  .btn-primary {
-    @apply bg-forest text-cream font-body font-medium px-5 py-2.5
-           rounded-sm transition-all duration-150
-           hover:bg-forest-light active:scale-[0.98]
-           disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-  .btn-secondary {
-    @apply border border-forest text-forest font-body font-medium px-5 py-2.5
-           rounded-sm transition-all duration-150
-           hover:bg-forest hover:text-cream active:scale-[0.98];
-  }
-  .btn-danger {
-    @apply border border-red-400 text-red-600 font-body font-medium px-4 py-2
-           rounded-sm transition-all duration-150
-           hover:bg-red-600 hover:text-white active:scale-[0.98];
-  }
-  .btn-terra {
-    @apply bg-terra text-white font-body font-medium px-5 py-2.5
-           rounded-sm transition-all duration-150
-           hover:bg-terra-light active:scale-[0.98];
-  }
+    /* ── Buttons ─────────────────────────────────────────────────── */
+    .btn-primary {
+        @apply bg-kale text-parchment font-body font-medium px-5 py-2.5
+        rounded transition-all duration-150 min-h-[44px]
+        hover:bg-kale-light active:scale-[0.98]
+        disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+    .btn-secondary {
+        @apply border border-kale text-kale font-body font-medium px-5 py-2.5
+        rounded transition-all duration-150 min-h-[44px]
+        hover:bg-kale hover:text-parchment active:scale-[0.98];
+    }
+    .btn-danger {
+        @apply border border-red-400 text-red-600 font-body font-medium px-4 py-2
+        rounded transition-all duration-150 min-h-[44px]
+        hover:bg-red-600 hover:text-white active:scale-[0.98];
+    }
+    .btn-terra {
+        @apply bg-carrot text-white font-body font-medium px-5 py-2.5
+        rounded transition-all duration-150 min-h-[44px]
+        hover:bg-carrot-light active:scale-[0.98];
+    }
 
-  /* ── Inputs ─────────────────────────────────────────────────── */
-  .input {
-    @apply w-full border border-gray-300 bg-white rounded-sm px-4 py-2.5
-           font-body text-sm text-ink placeholder-gray-400
-           focus:outline-none focus:ring-1 focus:ring-forest focus:border-forest
-           transition-colors duration-150;
-  }
-  .label {
-    @apply block text-xs font-mono font-medium text-ink-muted uppercase tracking-widest mb-1.5;
-  }
+    /* ── Inputs ─────────────────────────────────────────────────── */
+    .input {
+        @apply w-full border border-sage-dark bg-white rounded px-4 py-2.5
+        font-body text-base sm:text-sm text-ink placeholder-ink-muted
+        focus:outline-none focus:ring-2 focus:ring-leaf/20 focus:border-leaf
+        transition-colors duration-150 min-h-[44px];
+    }
+    .label {
+        @apply block text-xs font-mono font-medium text-ink-muted uppercase tracking-widest mb-1.5;
+    }
 
-  /* ── Cards ────────────────────────────────────────────────── */
-  .card {
-    @apply bg-white border border-gray-200 rounded-sm p-5;
-  }
+    /* ── Cards ────────────────────────────────────────────────── */
+    .card {
+        @apply bg-white border border-sage rounded p-5;
+    }
 
-  /* ── Badge ────────────────────────────────────────────────── */
-  .badge {
-    @apply inline-flex items-center px-2 py-0.5 text-xs font-mono rounded-sm;
-  }
+    /* ── Badge ────────────────────────────────────────────────── */
+    .badge {
+        @apply inline-flex items-center px-2 py-0.5 text-xs font-mono rounded;
+    }
 }

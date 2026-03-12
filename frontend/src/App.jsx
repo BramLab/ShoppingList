@@ -10,36 +10,36 @@ import StoredFoods   from './pages/StoredFoods';
 import DeletedFoods  from './pages/DeletedFoods';
 
 export default function App() {
-  return (
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public */}
-            <Route path="/login"    element={<Login />} />
-            <Route path="/register" element={<Register />} />
+    return (
+        <AuthProvider>
+            <BrowserRouter>
+                <Routes>
+                    {/* Public */}
+                    <Route path="/login"    element={<Login />} />
+                    <Route path="/register" element={<Register />} />
 
-            {/* Protected — wrapped in persistent top-bar Layout */}
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }>
-              <Route index                  element={<Dashboard />} />
-              <Route path="stored-foods"    element={<StoredFoods />} />
-              <Route path="deleted-foods"   element={<DeletedFoods />} />
+                    {/* Protected — wrapped in persistent top-bar Layout */}
+                    <Route path="/" element={
+                        <ProtectedRoute>
+                            <Layout />
+                        </ProtectedRoute>
+                    }>
+                        <Route index                element={<Dashboard />} />
+                        <Route path="stored-foods"  element={<StoredFoods />} />
+                        <Route path="deleted-foods" element={<DeletedFoods />} />
 
-              {/* Admin only */}
-              <Route path="admin/users" element={
-                <ProtectedRoute adminOnly>
-                  <AdminUsers />
-                </ProtectedRoute>
-              } />
-            </Route>
+                        {/* Admin only */}
+                        <Route path="admin/users" element={
+                            <ProtectedRoute adminOnly>
+                                <AdminUsers />
+                            </ProtectedRoute>
+                        } />
+                    </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-  );
+                    {/* Fallback */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </BrowserRouter>
+        </AuthProvider>
+    );
 }
